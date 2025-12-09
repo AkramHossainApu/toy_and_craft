@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toy & Craft Inventory</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="assets/images/logo.png" alt="Toy & Craft Logo" class="logo">
+            <!-- Title is in the logo but adding text for accessibility/structure if needed, or just relying on logo -->
+            <!-- The user said "Shop Title as 'Toy & Craft'" and "Vibrant Logo". I'll display the logo prominently. -->
+        </div>
+        <div class="user-controls">
+            <button id="admin-login-btn" class="cute-btn">Admin Login 🔒</button>
+            <div id="admin-panel" class="hidden">
+                <span class="welcome-text">Welcome, Admin! ✨</span>
+                <button id="logout-btn" class="cute-btn secondary">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1>Inventory Stock 🧸</h1>
+            <div id="product-grid" class="grid">
+                <!-- Products will be injected here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Admin Login 🗝️</h2>
+            <p>Enter the secret password!</p>
+            <input type="password" id="password-input" placeholder="Password...">
+            <button id="login-submit" class="cute-btn">Unlock</button>
+            <p id="login-error" class="error-msg hidden">Oops! Wrong password. 🙈</p>
+        </div>
+    </div>
+
+    <!-- Edit Stock Modal -->
+    <div id="edit-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Update Stock 📦</h2>
+            <h3 id="edit-product-name">Product Name</h3>
+            <img id="edit-product-image" src="" alt="Product" class="preview-img">
+            <div class="input-group">
+                <label for="stock-input">Quantity:</label>
+                <input type="number" id="stock-input" min="0">
+            </div>
+            <button id="save-stock-btn" class="cute-btn">Save Changes</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
