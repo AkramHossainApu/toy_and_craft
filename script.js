@@ -1,4 +1,3 @@
-// Security - SHA-256 Hash of "TashaOpu"
 const adminHash = 'f18852e91292d79d72697f658b2d66116764860719e58f7626f28c2766f5f75d';
 
 // Data generated from file system
@@ -553,7 +552,7 @@ function renderProducts() {
         if (product.stock === 0) {
             stockClass = 'stock-out';
             stockText = 'Out of Stock';
-        } else if (product.stock < 5) {
+        } else if (product.stock < 3) {
             stockClass = 'stock-low';
             stockText = `Low Stock: ${product.stock}`;
         }
