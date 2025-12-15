@@ -42,9 +42,9 @@ const defaultProducts = [
     offerPrice: 0
   },
   {
-    id: "culomi",
-    name: "Culomi",
-    image: "assets/images/culomi.jpg",
+    id: "kulomi",
+    name: "kulomi",
+    image: "assets/images/kulomi.jpg",
     stock: 0,
     price: 0,
     offerPrice: 0
@@ -730,7 +730,27 @@ async function loadInventory() {
     }
 }
 
+// Add a simple loading indicator
+const loadingIndicator = document.createElement('div');
+loadingIndicator.id = 'loading-indicator';
+loadingIndicator.style.position = 'fixed';
+loadingIndicator.style.top = '0';
+loadingIndicator.style.left = '0';
+loadingIndicator.style.width = '100vw';
+loadingIndicator.style.height = '100vh';
+loadingIndicator.style.background = 'rgba(255,255,255,0.6)';
+loadingIndicator.style.display = 'flex';
+loadingIndicator.style.alignItems = 'center';
+loadingIndicator.style.justifyContent = 'center';
+loadingIndicator.style.fontSize = '2em';
+loadingIndicator.style.zIndex = '9999';
+loadingIndicator.style.color = '#333';
+loadingIndicator.innerHTML = '<span>Saving, please wait...</span>';
+document.body.appendChild(loadingIndicator);
+loadingIndicator.style.display = 'none';
+
 async function saveInventory() {
+    loadingIndicator.style.display = 'flex';
     // Remove all docs and re-add (for admin update)
     const snapshot = await getDocs(collection(db, 'Products'));
     for (const d of snapshot.docs) {
@@ -740,6 +760,7 @@ async function saveInventory() {
         await addDoc(collection(db, 'Products'), p);
     }
     localStorage.setItem('toyStoreInventory', JSON.stringify(inventory));
+    loadingIndicator.style.display = 'none';
 }
 
 // --- Rendering ---
@@ -776,9 +797,9 @@ function renderProducts() {
         const editDisplay = isLoggedIn ? 'block' : 'none';
         let priceHtml = '';
         if (product.offerPrice && product.offerPrice > 0) {
-            priceHtml = `<span class='price-tag'>$${product.offerPrice.toFixed(2)}</span> <span class='regular-price'><s>$${product.price.toFixed(2)}</s></span>`;
+            priceHtml = `<span class='price-tag'>৳${product.offerPrice.toFixed(2)}</span> <span class='regular-price'><s>৳${product.price.toFixed(2)}</s></span>`;
         } else {
-            priceHtml = `<span class='price-tag'>$${product.price.toFixed(2)}</span>`;
+            priceHtml = `<span class='price-tag'>৳${product.price.toFixed(2)}</span>`;
         }
         card.innerHTML = `
             <div class="card-img-container">
