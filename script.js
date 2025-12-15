@@ -12,7 +12,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Add price and offerPrice to default products (default to 0)
+// Make sure defaultProducts is fully populated with all products
 const defaultProducts = [
   {
     id: "bounce-tiger",
@@ -703,12 +703,14 @@ function init() {
 }
 
 async function loadInventory() {
-    // Use 'Products' (capital P) for Firestore collection
     try {
         const snapshot = await db.collection('Products').get();
         if (snapshot.empty) {
+            // Seed Firestore if empty
             await Promise.all(defaultProducts.map(p => db.collection('Products').doc(p.id).set(p)));
-            inventory = JSON.parse(JSON.stringify(defaultProducts));
+            // Fetch again after seeding
+            const seededSnapshot = await db.collection('Products').get();
+            inventory = seededSnapshot.docs.map(doc => doc.data());
         } else {
             inventory = snapshot.docs.map(doc => doc.data());
         }
