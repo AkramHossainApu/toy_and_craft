@@ -286,3 +286,41 @@ input:focus {
     font-weight: 600;
     color: var(--primary-color);
 }
+
+.site-title {
+    font-size: 2em;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-left: 18px;
+    letter-spacing: 2px;
+    font-family: var(--font-family);
+}
+
+.controls-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+#search-input, #sort-select {
+    padding: 8px 14px;
+    border-radius: 15px;
+    border: 2px solid #eee;
+    font-size: 1em;
+    font-family: var(--font-family);
+    outline: none;
+    transition: border 0.2s;
+}
+
+#search-input:focus, #sort-select:focus {
+    border-color: var(--primary-color);
+}
+
+.price-tag {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #ff6b6b;
+    margin-bottom: 8px;
+}

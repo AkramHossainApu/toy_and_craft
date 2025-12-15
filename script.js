@@ -1,5 +1,17 @@
 const adminHash = 'f18852e91292d79d72697f658b2d66116764860719e58f7626f28c2766f5f75d';
 
+// Firebase config and init
+const firebaseConfig = {
+    apiKey: "AIzaSyARQW48lm5jEavNwCDG7tKlolxJPg1ggLg",
+    authDomain: "toyandcraftstore.firebaseapp.com",
+    projectId: "toyandcraftstore",
+    storageBucket: "toyandcraftstore.firebasestorage.app",
+    messagingSenderId: "732577086084",
+    appId: "1:732577086084:web:9f5db5dce1491124aaa0d1"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 // Data generated from file system
 const defaultProducts = [
   {
@@ -488,7 +500,7 @@ const defaultProducts = [
     "image": "assets/images/White lily 260-24.jpg",
     "stock": 10
   }
-];
+].map(p => ({ ...p, price: p.price !== undefined ? p.price : 10.00 }));
 
 // App State
 let inventory = [];
@@ -512,7 +524,12 @@ const loginError = document.getElementById('login-error');
 const editName = document.getElementById('edit-product-name');
 const editImage = document.getElementById('edit-product-image');
 const stockInput = document.getElementById('stock-input');
+const priceInput = document.getElementById('price-input');
 const saveStockBtn = document.getElementById('save-stock-btn');
+
+// DOM refs for new controls
+const searchInput = document.getElementById('search-input');
+const sortSelect = document.getElementById('sort-select');
 
 // --- Initialization ---
 
@@ -522,19 +539,29 @@ function init() {
     setupEventListeners();
 }
 
-function loadInventory() {
-    const saved = localStorage.getItem('toyStoreInventory');
-    if (saved) {
-        inventory = JSON.parse(saved);
-        // Merge with default products in case new images were added (optional robustness)
-        // For now, assume simple persistence. If saved exists, use it.
-    } else {
-        inventory = JSON.parse(JSON.stringify(defaultProducts)); // Deep copy
-        saveInventory();
+async function loadInventory() {
+    try {
+        const snapshot = await db.collection('products').get();
+        if (snapshot.empty) {
+            await Promise.all(defaultProducts.map(p => db.collection('products').doc(p.id).set(p)));
+            inventory = JSON.parse(JSON.stringify(defaultProducts));
+        } else {
+            inventory = snapshot.docs.map(doc => doc.data());
+        }
+        renderProducts();
+    } catch (e) {
+        const saved = localStorage.getItem('toyStoreInventory');
+        if (saved) {
+            inventory = JSON.parse(saved);
+        } else {
+            inventory = JSON.parse(JSON.stringify(defaultProducts));
+        }
+        renderProducts();
     }
 }
 
-function saveInventory() {
+async function saveInventory() {
+    await Promise.all(inventory.map(p => db.collection('products').doc(p.id).set(p)));
     localStorage.setItem('toyStoreInventory', JSON.stringify(inventory));
 }
 
@@ -542,11 +569,24 @@ function saveInventory() {
 
 function renderProducts() {
     grid.innerHTML = '';
-
-    inventory.forEach(product => {
+    let filtered = inventory.slice();
+    const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    if (searchVal) {
+        filtered = filtered.filter(p => p.name.toLowerCase().includes(searchVal));
+    }
+    const sortVal = sortSelect ? sortSelect.value : 'default';
+    if (sortVal === "price-asc") {
+        filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (sortVal === "price-desc") {
+        filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+    } else if (sortVal === "stock") {
+        filtered = filtered.filter(p => p.stock > 0);
+    } else if (sortVal === "out") {
+        filtered = filtered.filter(p => p.stock === 0);
+    }
+    filtered.forEach(product => {
         const card = document.createElement('div');
         card.className = 'card';
-
         let stockClass = 'stock-high';
         let stockText = `In Stock: ${product.stock}`;
         if (product.stock === 0) {
@@ -556,19 +596,16 @@ function renderProducts() {
             stockClass = 'stock-low';
             stockText = `Low Stock: ${product.stock}`;
         }
-
-        // Hide edit button if not logged in
         const editDisplay = isLoggedIn ? 'block' : 'none';
-
         card.innerHTML = `
             <div class="card-img-container">
                 <img src="${product.image}" alt="${product.name}" class="card-img" loading="lazy">
             </div>
             <div class="card-title">${product.name}</div>
+            <div class="price-tag">$${(product.price || 0).toFixed(2)}</div>
             <div class="stock-status ${stockClass}">${stockText}</div>
             <button class="edit-btn" style="display: ${editDisplay}" onclick="openEditModal('${product.id}')">Update Stock ✏️</button>
         `;
-
         grid.appendChild(card);
     });
 }
@@ -625,6 +662,8 @@ function setupEventListeners() {
 
     // Save Stock
     saveStockBtn.addEventListener('click', handleSaveStock);
+    if (searchInput) searchInput.addEventListener('input', renderProducts);
+    if (sortSelect) sortSelect.addEventListener('change', renderProducts);
 }
 
 // --- Login Logic ---
@@ -669,21 +708,27 @@ window.openEditModal = function(id) {
     editName.textContent = product.name;
     editImage.src = product.image;
     stockInput.value = product.stock;
+    if (priceInput) priceInput.value = product.price || 0;
 
     editModal.classList.remove('hidden');
 }
 
-function handleSaveStock() {
+async function handleSaveStock() {
     const newStock = parseInt(stockInput.value);
+    const newPrice = parseFloat(priceInput.value);
     if (isNaN(newStock) || newStock < 0) {
         alert("Please enter a valid stock number.");
         return;
     }
-
+    if (isNaN(newPrice) || newPrice < 0) {
+        alert("Please enter a valid price.");
+        return;
+    }
     const product = inventory.find(p => p.id === editingProductId);
     if (product) {
         product.stock = newStock;
-        saveInventory();
+        product.price = newPrice;
+        await saveInventory();
         renderProducts();
         editModal.classList.add('hidden');
     }
