@@ -765,6 +765,41 @@ async function saveInventory() {
 
 // --- Rendering ---
 
+// Add a per-product saving indicator
+function setProductSaving(id, saving) {
+    const card = document.querySelector(`.card[data-id='${id}']`);
+    if (card) {
+        let indicator = card.querySelector('.saving-indicator');
+        if (saving) {
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.className = 'saving-indicator';
+                indicator.innerHTML = '<div class="bar"></div>';
+                card.appendChild(indicator);
+            }
+            indicator.style.display = 'block';
+        } else if (indicator) {
+            indicator.style.display = 'none';
+        }
+    }
+}
+
+async function saveProduct(product) {
+    setProductSaving(product.id, true);
+    // Find the Firestore doc for this product by id (if exists)
+    const snapshot = await getDocs(collection(db, 'Products'));
+    let docId = null;
+    snapshot.forEach(docSnap => {
+        if (docSnap.data().id === product.id) docId = docSnap.id;
+    });
+    if (docId) {
+        await setDoc(doc(db, 'Products', docId), product);
+    } else {
+        await addDoc(collection(db, 'Products'), product);
+    }
+    setProductSaving(product.id, false);
+}
+
 function renderProducts() {
     grid.innerHTML = '';
     let filtered = inventory.slice();
@@ -785,6 +820,7 @@ function renderProducts() {
     filtered.forEach(product => {
         const card = document.createElement('div');
         card.className = 'card';
+        card.setAttribute('data-id', product.id);
         let stockClass = 'stock-high';
         let stockText = `In Stock: ${product.stock}`;
         if (product.stock === 0) {
@@ -937,7 +973,7 @@ async function handleSaveStock() {
         product.stock = newStock;
         product.price = newPrice;
         product.offerPrice = offerPriceInput.value !== '' ? newOfferPrice : 0;
-        await saveInventory();
+        await saveProduct(product);
         renderProducts();
         editModal.classList.add('hidden');
     }
