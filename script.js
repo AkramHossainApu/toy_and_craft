@@ -1,3 +1,6 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
 const adminHash = 'f18852e91292d79d72697f658b2d66116764860719e58f7626f28c2766f5f75d';
 
 // Firebase config and init
@@ -9,8 +12,8 @@ const firebaseConfig = {
     messagingSenderId: "732577086084",
     appId: "1:732577086084:web:9f5db5dce1491124aaa0d1"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 // Make sure defaultProducts is fully populated with all products
 const defaultProducts = [
@@ -704,18 +707,19 @@ function init() {
 
 async function loadInventory() {
     try {
-        const snapshot = await db.collection('Products').get();
+        const snapshot = await getDocs(collection(db, 'Products'));
         if (snapshot.empty) {
-            // Seed Firestore if empty
-            await Promise.all(defaultProducts.map(p => db.collection('Products').doc(p.id).set(p)));
-            // Fetch again after seeding
-            const seededSnapshot = await db.collection('Products').get();
+            for (const p of defaultProducts) {
+                await addDoc(collection(db, 'Products'), p);
+            }
+            const seededSnapshot = await getDocs(collection(db, 'Products'));
             inventory = seededSnapshot.docs.map(doc => doc.data());
         } else {
             inventory = snapshot.docs.map(doc => doc.data());
         }
         renderProducts();
     } catch (e) {
+        console.error('Error loading inventory:', e);
         const saved = localStorage.getItem('toyStoreInventory');
         if (saved) {
             inventory = JSON.parse(saved);
@@ -727,7 +731,14 @@ async function loadInventory() {
 }
 
 async function saveInventory() {
-    await Promise.all(inventory.map(p => db.collection('Products').doc(p.id).set(p)));
+    // Remove all docs and re-add (for admin update)
+    const snapshot = await getDocs(collection(db, 'Products'));
+    for (const d of snapshot.docs) {
+        await deleteDoc(doc(db, 'Products', d.id));
+    }
+    for (const p of inventory) {
+        await addDoc(collection(db, 'Products'), p);
+    }
     localStorage.setItem('toyStoreInventory', JSON.stringify(inventory));
 }
 
