@@ -818,6 +818,9 @@ async function saveProduct(product) {
     setProductSaving(product.id, false);
 }
 
+let noProductsTimeout = null;
+let lastProductsRendered = 0;
+
 function renderProducts() {
     console.log('renderProducts called, inventory:', inventory);
     grid.innerHTML = '';
@@ -837,8 +840,17 @@ function renderProducts() {
         filtered = filtered.filter(p => p.stock === 0);
     }
     if (filtered.length === 0) {
-        grid.innerHTML = '<div style="text-align:center;color:#d32f2f;font-weight:bold;">No products found.</div>';
+        // Only show the message after 1 minute if still no products
+        if (noProductsTimeout) clearTimeout(noProductsTimeout);
+        noProductsTimeout = setTimeout(() => {
+            // Only show if still no products after 1 min
+            if (grid && grid.children.length === 0) {
+                grid.innerHTML = '<div style="text-align:center;color:#d32f2f;font-weight:bold;">No products found.</div>';
+            }
+        }, 60000);
         return;
+    } else {
+        if (noProductsTimeout) clearTimeout(noProductsTimeout);
     }
     filtered.forEach(product => {
         const card = document.createElement('div');
@@ -1385,44 +1397,14 @@ closeModals.forEach(btn => {
 // Add long-press admin login to logo
 const logoImg = document.querySelector('.logo');
 let logoPressTimer = null;
+let lastLogoTap = 0;
 if (logoImg) {
   logoImg.addEventListener('mousedown', function (e) {
-    logoPressTimer = setTimeout(() => {
-      // Show admin login modal
-      if (loginModal) {
-        loginModal.classList.remove('hidden');
-        loginForm.classList.add('hidden');
-        signupForm.classList.add('hidden');
-        let adminDiv = document.getElementById('admin-login-div');
-        if (!adminDiv) {
-          adminDiv = document.createElement('div');
-          adminDiv.id = 'admin-login-div';
-          adminDiv.innerHTML = `<h2>Admin Login 🗝️</h2><input type='password' id='admin-password' placeholder='Password...'><button id='admin-login-submit' class='cute-btn'>Unlock</button><p id='admin-login-error' class='error-msg hidden'></p>`;
-          loginModal.querySelector('.modal-content').appendChild(adminDiv);
-        }
-        adminDiv.classList.remove('hidden');
-        setTimeout(() => {
-          const adminPassInput = document.getElementById('admin-password');
-          if (adminPassInput) adminPassInput.focus();
-        }, 50);
-        document.getElementById('admin-login-submit').onclick = async () => {
-          const pass = document.getElementById('admin-password').value;
-          const hash = await sha256(pass);
-          if (hash === adminHash) {
-            isAdmin = true;
-            isLoggedIn = true;
-            currentUser = { name: 'Admin' };
-            loginModal.classList.add('hidden');
-            showProfileIcon(currentUser);
-            adminDiv.classList.add('hidden');
-            toggleAdminView();
-          } else {
-            document.getElementById('admin-login-error').textContent = 'Wrong password!';
-            document.getElementById('admin-login-error').classList.remove('hidden');
-          }
-        };
-      }
-    }, 700); // 700ms long press
+    if (window.innerWidth > 600) { // Desktop: long press
+      logoPressTimer = setTimeout(() => {
+        showAdminLoginModal();
+      }, 700);
+    }
   });
   logoImg.addEventListener('mouseup', function (e) {
     clearTimeout(logoPressTimer);
@@ -1430,43 +1412,65 @@ if (logoImg) {
   logoImg.addEventListener('mouseleave', function (e) {
     clearTimeout(logoPressTimer);
   });
-  logoImg.addEventListener('touchstart', function (e) {
-    logoPressTimer = setTimeout(() => {
-      if (loginModal) {
-        loginModal.classList.remove('hidden');
-        loginForm.classList.add('hidden');
-        signupForm.classList.add('hidden');
-        let adminDiv = document.getElementById('admin-login-div');
-        if (!adminDiv) {
-          adminDiv = document.createElement('div');
-          adminDiv.id = 'admin-login-div';
-          adminDiv.innerHTML = `<h2>Admin Login 🗝️</h2><input type='password' id='admin-password' placeholder='Password...'><button id='admin-login-submit' class='cute-btn'>Unlock</button><p id='admin-login-error' class='error-msg hidden'></p>`;
-          loginModal.querySelector('.modal-content').appendChild(adminDiv);
-        }
-        adminDiv.classList.remove('hidden');
-        setTimeout(() => {
-          const adminPassInput = document.getElementById('admin-password');
-          if (adminPassInput) adminPassInput.focus();
-        }, 50);
-        document.getElementById('admin-login-submit').onclick = async () => {
-          const pass = document.getElementById('admin-password').value;
-          const hash = await sha256(pass);
-          if (hash === adminHash) {
-            isAdmin = true;
-            isLoggedIn = true;
-            currentUser = { name: 'Admin' };
-            loginModal.classList.add('hidden');
-            showProfileIcon(currentUser);
-            adminDiv.classList.add('hidden');
-            toggleAdminView();
-          } else {
-            document.getElementById('admin-login-error').textContent = 'Wrong password!';
-            document.getElementById('admin-login-error').classList.remove('hidden');
-          }
-        };
+  // Mobile: require two quick taps (true double tap)
+  logoImg.addEventListener('touchend', function (e) {
+    if (window.innerWidth <= 600) {
+      const now = Date.now();
+      if (now - lastLogoTap < 350) {
+        showAdminLoginModal();
+        lastLogoTap = 0;
+      } else {
+        lastLogoTap = now;
       }
-    }, 700);
+    }
+    clearTimeout(logoPressTimer);
   });
+  logoImg.addEventListener('touchstart', function (e) {
+    if (window.innerWidth > 600) {
+      logoPressTimer = setTimeout(() => {
+        showAdminLoginModal();
+      }, 700);
+    }
+  });
+  logoImg.addEventListener('touchcancel', function (e) {
+    clearTimeout(logoPressTimer);
+  });
+}
+
+function showAdminLoginModal() {
+  if (loginModal) {
+    loginModal.classList.remove('hidden');
+    loginForm.classList.add('hidden');
+    signupForm.classList.add('hidden');
+    let adminDiv = document.getElementById('admin-login-div');
+    if (!adminDiv) {
+      adminDiv = document.createElement('div');
+      adminDiv.id = 'admin-login-div';
+      adminDiv.innerHTML = `<h2>Admin Login 🗝️</h2><input type='password' id='admin-password' placeholder='Password...'><button id='admin-login-submit' class='cute-btn'>Unlock</button><p id='admin-login-error' class='error-msg hidden'></p>`;
+      loginModal.querySelector('.modal-content').appendChild(adminDiv);
+    }
+    adminDiv.classList.remove('hidden');
+    setTimeout(() => {
+      const adminPassInput = document.getElementById('admin-password');
+      if (adminPassInput) adminPassInput.focus();
+    }, 50);
+    document.getElementById('admin-login-submit').onclick = async () => {
+      const pass = document.getElementById('admin-password').value;
+      const hash = await sha256(pass);
+      if (hash === adminHash) {
+        isAdmin = true;
+        isLoggedIn = true;
+        currentUser = { name: 'Admin' };
+        loginModal.classList.add('hidden');
+        showProfileIcon(currentUser);
+        adminDiv.classList.add('hidden');
+        toggleAdminView();
+      } else {
+        document.getElementById('admin-login-error').textContent = 'Wrong password!';
+        document.getElementById('admin-login-error').classList.remove('hidden');
+      }
+    };
+  }
 }
 
 // Initialize the app

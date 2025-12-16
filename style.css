@@ -15,30 +15,62 @@ body {
 }
 
 header {
-    background-color: var(--card-bg);
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+  background-color: var(--card-bg);
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-wrap: wrap;
 }
-
 .logo-container {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 0 0 auto;
 }
-
 .logo {
-    height: 60px;
-    object-fit: contain;
-    transition: transform 0.3s ease;
+  height: 48px;
+  min-width: 48px;
+  max-width: 15vw;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  margin-right: 10px;
 }
-
-.logo:hover {
-    transform: scale(1.05) rotate(2deg);
+.site-title {
+  font-size: 2em;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-left: 0;
+  letter-spacing: 2px;
+  font-family: var(--font-family);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 50vw;
+}
+.user-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 1.2em;
+  z-index: 10;
+}
+.cart-btn {
+  background: none;
+  border: none;
+  position: relative;
+  margin-right: 0;
+  margin-left: 0;
+  left: 0;
+  cursor: pointer;
+  padding: 0;
+  z-index: 2;
 }
 
 .cute-btn, .cute-btn.secondary {
@@ -89,9 +121,33 @@ h1 {
 }
 
 .grid {
-    display: grid;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 18px;
+}
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px;
+  }
+}
+@media (min-width: 601px) and (max-width: 940px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px;
+  }
+}
+@media (min-width: 800px) and (max-width: 940px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 18px;
+  }
+}
+@media (min-width: 1201px) {
+  .grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 25px;
+  }
 }
 
 .card {
@@ -198,16 +254,18 @@ h1 {
     animation: fadeIn 0.3s;
 }
 
-.modal-content {
-    background-color: white;
-    padding: 30px;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    position: relative;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    animation: slideUp 0.3s;
+.modal-content, .cart-modal-content, .user-modal-content {
+  background: #fff !important;
+  padding: 30px 24px 24px 24px !important;
+  border-radius: 20px;
+  width: 95vw;
+  max-width: 400px !important;
+  min-width: 0;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  animation: slideUp 0.3s;
+  margin: 0 auto;
 }
 
 .close-modal {
@@ -278,7 +336,10 @@ input:focus {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 1.2em;
+  z-index: 10;
 }
 
 .welcome-text {
@@ -288,12 +349,16 @@ input:focus {
 }
 
 .site-title {
-    font-size: 2em;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-left: 18px;
-    letter-spacing: 2px;
-    font-family: var(--font-family);
+  font-size: 2em;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-left: 0;
+  letter-spacing: 2px;
+  font-family: var(--font-family);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 50vw;
 }
 
 .controls-row {
@@ -459,10 +524,12 @@ input:focus {
   background: none;
   border: none;
   position: relative;
-  margin-right: 32px;
-  left: -18px; /* moved more left */
+  margin-right: 0;
+  margin-left: 0.5em;
+  left: 0;
   cursor: pointer;
   padding: 0;
+  z-index: 2;
 }
 
 .cart-count {
@@ -682,31 +749,94 @@ input:focus {
   width: 100%;
 }
 
+@media (max-width: 900px) {
+  .site-title {
+    font-size: 1.3em;
+    max-width: 32vw;
+  }
+  .logo {
+    height: 38px;
+    max-width: 18vw;
+  }
+  .user-controls {
+    gap: 0.7em;
+  }
+}
 @media (max-width: 600px) {
+  header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 8px 2vw;
+  }
+  .logo-container {
+    justify-content: flex-start;
+    width: auto;
+    margin-bottom: 0;
+    min-width: 0;
+  }
+  .site-title {
+    font-size: 1.1em;
+    max-width: 40vw;
+    text-align: left;
+    margin-left: 0;
+    margin-right: 8px;
+  }
+  .user-controls {
+    width: auto;
+    justify-content: flex-end;
+    margin-top: 0;
+    margin-bottom: 0;
+    gap: 0.7em;
+    flex-shrink: 1;
+    flex: 1 1 auto;
+  }
+  .cart-btn {
+    margin-right: 0;
+    left: 0;
+    min-width: 28px;
+    min-height: 28px;
+  }
+  .profile-icon {
+    margin-left: 0;
+  }
+  .container {
+    padding: 0 2vw;
+  }
   .controls-row {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 25px;
   }
   #search-input, #sort-select {
     width: 100%;
     box-sizing: border-box;
     font-size: 1em;
+    min-width: 0;
+    max-width: 100vw;
   }
-  #product-view-modal .user-modal-content {
-    max-width: 98vw;
-    width: 98vw;
-    padding: 0 2vw;
+  .grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px;
   }
-  #view-product-image.zoom-img {
-    max-width: 90vw;
-    max-height: 60vw;
+}
+@media (max-width: 400px) {
+  .site-title {
+    font-size: 0.95em;
+    max-width: 48vw;
   }
-  .profile-menu {
-    right: 2vw;
-    top: 60px;
-    min-width: 140px;
-    max-width: 98vw;
-    padding: 10px 6vw 10px 6vw;
+  .logo {
+    height: 32px;
+    max-width: 22vw;
+  }
+}
+@media (max-width: 600px) {
+  .modal-content, .cart-modal-content, .user-modal-content {
+    max-width: 99vw !important;
+    width: 99vw !important;
+    padding: 10px 1vw 10px 1vw;
   }
 }
