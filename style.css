@@ -25,6 +25,7 @@ header {
   top: 0;
   z-index: 100;
   flex-wrap: wrap;
+  min-height: 48px;
 }
 .logo-container {
   display: flex;
@@ -34,7 +35,7 @@ header {
 }
 .logo {
   height: 48px;
-  min-width: 48px;
+  min-width: 32px;
   max-width: 15vw;
   object-fit: contain;
   transition: transform 0.3s ease;
@@ -51,6 +52,7 @@ header {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 50vw;
+  transition: font-size 0.2s;
 }
 .user-controls {
   display: flex;
@@ -768,6 +770,7 @@ input:focus {
     align-items: center;
     justify-content: flex-start;
     padding: 8px 2vw;
+    min-height: 38px;
   }
   .logo-container {
     justify-content: flex-start;
@@ -775,12 +778,14 @@ input:focus {
     margin-bottom: 0;
     min-width: 0;
   }
+  .logo {
+    height: 28px;
+    max-width: 16vw;
+    min-width: 24px;
+  }
   .site-title {
-    font-size: 1.1em;
-    max-width: 40vw;
-    text-align: left;
-    margin-left: 0;
-    margin-right: 8px;
+    font-size: 1em;
+    max-width: 38vw;
   }
   .user-controls {
     width: auto;
@@ -825,12 +830,13 @@ input:focus {
 }
 @media (max-width: 400px) {
   .site-title {
-    font-size: 0.95em;
-    max-width: 48vw;
+    font-size: 0.85em;
+    max-width: 28vw;
   }
   .logo {
-    height: 32px;
-    max-width: 22vw;
+    height: 20px;
+    max-width: 12vw;
+    min-width: 18px;
   }
 }
 @media (max-width: 600px) {

@@ -1398,6 +1398,7 @@ closeModals.forEach(btn => {
 const logoImg = document.querySelector('.logo');
 let logoPressTimer = null;
 let lastLogoTap = 0;
+let logoTapCount = 0;
 if (logoImg) {
   logoImg.addEventListener('mousedown', function (e) {
     if (window.innerWidth > 600) { // Desktop: long press
@@ -1417,10 +1418,14 @@ if (logoImg) {
     if (window.innerWidth <= 600) {
       const now = Date.now();
       if (now - lastLogoTap < 350) {
-        showAdminLoginModal();
-        lastLogoTap = 0;
+        logoTapCount++;
       } else {
-        lastLogoTap = now;
+        logoTapCount = 1;
+      }
+      lastLogoTap = now;
+      if (logoTapCount === 2) {
+        showAdminLoginModal();
+        logoTapCount = 0;
       }
     }
     clearTimeout(logoPressTimer);
@@ -1472,6 +1477,32 @@ function showAdminLoginModal() {
     };
   }
 }
+
+// In loginForm.onsubmit, always show profile icon after user login
+loginForm.onsubmit = async e => {
+  e.preventDefault();
+  const name = document.getElementById('login-name').value.trim();
+  const password = (loginPasswordInput && loginPasswordInput.value) || '';
+  const hash = await sha256(password);
+  const usersRef = collection(db, 'Users');
+  const snapshot = await getDocs(usersRef);
+  let found = null;
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    if (data.name === name && data.password === hash) found = { ...data, docId: docSnap.id };
+  });
+  if (found) {
+    currentUser = found;
+    isAdmin = false;
+    isLoggedIn = true;
+    loginModal.classList.add('hidden');
+    showProfileIcon(currentUser);
+    toggleAdminView();
+  } else {
+    document.getElementById('login-error').textContent = 'Invalid name or password.';
+    document.getElementById('login-error').classList.remove('hidden');
+  }
+};
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
