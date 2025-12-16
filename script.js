@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-const adminHash = 'f18852e91292d79d72697f658b2d66116764860719e58f7626f28c2766f5f75d';
+const adminHash = '687cdf3caeaa888b000edf4a01d128e3b32026b04fe248aa30ab2faba6d34033';
 
 // Firebase config and init
 const firebaseConfig = {
@@ -670,6 +670,7 @@ const defaultProducts = [
 // App State
 let inventory = [];
 let isLoggedIn = false;
+let isAdmin = false;
 let editingProductId = null;
 
 // DOM Elements
@@ -682,10 +683,14 @@ const loginModal = document.getElementById('login-modal');
 const editModal = document.getElementById('edit-modal');
 const closeModals = document.querySelectorAll('.close-modal');
 
-const passwordInput = document.getElementById('password-input');
-const loginSubmit = document.getElementById('login-submit');
+// Login inputs in the modal
+const loginNameInput = document.getElementById('login-name');
+const loginPasswordInput = document.getElementById('login-password');
 const loginError = document.getElementById('login-error');
+const openSignupLink = document.getElementById('open-signup-link');
+const openLoginLink = document.getElementById('open-login-link');
 
+// Edit product inputs
 const editName = document.getElementById('edit-product-name');
 const editImage = document.getElementById('edit-product-image');
 const stockInput = document.getElementById('stock-input');
@@ -696,6 +701,19 @@ const saveStockBtn = document.getElementById('save-stock-btn');
 // DOM refs for new controls
 const searchInput = document.getElementById('search-input');
 const sortSelect = document.getElementById('sort-select');
+const editNameInput = document.getElementById('edit-name-input');
+const editImageInput = document.getElementById('edit-image-input');
+const editImageUpload = document.getElementById('edit-image-upload');
+
+// Product modal logic for users
+const productViewModal = document.getElementById('product-view-modal');
+const closeProductModal = document.getElementById('close-product-modal');
+const viewProductName = document.getElementById('view-product-name');
+const viewProductImage = document.getElementById('view-product-image');
+const viewProductPrices = document.getElementById('view-product-prices');
+const viewProductQty = document.getElementById('view-product-qty');
+const viewProductQtyGroup = document.getElementById('view-product-qty-group');
+const viewProductOut = document.getElementById('view-product-out');
 
 // --- Initialization ---
 
@@ -801,6 +819,7 @@ async function saveProduct(product) {
 }
 
 function renderProducts() {
+    console.log('renderProducts called, inventory:', inventory);
     grid.innerHTML = '';
     let filtered = inventory.slice();
     const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
@@ -817,6 +836,10 @@ function renderProducts() {
     } else if (sortVal === "out") {
         filtered = filtered.filter(p => p.stock === 0);
     }
+    if (filtered.length === 0) {
+        grid.innerHTML = '<div style="text-align:center;color:#d32f2f;font-weight:bold;">No products found.</div>';
+        return;
+    }
     filtered.forEach(product => {
         const card = document.createElement('div');
         card.className = 'card';
@@ -830,33 +853,46 @@ function renderProducts() {
             stockClass = 'stock-low';
             stockText = `Low on Stock: ${product.stock}`;
         }
-        const editDisplay = isLoggedIn ? 'block' : 'none';
+        // Only show edit if isAdmin is true
         let priceHtml = '';
         if (product.offerPrice && product.offerPrice > 0) {
             priceHtml = `<span class='price-tag'>৳${product.offerPrice.toFixed(2)}</span> <span class='regular-price'><s>৳${product.price.toFixed(2)}</s></span>`;
         } else {
             priceHtml = `<span class='price-tag'>৳${product.price.toFixed(2)}</span>`;
         }
+        // Offer badge
+        let offerBadge = '';
+        if (product.offerPrice && product.offerPrice > 0 && product.price > 0 && product.offerPrice < product.price) {
+            const percent = Math.round(100 - (product.offerPrice / product.price) * 100);
+            offerBadge = `<div class="offer-badge">-${percent}%</div>`;
+        }
         card.innerHTML = `
-            <div class="card-img-container">
+            <div class="card-img-container" onclick="openProductModal('${product.id}')">
+                ${offerBadge}
                 <img src="${product.image}" alt="${product.name}" class="card-img" loading="lazy">
             </div>
             <div class="card-title">${product.name}</div>
             <div>${priceHtml}</div>
-            <div class="stock-status ${stockClass}">${stockText}</div>
-            <button class="edit-btn" style="display: ${editDisplay}" onclick="openEditModal('${product.id}')">Update Stock ✏️</button>
+            ${isAdmin ? `<div class="stock-status ${stockClass}">${stockText}</div><button class="edit-btn" onclick="openEditModal('${product.id}');event.stopPropagation();">Update Stock ✏️</button>` : (product.stock === 0 ? `<div class="stock-status ${stockClass}">${stockText}</div>` : '')}
         `;
         grid.appendChild(card);
     });
 }
 
 function toggleAdminView() {
-    if (isLoggedIn) {
-        adminLoginBtn.classList.add('hidden');
-        adminPanel.classList.remove('hidden');
+    // Always hide login and show profile icon after login (admin or user)
+    if (isAdmin) {
+        if (adminLoginBtn) adminLoginBtn.classList.add('hidden');
+        if (adminPanel) adminPanel.classList.remove('hidden');
+        showProfileIcon({ name: 'Admin' });
+    } else if (currentUser) {
+        if (adminLoginBtn) adminLoginBtn.classList.add('hidden');
+        if (adminPanel) adminPanel.classList.add('hidden');
+        showProfileIcon(currentUser);
     } else {
-        adminLoginBtn.classList.remove('hidden');
-        adminPanel.classList.add('hidden');
+        if (adminLoginBtn) adminLoginBtn.classList.remove('hidden');
+        if (adminPanel) adminPanel.classList.add('hidden');
+        hideProfileIcon();
     }
     renderProducts();
 }
@@ -870,7 +906,11 @@ function setupEventListeners() {
             loginModal.classList.add('hidden');
             editModal.classList.add('hidden');
             loginError.classList.add('hidden');
-            passwordInput.value = '';
+            if (loginPasswordInput) loginPasswordInput.value = '';
+            if (loginNameInput) loginNameInput.value = '';
+            // Hide admin login div if present
+            const adminDiv = document.getElementById('admin-login-div');
+            if (adminDiv) adminDiv.classList.add('hidden');
         });
     });
 
@@ -878,7 +918,8 @@ function setupEventListeners() {
         if (e.target === loginModal) {
             loginModal.classList.add('hidden');
             loginError.classList.add('hidden');
-            passwordInput.value = '';
+            if (loginPasswordInput) loginPasswordInput.value = '';
+            if (loginNameInput) loginNameInput.value = '';
         }
         if (e.target === editModal) editModal.classList.add('hidden');
     });
@@ -886,13 +927,48 @@ function setupEventListeners() {
     // Login
     adminLoginBtn.addEventListener('click', () => {
         loginModal.classList.remove('hidden');
+        // show login tab by default
+        if (showLoginBtn) showLoginBtn.click();
+        setTimeout(() => {
+            if (loginNameInput) loginNameInput.focus();
+        }, 120);
     });
 
-    loginSubmit.addEventListener('click', handleLogin);
+    // allow Enter on password input to submit the login form
+    if (loginPasswordInput) {
+        loginPasswordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleLogin();
+            }
+        });
+    }
 
-    passwordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleLogin();
-    });
+    // Open signup when user clicks the inline link
+    if (openSignupLink) {
+        openSignupLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            // switch modal to signup form
+            loginForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+            if (document.getElementById('signup-name')) document.getElementById('signup-name').focus();
+            // Hide admin login div if present
+            const adminDiv = document.getElementById('admin-login-div');
+            if (adminDiv) adminDiv.classList.add('hidden');
+        });
+    }
+    // Open login when user clicks the inline link in signup
+    if (openLoginLink) {
+        openLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            signupForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            if (loginNameInput) loginNameInput.focus();
+            // Hide admin login div if present
+            const adminDiv = document.getElementById('admin-login-div');
+            if (adminDiv) adminDiv.classList.add('hidden');
+        });
+    }
 
     // Logout
     logoutBtn.addEventListener('click', () => {
@@ -909,13 +985,14 @@ function setupEventListeners() {
 // --- Login Logic ---
 
 async function handleLogin() {
-    const password = passwordInput.value;
+    const password = (loginPasswordInput && loginPasswordInput.value) || '';
     const hash = await sha256(password);
 
     if (hash === adminHash) {
         isLoggedIn = true;
+        isAdmin = true;
         loginModal.classList.add('hidden');
-        passwordInput.value = '';
+        if (loginPasswordInput) loginPasswordInput.value = '';
         loginError.classList.add('hidden');
         toggleAdminView();
     } else {
@@ -946,13 +1023,30 @@ window.openEditModal = function(id) {
     editingProductId = id;
     editName.textContent = product.name;
     editImage.src = product.image;
+    if (editNameInput) editNameInput.value = product.name;
+    if (editImageInput) editImageInput.value = product.image;
+    if (editImageUpload) editImageUpload.value = '';
     stockInput.value = product.stock;
     if (priceInput) priceInput.value = product.price || 0;
     if (offerPriceInput) offerPriceInput.value = product.offerPrice || 0;
     editModal.classList.remove('hidden');
 }
 
+if (editImageUpload) {
+    editImageUpload.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            editImage.src = e.target.result;
+            editImage.classList.remove('zoomed');
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
 async function handleSaveStock() {
+    console.log('handleSaveStock called');
     const newStock = parseInt(stockInput.value);
     const newPrice = parseFloat(priceInput.value);
     const newOfferPrice = parseFloat(offerPriceInput.value);
@@ -973,11 +1067,409 @@ async function handleSaveStock() {
         product.stock = newStock;
         product.price = newPrice;
         product.offerPrice = offerPriceInput.value !== '' ? newOfferPrice : 0;
+        editModal.classList.add('hidden'); // Instantly close modal
         await saveProduct(product);
         renderProducts();
-        editModal.classList.add('hidden');
     }
 }
 
-// Start the app
-init();
+// Product modal logic for users
+window.openProductModal = function(id) {
+    if (isAdmin) return; // Only for normal users
+    const product = inventory.find(p => p.id === id);
+    if (!product) return;
+    viewProductName.textContent = product.name;
+    viewProductImage.src = product.image;
+    viewProductImage.alt = product.name;
+    if (product.offerPrice && product.offerPrice > 0) {
+        viewProductPrices.innerHTML = `<span class='price-tag'>৳${product.offerPrice.toFixed(2)}</span> <span class='regular-price'><s>৳${product.price.toFixed(2)}</s></span>`;
+    } else {
+        viewProductPrices.innerHTML = `<span class='price-tag'>৳${product.price.toFixed(2)}</span>`;
+    }
+    if (product.stock > 0) {
+        viewProductQtyGroup.style.display = '';
+        viewProductQty.max = product.stock;
+        viewProductQty.value = 1;
+        viewProductQty.disabled = false;
+        viewProductOut.style.display = 'none';
+    } else {
+        viewProductQtyGroup.style.display = 'none';
+        viewProductOut.style.display = '';
+    }
+    productViewModal.classList.remove('hidden');
+}
+
+if (closeProductModal) closeProductModal.onclick = function() {
+    productViewModal.classList.add('hidden');
+}
+
+// Zoom logic
+if (viewProductImage) {
+    let zoomed = false;
+    viewProductImage.onclick = function() {
+        zoomed = !zoomed;
+        if (zoomed) {
+            viewProductImage.classList.add('zoomed');
+            viewProductImage.style.transform = '';
+            viewProductImage.style.cursor = 'zoom-out';
+        } else {
+            viewProductImage.classList.remove('zoomed');
+            viewProductImage.style.transform = '';
+            viewProductImage.style.cursor = 'zoom-in';
+        }
+    };
+}
+
+// --- Cart System ---
+let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+function updateCartCount() {
+    document.getElementById('cart-count').textContent = cart.reduce((sum, item) => sum + item.qty, 0);
+}
+
+function saveCart() {
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+}
+
+function addToCart(product, qty) {
+    const existing = cart.find(item => item.id === product.id);
+    if (existing) {
+        existing.qty = Math.min(existing.qty + qty, product.stock);
+    } else {
+        cart.push({ id: product.id, name: product.name, image: product.image, price: product.offerPrice && product.offerPrice > 0 ? product.offerPrice : product.price, stock: product.stock, qty: Math.min(qty, product.stock) });
+    }
+    saveCart();
+}
+
+function removeFromCart(id) {
+    cart = cart.filter(item => item.id !== id);
+    saveCart();
+    renderCart();
+}
+
+function updateCartQty(id, qty) {
+    const item = cart.find(i => i.id === id);
+    if (item) {
+        item.qty = Math.max(1, Math.min(qty, item.stock));
+        saveCart();
+        renderCart();
+    }
+}
+
+function renderCart() {
+    const cartItems = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+    const checkoutBtn = document.getElementById('checkout-btn');
+    if (!cartItems || !cartTotal) return;
+    if (cart.length === 0) {
+        cartItems.innerHTML = '<div style="text-align:center;color:#888;">Your cart is empty.</div>';
+        cartTotal.textContent = '';
+        if (checkoutBtn) checkoutBtn.style.display = 'none';
+        return;
+    }
+    let total = 0;
+    cartItems.innerHTML = cart.map(item => {
+        total += item.price * item.qty;
+        return `<div class='cart-row'>
+            <img src='${item.image}' alt='${item.name}' class='cart-thumb'>
+            <span class='cart-name'>${item.name}</span>
+            <span class='cart-qty-group'>
+                <button class='cart-qty-btn' data-id='${item.id}' data-action='minus'>&minus;</button>
+                <input type='number' min='1' max='${item.stock}' value='${item.qty}' class='cart-qty' data-id='${item.id}'>
+                <button class='cart-qty-btn' data-id='${item.id}' data-action='plus'>&#43;</button>
+            </span>
+            <span class='cart-price'>৳${(item.price * item.qty).toFixed(2)}</span>
+            <button class='cart-remove' data-id='${item.id}'>&times;</button>
+        </div>`;
+    }).join('');
+    cartTotal.textContent = `Total: ৳${total.toFixed(2)}`;
+    if (checkoutBtn) checkoutBtn.style.display = 'block';
+    // Add listeners
+    cartItems.querySelectorAll('.cart-remove').forEach(btn => {
+        btn.onclick = e => removeFromCart(btn.dataset.id);
+    });
+    cartItems.querySelectorAll('.cart-qty').forEach(input => {
+        input.onchange = e => updateCartQty(input.dataset.id, parseInt(input.value));
+    });
+    cartItems.querySelectorAll('.cart-qty-btn').forEach(btn => {
+        btn.onclick = e => {
+            const id = btn.dataset.id;
+            const item = cart.find(i => i.id === id);
+            if (!item) return;
+            if (btn.dataset.action === 'plus' && item.qty < item.stock) {
+                updateCartQty(id, item.qty + 1);
+            } else if (btn.dataset.action === 'minus' && item.qty > 1) {
+                updateCartQty(id, item.qty - 1);
+            }
+        };
+    });
+}
+
+document.getElementById('cart-btn').onclick = function() {
+    renderCart();
+    document.getElementById('cart-modal').classList.remove('hidden');
+};
+document.getElementById('close-cart-modal').onclick = function() {
+    document.getElementById('cart-modal').classList.add('hidden');
+};
+document.getElementById('checkout-btn').onclick = function() {
+    alert('Checkout is not implemented.');
+};
+updateCartCount();
+
+// Add to Cart button in product modal
+const viewProductAddBtn = document.createElement('button');
+viewProductAddBtn.id = 'view-product-add-btn';
+viewProductAddBtn.className = 'cute-btn';
+viewProductAddBtn.textContent = 'Add to Cart';
+viewProductAddBtn.onclick = function() {
+    const id = viewProductAddBtn.dataset.id;
+    const product = inventory.find(p => p.id === id);
+    const qty = parseInt(viewProductQty.value) || 1;
+    if (product && product.stock > 0) {
+        addToCart(product, qty);
+        document.getElementById('product-view-modal').classList.add('hidden');
+    }
+};
+// Insert Add to Cart button logic in openProductModal
+const origOpenProductModal = window.openProductModal;
+window.openProductModal = function(id) {
+    origOpenProductModal(id);
+    const product = inventory.find(p => p.id === id);
+    if (!product) return;
+    viewProductAddBtn.dataset.id = id;
+    if (product.stock > 0) {
+        if (!document.getElementById('view-product-add-btn')) {
+            document.getElementById('view-product-qty-group').after(viewProductAddBtn);
+        }
+        viewProductAddBtn.disabled = false;
+    } else {
+        if (document.getElementById('view-product-add-btn')) {
+            viewProductAddBtn.remove();
+        }
+    }
+};
+
+// --- Unified Login/Signup/Profile Logic ---
+const loginBtn = document.getElementById('admin-login-btn');
+const loginForm = document.getElementById('login-form');
+const signupForm = document.getElementById('signup-form');
+const showLoginBtn = document.getElementById('show-login');
+const showSignupBtn = document.getElementById('show-signup');
+const userControls = document.querySelector('.user-controls');
+
+let currentUser = null;
+
+function showProfileIcon(user) {
+  let icon = document.getElementById('profile-icon');
+  if (!icon) {
+    icon = document.createElement('button');
+    icon.id = 'profile-icon';
+    icon.className = 'profile-icon';
+    icon.title = 'Profile';
+    icon.innerHTML = '👤';
+    // Always append as last child for right alignment
+    userControls.appendChild(icon);
+  }
+  icon.onclick = showProfileMenu;
+  if (loginBtn) loginBtn.classList.add('hidden');
+  if (adminPanel) adminPanel.classList.add('hidden');
+}
+
+function hideProfileIcon() {
+  const icon = document.getElementById('profile-icon');
+  if (icon) icon.remove();
+  if (loginBtn) loginBtn.classList.remove('hidden');
+  if (adminPanel) adminPanel.classList.add('hidden');
+}
+
+function showProfileMenu() {
+  let menu = document.getElementById('profile-menu');
+  if (!menu) {
+    menu = document.createElement('div');
+    menu.id = 'profile-menu';
+    menu.className = 'profile-menu';
+    document.body.appendChild(menu);
+  }
+  menu.innerHTML = `<div class='profile-info'><b>${currentUser?.name}</b><br>${currentUser?.number || ''}<br>${currentUser?.address || ''}</div><button id='logout-profile' class='cute-btn secondary'>Logout</button>`;
+  menu.style.display = 'block';
+  // Position fixed to top right (matches CSS)
+  menu.style.right = '24px';
+  menu.style.top = window.innerWidth < 600 ? '60px' : '70px';
+  menu.style.left = '';
+  document.getElementById('logout-profile').onclick = () => {
+    if (isAdmin) {
+      isAdmin = false;
+      isLoggedIn = false;
+      currentUser = null;
+      hideProfileIcon();
+      menu.style.display = 'none';
+      adminLoginBtn.classList.remove('hidden');
+      adminPanel.classList.add('hidden');
+      renderProducts();
+      alert('Admin logged out.');
+    } else {
+      currentUser = null;
+      isLoggedIn = false;
+      hideProfileIcon();
+      menu.style.display = 'none';
+      renderProducts();
+    }
+  };
+  document.addEventListener('mousedown', function handler(e) {
+    if (!menu.contains(e.target) && e.target !== document.getElementById('profile-icon')) {
+      menu.style.display = 'none';
+      document.removeEventListener('mousedown', handler);
+    }
+  });
+}
+
+loginBtn.onclick = () => {
+  loginModal.classList.remove('hidden');
+  loginForm.classList.remove('hidden');
+  signupForm.classList.add('hidden');
+  if (loginNameInput) loginNameInput.focus();
+  // Hide admin login div if present
+  const adminDiv = document.getElementById('admin-login-div');
+  if (adminDiv) adminDiv.classList.add('hidden');
+};
+
+signupForm.onsubmit = async e => {
+  e.preventDefault();
+  const name = document.getElementById('signup-name').value.trim();
+  const number = document.getElementById('signup-number').value.trim();
+  const address = document.getElementById('signup-address').value.trim();
+  const password = document.getElementById('signup-password').value;
+  if (!name || !number || !address || !password) {
+    document.getElementById('signup-error').textContent = 'All fields are required.';
+    document.getElementById('signup-error').classList.remove('hidden');
+    return;
+  }
+  const hash = await sha256(password);
+  const usersRef = collection(db, 'Users');
+  // Check if user with same name exists
+  const snapshot = await getDocs(usersRef);
+  let exists = false;
+  snapshot.forEach(docSnap => {
+    if (docSnap.data().name === name) exists = true;
+  });
+  if (exists) {
+    document.getElementById('signup-error').textContent = 'Name already taken. Please use a different name.';
+    document.getElementById('signup-error').classList.remove('hidden');
+    return;
+  }
+  const userId = uuidv4();
+  await setDoc(doc(usersRef, name), {
+    id: userId,
+    name,
+    number,
+    address,
+    password: hash
+  });
+  document.getElementById('signup-error').classList.add('hidden');
+  signupForm.reset();
+  showLoginBtn.click();
+  document.getElementById('login-error').textContent = 'Sign up successful! Please log in.';
+  document.getElementById('login-error').classList.remove('hidden');
+};
+
+// Hide profile menu on logout or modal close
+closeModals.forEach(btn => {
+   btn.addEventListener('click', () => {
+     const menu = document.getElementById('profile-menu');
+     if (menu) menu.style.display = 'none';
+   });
+ });
+
+// Add long-press admin login to logo
+const logoImg = document.querySelector('.logo');
+let logoPressTimer = null;
+if (logoImg) {
+  logoImg.addEventListener('mousedown', function (e) {
+    logoPressTimer = setTimeout(() => {
+      // Show admin login modal
+      if (loginModal) {
+        loginModal.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+        signupForm.classList.add('hidden');
+        let adminDiv = document.getElementById('admin-login-div');
+        if (!adminDiv) {
+          adminDiv = document.createElement('div');
+          adminDiv.id = 'admin-login-div';
+          adminDiv.innerHTML = `<h2>Admin Login 🗝️</h2><input type='password' id='admin-password' placeholder='Password...'><button id='admin-login-submit' class='cute-btn'>Unlock</button><p id='admin-login-error' class='error-msg hidden'></p>`;
+          loginModal.querySelector('.modal-content').appendChild(adminDiv);
+        }
+        adminDiv.classList.remove('hidden');
+        setTimeout(() => {
+          const adminPassInput = document.getElementById('admin-password');
+          if (adminPassInput) adminPassInput.focus();
+        }, 50);
+        document.getElementById('admin-login-submit').onclick = async () => {
+          const pass = document.getElementById('admin-password').value;
+          const hash = await sha256(pass);
+          if (hash === adminHash) {
+            isAdmin = true;
+            isLoggedIn = true;
+            currentUser = { name: 'Admin' };
+            loginModal.classList.add('hidden');
+            showProfileIcon(currentUser);
+            adminDiv.classList.add('hidden');
+            toggleAdminView();
+          } else {
+            document.getElementById('admin-login-error').textContent = 'Wrong password!';
+            document.getElementById('admin-login-error').classList.remove('hidden');
+          }
+        };
+      }
+    }, 700); // 700ms long press
+  });
+  logoImg.addEventListener('mouseup', function (e) {
+    clearTimeout(logoPressTimer);
+  });
+  logoImg.addEventListener('mouseleave', function (e) {
+    clearTimeout(logoPressTimer);
+  });
+  logoImg.addEventListener('touchstart', function (e) {
+    logoPressTimer = setTimeout(() => {
+      if (loginModal) {
+        loginModal.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+        signupForm.classList.add('hidden');
+        let adminDiv = document.getElementById('admin-login-div');
+        if (!adminDiv) {
+          adminDiv = document.createElement('div');
+          adminDiv.id = 'admin-login-div';
+          adminDiv.innerHTML = `<h2>Admin Login 🗝️</h2><input type='password' id='admin-password' placeholder='Password...'><button id='admin-login-submit' class='cute-btn'>Unlock</button><p id='admin-login-error' class='error-msg hidden'></p>`;
+          loginModal.querySelector('.modal-content').appendChild(adminDiv);
+        }
+        adminDiv.classList.remove('hidden');
+        setTimeout(() => {
+          const adminPassInput = document.getElementById('admin-password');
+          if (adminPassInput) adminPassInput.focus();
+        }, 50);
+        document.getElementById('admin-login-submit').onclick = async () => {
+          const pass = document.getElementById('admin-password').value;
+          const hash = await sha256(pass);
+          if (hash === adminHash) {
+            isAdmin = true;
+            isLoggedIn = true;
+            currentUser = { name: 'Admin' };
+            loginModal.classList.add('hidden');
+            showProfileIcon(currentUser);
+            adminDiv.classList.add('hidden');
+            toggleAdminView();
+          } else {
+            document.getElementById('admin-login-error').textContent = 'Wrong password!';
+            document.getElementById('admin-login-error').classList.remove('hidden');
+          }
+        };
+      }
+    }, 700);
+  });
+}
+
+// Initialize the app
+document.addEventListener('DOMContentLoaded', () => {
+   init();
+});
