@@ -1,164 +1,501 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toy & Craft</title>
+    <base href="/">
+    <meta name="description"
+        content="Discover the joy of creating with our premium Mini Bricks and accessorize with our handcrafted Key Rings.">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
-
-    <header>
-        <div class="logo-container">
-            <img src="assets/images/logo.png" alt="Toy & Craft Logo" class="logo">
-            <span class="site-title">Toy &amp; Craft</span>
-        </div>
-        <div class="user-controls">
-            <button id="cart-btn" class="cart-btn" aria-label="View Cart">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1976d2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61l1.38-7.39H6"/></svg>
-                <span id="cart-count" class="cart-count">0</span>
-            </button>
-            <button id="admin-login-btn" class="cute-btn">Login</button>
-            <div id="admin-panel" class="hidden">
-                <span class="welcome-text">Welcome, Admin! ✨</span>
-                <button id="logout-btn" class="cute-btn secondary">Logout</button>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="/assets/tc_logo.png" alt="Logo" class="site-logo-img">
+                <span class="logo-text" id="site-title"
+                    style="cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; margin-left: 10px;">Toy
+                    & Craft</span>
+            </div>
+            <div class="nav-actions">
+                <button class="icon-btn cart-toggle" id="cart-toggle" aria-label="Open Cart"
+                    style="margin-right: 15px;">
+                    <span class="material-icons-round">shopping_bag</span>
+                    <span class="cart-badge" id="cart-badge" style="display: none;">0</span>
+                </button>
+                <button class="icon-btn theme-toggle" id="theme-toggle" aria-label="Toggle Theme"
+                    style="margin-right: 15px;">
+                    <span class="material-icons-round">dark_mode</span>
+                </button>
+                <button class="btn btn-primary btn-sm" id="auth-login-btn">Login</button>
+                <div id="user-profile-badge"
+                    style="display: none; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;">
+                    <span class="material-icons-round">account_circle</span>
+                    <span id="user-profile-name">User</span>
+                </div>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <main>
-        <div class="container">
-            <h1>✨ MINI BRICKS ✨</h1>
-
-            <!-- Search and Sort Controls -->
-            <div class="controls-row">
-                <input type="text" id="search-input" placeholder="Search by name..." />
-                <label for="sort-select" class="visually-hidden">Sort Products</label>
-                <select id="sort-select" title="Sort Products">
-                    <option value="default">All</option>
-                    <option value="price-asc">Price: Low to High</option>
-                    <option value="price-desc">Price: High to Low</option>
-                    <option value="stock">Only In Stock</option>
-                    <option value="out">Only Out of Stock</option>
-                </select>
-            </div>
-
-            <div id="product-grid" class="grid">
-                <!-- Products will be injected here -->
-            </div>
+    <!-- Admin Tools Banner (Hidden by Default) -->
+    <div id="admin-tools-banner" class="admin-tools-banner" style="display: none;">
+        <div class="admin-banner-content">
+            <span class="material-icons-round">security</span>
+            <span>Admin Mode Active</span>
         </div>
+        <div class="admin-banner-actions">
+            <button class="btn btn-secondary btn-sm" id="admin-orders-btn"
+                style="background: rgba(255,255,255,0.2); border: none; color: white; margin-right: 10px;">All
+                Orders</button>
+            <button class="btn btn-primary btn-sm" id="admin-logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <!-- Removed Hero and Features Sections -->
+    <main id="main-content">
+        <!-- Shop Section -->
+        <section id="shop" class="shop-section">
+            <div class="section-header" style="position: relative;">
+                <div id="admin-header-edit-container" style="display: none; position: absolute; top: 0; right: 0;">
+                    <button class="btn btn-secondary btn-sm" id="admin-edit-header-btn">
+                        <span class="material-icons-round" style="font-size: 16px; margin-right: 4px;">edit</span> Edit
+                        Header
+                    </button>
+                </div>
+                <h2 class="section-title" id="home-title">Explore Our Collection</h2>
+                <p class="section-subtitle" id="home-subtitle">Find the perfect mini brick set or a cute companion for
+                    your
+                    keys.</p>
+
+                <div class="category-tabs">
+                    <button class="tab-btn active" data-category="mini-bricks">Mini Bricks</button>
+                    <button class="tab-btn" data-category="key-rings">Key Rings</button>
+                </div>
+            </div>
+
+            <div class="product-grid" id="product-grid">
+                <!-- Products will be dynamically injected here by app.js -->
+            </div>
+        </section>
+
+        <!-- Connect with Us (Socials) -->
+        <section class="newsletter">
+            <div class="newsletter-card">
+                <h2>Connect With Us</h2>
+                <p>Join our community across social media for exclusive offers, sneak peeks at new sets, and fun DIY
+                    ideas!
+                </p>
+                <div class="social-links-large">
+                    <a href="https://web.facebook.com/profile.php?id=61582394120895" target="_blank"
+                        class="btn btn-secondary social-btn fb-btn">
+                        <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook" width="24"
+                            height="24">
+                        Facebook
+                    </a>
+                    <a href="https://www.instagram.com/toy_and_craft/" target="_blank"
+                        class="btn btn-secondary social-btn insta-btn">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="24"
+                            height="24">
+                        Instagram
+                    </a>
+                    <a href="https://www.tiktok.com/@toy_and_craft" target="_blank"
+                        class="btn btn-secondary social-btn tiktok-btn">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok" width="24"
+                            height="24">
+                        TikTok
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-bottom"
+                style="justify-content: center; padding: 2rem; border-top: 1px solid var(--border-color);">
+                <p id="secret-admin-trigger" style="cursor: default;">&copy; 2026 Toy & Craft. All rights reserved.</p>
+            </div>
+        </footer>
     </main>
 
-    <!-- Login Modal -->
-    <div id="login-modal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div id="login-signup-toggle" class="toggle-row">
-                <!-- Removed toggle buttons for cleaner UI -->
-            </div>
-            <form id="login-form" autocomplete="on">
-                <h2>Login</h2>
-                <div class="input-group">
-                    <label for="login-name">Name</label>
-                    <input type="text" id="login-name" required autocomplete="username">
-                </div>
-                <div class="input-group">
-                    <label for="login-password">Password</label>
-                    <input type="password" id="login-password" required autocomplete="current-password">
-                </div>
-                <div class="center-btn-row">
-                  <button type="submit" class="cute-btn">Login</button>
-                </div>
-                <p id="login-error" class="error-msg hidden" aria-live="polite"></p>
-                <p class="small-note">Don't have an account? <a href="#" id="open-signup-link">Sign up</a></p>
-            </form>
-            <form id="signup-form" class="hidden" autocomplete="on">
-                <h2>Sign Up</h2>
-                <div class="input-group">
-                    <label for="signup-name">Name</label>
-                    <input type="text" id="signup-name" required autocomplete="username">
-                </div>
-                <div class="input-group">
-                    <label for="signup-number">Phone Number</label>
-                    <input type="tel" id="signup-number" required pattern="[0-9]{10,15}" autocomplete="tel">
-                </div>
-                <div class="input-group">
-                    <label for="signup-address">Address</label>
-                    <input type="text" id="signup-address" required autocomplete="street-address">
-                </div>
-                <div class="input-group">
-                    <label for="signup-password">Password</label>
-                    <input type="password" id="signup-password" required autocomplete="new-password">
-                </div>
-                <button type="submit" class="cute-btn">Sign Up</button>
-                <p id="signup-error" class="error-msg hidden" aria-live="polite"></p>
-                <p class="small-note">Already have an account? <a href="#" id="open-login-link">Login</a></p>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Stock Modal -->
-    <div id="edit-modal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2>Update Stock 📦</h2>
-            <h3 id="edit-product-name">Product Name</h3>
-            <div class="image-edit-container">
-                <img id="edit-product-image" src="" alt="Product" class="preview-img">
-                <label for="edit-image-upload" class="image-upload-icon" title="Change Product Image">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1976d2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19.5 3 21l1.5-4L16.5 3.5z"/></svg>
-                    <input type="file" id="edit-image-upload" accept="image/*" aria-label="Change Product Image">
-                </label>
-            </div>
-            <div class="input-group">
-                <label for="edit-name-input">Product Name:</label>
-                <input type="text" id="edit-name-input" class="styled-input">
-            </div>
-            <div class="input-group">
-                <label for="stock-input">Quantity:</label>
-                <input type="number" id="stock-input" min="0">
-            </div>
-            <div class="input-group">
-                <label for="price-input">Price (৳):</label>
-                <input type="number" id="price-input" min="0" step="0.01" required>
-            </div>
-            <div class="input-group">
-                <label for="offer-price-input">Offer Price (৳):</label>
-                <input type="number" id="offer-price-input" min="0" step="0.01">
-            </div>
-            <button id="save-stock-btn" class="cute-btn">Save Changes</button>
-        </div>
-    </div>
-
-    <!-- Product View Modal for Users -->
-    <div id="product-view-modal" class="modal hidden">
-        <div class="modal-content user-modal-content">
-            <span class="close-modal" id="close-product-modal">&times;</span>
-            <h2 id="view-product-name"></h2>
-            <div class="zoom-container">
-                <img id="view-product-image" src="" alt="Product" class="zoom-img">
-            </div>
-            <div id="view-product-prices"></div>
-            <div id="view-product-qty-group">
-                <label for="view-product-qty">Quantity:</label>
-                <input type="number" id="view-product-qty" min="1" value="1">
-            </div>
-            <div id="view-product-out" class="out-of-stock-msg">Out of Stock</div>
-        </div>
-    </div>
-
-    <!-- Cart Modal -->
-    <div id="cart-modal" class="modal hidden">
-        <div class="modal-content cart-modal-content">
-            <span class="close-modal" id="close-cart-modal">&times;</span>
+    <!-- Cart Overlay & Sidebar -->
+    <div class="cart-overlay" id="cart-overlay"></div>
+    <aside class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
             <h2>Your Cart</h2>
-            <div id="cart-items"></div>
-            <div id="cart-total"></div>
-            <button id="checkout-btn" class="cute-btn">Checkout</button>
+            <button class="icon-btn close-cart" id="close-cart">
+                <span class="material-icons-round">close</span>
+            </button>
+        </div>
+        <div class="cart-items" id="cart-items">
+            <!-- Cart items injected here -->
+            <div class="empty-cart-msg">Your cart is empty.</div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cart-total-price">৳0.00</span>
+            </div>
+            <button class="btn btn-primary checkout-btn" id="checkout-btn">Proceed to Checkout</button>
+        </div>
+    </aside>
+
+    <!-- Custom Password Modal -->
+    <div class="modal-overlay" id="password-modal" style="display: none; z-index: 4000;">
+        <div class="modal-card" style="max-width: 350px; padding: 2rem; text-align: center;">
+            <h2 id="password-modal-title" style="margin-bottom: 1.5rem; font-size: 1.25rem;">Enter Admin Password</h2>
+            <div class="form-group">
+                <input type="password" id="password-input" placeholder="Password"
+                    style="text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
+            </div>
+            <div class="modal-actions" style="justify-content: center; border: none; padding-top: 0; margin-top: 1rem;">
+                <button type="button" class="btn btn-secondary" id="password-cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="password-submit-btn">Submit</button>
+            </div>
         </div>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <!-- Admin Management Modal -->
+    <div class="modal-overlay" id="admin-modal" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 id="admin-modal-title">Add New Product</h2>
+                <button class="icon-btn close-modal" id="close-admin-modal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="admin-product-form">
+                    <input type="hidden" id="admin-product-id">
+
+                    <div class="form-group">
+                        <label for="admin-product-name">Product Name</label>
+                        <input type="text" id="admin-product-name" required placeholder="e.g. Space Explorer Apollo">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin-product-category">Category</label>
+                        <select id="admin-product-category" required>
+                            <!-- Options injected dynamically by app.js -->
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="admin-product-price">Regular Price (৳)</label>
+                            <input type="number" id="admin-product-price" required min="0" step="0.01"
+                                placeholder="e.g. 1500">
+                        </div>
+                        <div class="form-group">
+                            <label for="admin-product-offer">Discount Price (৳)</label>
+                            <input type="number" id="admin-product-offer" min="0" step="0.01" placeholder="Optional">
+                            <small>Leave blank for no discount</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin-product-image">Image URL</label>
+                        <input type="url" id="admin-product-image" required placeholder="https://example.com/image.jpg">
+                    </div>
+
+                    <div class="form-row checkbox-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="admin-product-new"> Is New?
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="admin-product-sale"> Is On Sale?
+                        </label>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" id="admin-cancel-btn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Product</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Header Modal -->
+    <div class="modal-overlay" id="header-modal" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Edit Section Header</h2>
+                <button class="icon-btn close-modal" id="close-header-modal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="admin-header-form">
+                    <div class="form-group">
+                        <label for="admin-header-title">Heading</label>
+                        <input type="text" id="admin-header-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-header-subtitle">Subheading</label>
+                        <textarea id="admin-header-subtitle" required rows="3"
+                            style="width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: var(--bg-card); color: var(--text-main); font-family: var(--font-body); resize: vertical;"></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" id="header-cancel-btn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth & Profile Modal -->
+    <div class="modal-overlay" id="auth-modal" style="display: none; z-index: 4000;">
+        <div class="modal-card" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2 id="auth-modal-title">Login</h2>
+                <button class="icon-btn close-modal" id="close-auth-modal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Login View -->
+                <div id="login-view">
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label for="login-identifier">Username, UserID, or Mobile</label>
+                            <input type="text" id="login-identifier" required placeholder="e.g. MasterBuilder99">
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <div class="input-wrapper" style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="login-password" required
+                                    style="width: 100%; padding-right: 40px;">
+                                <span class="material-icons-round toggle-password"
+                                    style="position: absolute; right: 10px; cursor: pointer; color: var(--text-muted); font-size: 1.2rem;">visibility</span>
+                            </div>
+                        </div>
+                        <div class="form-group checkbox-group"
+                            style="display: flex; align-items: center; justify-content: flex-start;">
+                            <label
+                                style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 0.9rem; cursor: pointer; flex-direction: row-reverse;">
+                                Keep me logged in
+                                <input type="checkbox" id="login-remember" checked>
+                            </label>
+                        </div>
+                        <div class="modal-actions" style="margin-top: 1rem; flex-direction: column; gap: 1rem;">
+                            <button type="submit" class="btn btn-primary" id="login-submit-btn"
+                                style="width: 100%;">Login</button>
+                            <div style="text-align: center; font-size: 0.9rem; color: var(--text-muted);">
+                                Don't have an account? <a href="#" id="show-register-btn"
+                                    style="color: var(--primary); font-weight: 600;">Register Here</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Register View -->
+                <div id="register-view" style="display: none;">
+                    <form id="register-form">
+                        <div class="form-group">
+                            <label for="register-username">Username</label>
+                            <input type="text" id="register-username" required placeholder="Choose a username">
+                        </div>
+                        <div class="form-group">
+                            <label for="register-userid">Unique User ID (Editable)</label>
+                            <input type="text" id="register-userid" required style="color: var(--text-main);"
+                                placeholder="Auto-generated, modify carefully">
+                            <small id="register-userid-hint"
+                                style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Leave
+                                matching your username for best results.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-mobile">Mobile Number</label>
+                            <input type="tel" id="register-mobile" required placeholder="e.g. +1 234 567 8900">
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Password</label>
+                            <div class="input-wrapper" style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="register-password" required
+                                    style="width: 100%; padding-right: 40px;">
+                                <span class="material-icons-round toggle-password"
+                                    style="position: absolute; right: 10px; cursor: pointer; color: var(--text-muted); font-size: 1.2rem;">visibility</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-address">Address</label>
+                            <textarea id="register-address" required rows="2"
+                                style="width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: var(--bg-card); color: var(--text-main); font-family: var(--font-body); resize: vertical;"></textarea>
+                        </div>
+                        <div class="form-group checkbox-group"
+                            style="display: flex; align-items: center; justify-content: flex-start;">
+                            <label
+                                style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 0.9rem; cursor: pointer; flex-direction: row-reverse;">
+                                Keep me logged in
+                                <input type="checkbox" id="register-remember" checked>
+                            </label>
+                        </div>
+                        <div class="modal-actions" style="margin-top: 1rem; flex-direction: column; gap: 1rem;">
+                            <button type="submit" class="btn btn-primary" id="register-submit-btn"
+                                style="width: 100%;">Register</button>
+                            <div style="text-align: center; font-size: 0.9rem; color: var(--text-muted);">
+                                Already have an account? <a href="#" id="show-login-btn"
+                                    style="color: var(--primary); font-weight: 600;">Login Here</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Profile View (For logged in users) -->
+                <div id="profile-view" style="display: none; max-height: 70vh; overflow-y: auto; padding-right: 5px;">
+                    <!-- Profile Tabs -->
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;"
+                        id="profile-tabs">
+                        <button id="tab-profile-details"
+                            style="background:none; border:none; cursor:pointer; font-weight:600; color:var(--primary); padding:0.5rem; border-bottom: 2px solid var(--primary);">Details</button>
+                        <button id="tab-profile-orders"
+                            style="background:none; border:none; cursor:pointer; font-weight:600; color:var(--text-muted); padding:0.5rem; border-bottom: 2px solid transparent;">Orders</button>
+                    </div>
+
+                    <!-- Details Content -->
+                    <div id="profile-details-content">
+                        <form id="profile-form">
+                            <div class="form-group">
+                                <label for="profile-username">Username</label>
+                                <input type="text" id="profile-username" readonly
+                                    style="background: var(--bg-hover); color: var(--text-muted); cursor: not-allowed;">
+                            </div>
+                            <div class="form-group">
+                                <label>Unique User ID</label>
+                                <input type="text" id="profile-userid" readonly
+                                    style="background: var(--bg-hover); color: var(--text-muted); cursor: not-allowed;">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-mobile">Mobile Number</label>
+                                <input type="tel" id="profile-mobile" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-address">Address</label>
+                                <textarea id="profile-address" rows="2"
+                                    style="width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: var(--bg-card); color: var(--text-main); font-family: var(--font-body); resize: vertical;"></textarea>
+                            </div>
+                            <div class="modal-actions" style="margin-top: 1rem; justify-content: space-between;">
+                                <button type="button" class="btn btn-secondary" id="auth-logout-btn"
+                                    style="background: rgba(255,50,50,0.1); color: #ff4444; border: none;">Sign
+                                    Out</button>
+                                <button type="submit" class="btn btn-primary" id="profile-update-btn">Update
+                                    Profile</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Orders Content -->
+                    <div id="profile-orders-content" style="display: none;">
+                        <div id="profile-orders-section">
+                            <h3 style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-main);">Personal Order
+                                History</h3>
+                            <div id="profile-orders-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                                <!-- Orders dynamic injection -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div class="modal-overlay" id="category-modal" style="display: none; z-index: 3500;">
+        <div class="modal-card" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Add New Category</h2>
+                <button class="icon-btn close-modal" id="close-category-modal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="category-form">
+                    <div class="form-group">
+                        <label for="new-category-name">Category Name</label>
+                        <input type="text" id="new-category-name" required placeholder="e.g. Board Games"
+                            autocomplete="off">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" id="category-cancel-btn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Category</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout SPA View -->
+    <div id="checkout-view"
+        style="display: none; padding: 2rem 1.5rem; max-width: 1200px; margin: 0 auto; min-height: 70vh;">
+        <h2 style="font-family: var(--font-heading); margin-bottom: 2rem; font-size: 2rem; color: var(--primary);">
+            Secure Checkout</h2>
+        <div style="display: grid; grid-template-columns: 1fr 350px; gap: 2rem;" class="checkout-grid">
+            <div class="checkout-details-section">
+                <div class="checkout-card"
+                    style="background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+                    <h3
+                        style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                        Shipping Details</h3>
+                    <div id="checkout-user-details"
+                        style="display: flex; flex-direction: column; gap: 0.8rem; color: var(--text-muted); line-height: 1.5;">
+                        <!-- JS injected user string -->
+                    </div>
+                </div>
+                <div class="checkout-card"
+                    style="background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                    <h3
+                        style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                        Order Summary</h3>
+                    <div id="checkout-items-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <!-- JS injected cart items -->
+                    </div>
+                </div>
+            </div>
+            <div class="checkout-action-section">
+                <div class="checkout-card"
+                    style="background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); position: sticky; top: 100px;">
+                    <h3 style="margin-bottom: 1.5rem;">Total</h3>
+                    <div
+                        style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: bold; color: var(--text-main); margin-bottom: 2rem;">
+                        <span>USD</span>
+                        <span id="checkout-total-price">$0.00</span>
+                    </div>
+                    <button class="btn btn-primary" id="checkout-confirm-btn"
+                        style="width: 100%; margin-bottom: 1rem; font-size: 1.1rem; padding: 1rem;">Confirm
+                        Order</button>
+                    <button class="btn btn-secondary" id="checkout-cancel-btn" style="width: 100%;">Return to
+                        Shop</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Orders SPA View -->
+    <div id="admin-orders-view"
+        style="display: none; padding: 2rem 1.5rem; max-width: 1200px; margin: 0 auto; min-height: 70vh;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 style="font-family: var(--font-heading); font-size: 2rem; color: var(--primary);">System Orders</h2>
+            <button class="btn btn-secondary" id="admin-orders-close-btn">Return to Shop</button>
+        </div>
+        <div id="admin-orders-list" style="display: flex; flex-direction: column; gap: 1rem;">
+            <!-- JS injected admin orders -->
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
 </body>
+
 </html>

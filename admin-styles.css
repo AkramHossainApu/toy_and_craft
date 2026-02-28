@@ -1,0 +1,327 @@
+/* --- Admin Styles --- */
+.admin-tools-banner {
+    background-color: var(--text-main);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    position: sticky;
+    top: 73px;
+    /* Just below navbar */
+    z-index: 999;
+}
+
+[data-theme="dark"] .admin-tools-banner {
+    background-color: #000000;
+}
+
+.admin-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.admin-banner-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+}
+
+/* Edit Product Button Overlay */
+.edit-product-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: var(--transition);
+}
+
+.product-card:hover .edit-product-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.edit-product-btn:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+.delete-product-btn {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    background-color: var(--bg-card);
+    color: var(--primary);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: var(--transition);
+}
+
+.product-card:hover .delete-product-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.delete-product-btn:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+/* Modal form styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal-card {
+    background: var(--bg-card);
+    width: 100%;
+    max-width: 500px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    font-size: 1.5rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="url"],
+.form-group input[type="password"],
+.form-group input[type="tel"],
+.form-group select {
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--primary);
+}
+
+.form-group small {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.checkbox-row {
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 2rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Dynamic Add Category Button */
+.add-category-btn {
+    background: transparent;
+    border: 2px dashed var(--border-color);
+    color: var(--text-muted);
+}
+
+.add-category-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background-color: transparent;
+    box-shadow: none;
+}
+
+.delete-category-btn {
+    margin-left: 0.5rem;
+    background: transparent;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    padding: 0.2rem;
+    border-radius: 4px;
+}
+
+.delete-category-btn:hover {
+    background-color: rgba(255, 92, 92, 0.1);
+}
+
+/* Social Buttons */
+.social-links-large {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    z-index: 2;
+    position: relative;
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    color: var(--text-main);
+    background-color: var(--bg-card);
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.social-btn img {
+    border-radius: 4px;
+}
+
+[data-theme="dark"] .social-btn {
+    background-color: #2D2D2D;
+    color: #FFFFFF;
+}
+
+.social-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.fb-btn:hover {
+    border-color: #1877F2;
+    color: #1877F2 !important;
+}
+
+.insta-btn:hover {
+    border-color: #E1306C;
+    color: #E1306C !important;
+}
+
+.tiktok-btn:hover {
+    border-color: #000000;
+    color: #000000 !important;
+}
+
+[data-theme="dark"] .tiktok-btn:hover {
+    border-color: #FFFFFF;
+    color: #FFFFFF !important;
+}
+
+/* Inline Add Product Card */
+.add-product-card {
+    border: 2px dashed var(--border-color);
+    background: transparent;
+    box-shadow: none;
+    transition: var(--transition);
+    opacity: 0.7;
+}
+
+.add-product-card:hover {
+    border-color: var(--primary);
+    background: var(--bg-card);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    opacity: 1;
+}
+
+.add-product-card:hover .material-icons-round {
+    transform: scale(1.1);
+}
+
+.add-product-card .material-icons-round {
+    transition: var(--transition);
+}
