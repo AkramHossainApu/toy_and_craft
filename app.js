@@ -438,7 +438,7 @@ function renderProducts(categorySlug) {
 
         // Handle undefined image smoothly
         const imgSrc = getAbsoluteImageUrl(product.image);
-        const imgDisplay = product.image ? `<img src="${imgSrc}" alt="${product.name}" class="product-img">` : `<div class="product-img" style="display:flex; align-items:center; justify-content:center; background:#eee; color:#aaa; height: 200px; width: 100%;">No Image</div>`;
+        const imgDisplay = product.image ? `<img src="${imgSrc}" alt="${product.name}" class="product-img" loading="lazy">` : `<div class="product-img" style="display:flex; align-items:center; justify-content:center; background:#eee; color:#aaa; height: 200px; width: 100%;">No Image</div>`;
 
         card.innerHTML = `
             ${adminActions}
@@ -1205,7 +1205,7 @@ function updateCartUI() {
         const cartItemEl = document.createElement('div');
         cartItemEl.className = 'cart-item';
         cartItemEl.innerHTML = `
-            <img src="${getAbsoluteImageUrl(item.image)}" alt="${item.name}" class="cart-item-img">
+            <img src="${getAbsoluteImageUrl(item.image)}" alt="${item.name}" class="cart-item-img" loading="lazy">
             <div class="cart-item-details">
                 <div class="cart-item-title">${item.name}</div>
                 <div class="cart-item-price">৳${item.currentPrice.toFixed(2)}</div>
@@ -1412,7 +1412,7 @@ if (checkoutBtn) {
                 const el = document.createElement('div');
                 el.style.cssText = "display: flex; gap: 1rem; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;";
                 el.innerHTML = `
-                    <img src="${getAbsoluteImageUrl(item.image)}" style="width: 50px; height: 50px; object-fit: cover; border-radius: var(--radius-sm);">
+                    <img src="${getAbsoluteImageUrl(item.image)}" style="width: 50px; height: 50px; object-fit: cover; border-radius: var(--radius-sm);" loading="lazy">
                     <div style="flex-grow: 1;">
                         <h4 style="margin: 0; font-size: 0.95rem;">${item.name}</h4>
                         <span style="font-size: 0.85rem; color: var(--text-muted);">Qty: ${item.qty}</span>
