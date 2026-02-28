@@ -3,6 +3,7 @@ import {
     getFirestore, collection, doc, setDoc, deleteDoc, updateDoc,
     onSnapshot, getDocs, getDoc, query, where, writeBatch, runTransaction
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { steadfastLocations } from "./locations.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyARQW48lm5jEavNwCDG7tKlolxJPg1ggLg",
@@ -26,6 +27,7 @@ let isAdmin = sessionStorage.getItem('tc_admin') === 'true';
 
 // User Auth State
 let currentUser = null; // { id: '...', name: '...', address: '...' }
+let currentGuest = null; // { name: '...', mobile: '...', address: '...', district: '...', thana: '...' }
 
 // Header State
 let homeTitleText = localStorage.getItem('tc_home_title');
@@ -80,6 +82,8 @@ const registerUseridInput = document.getElementById('register-userid');
 const registerMobileInput = document.getElementById('register-mobile');
 const registerPasswordInput = document.getElementById('register-password');
 const registerAddressInput = document.getElementById('register-address');
+const registerDistrictInput = document.getElementById('register-district');
+const registerThanaInput = document.getElementById('register-thana');
 const registerRememberInput = document.getElementById('register-remember');
 const registerSubmitBtn = document.getElementById('register-submit-btn');
 const showLoginBtn = document.getElementById('show-login-btn');
@@ -90,6 +94,8 @@ const profileUsernameInput = document.getElementById('profile-username');
 const profileUseridInput = document.getElementById('profile-userid');
 const profileMobileInput = document.getElementById('profile-mobile');
 const profileAddressInput = document.getElementById('profile-address');
+const profileDistrictInput = document.getElementById('profile-district');
+const profileThanaInput = document.getElementById('profile-thana');
 const profileOrdersList = document.getElementById('profile-orders-list');
 const profileUpdateBtn = document.getElementById('profile-update-btn');
 const authLogoutBtn = document.getElementById('auth-logout-btn');
@@ -97,7 +103,7 @@ const authLogoutBtn = document.getElementById('auth-logout-btn');
 // Admin Elements
 const siteTitle = document.getElementById('site-title');
 const adminToolsBanner = document.getElementById('admin-tools-banner');
-const adminLogoutBtn = document.getElementById('admin-logout-btn');
+const adminNavbarLogoutBtn = document.getElementById('admin-navbar-logout-btn');
 const homeTitle = document.getElementById('home-title');
 const homeSubtitle = document.getElementById('home-subtitle');
 const adminHeaderEditContainer = document.getElementById('admin-header-edit-container');
@@ -107,7 +113,22 @@ const adminEditHeaderBtn = document.getElementById('admin-edit-header-btn');
 const checkoutView = document.getElementById('checkout-view');
 const checkoutUserDetails = document.getElementById('checkout-user-details');
 const checkoutItemsList = document.getElementById('checkout-items-list');
+const checkoutSubtotalPrice = document.getElementById('checkout-subtotal-price');
+const checkoutDeliveryCharge = document.getElementById('checkout-delivery-charge');
 const checkoutTotalPrice = document.getElementById('checkout-total-price');
+
+// Guest Modal Elements
+const guestModal = document.getElementById('guest-modal');
+const closeGuestModalBtn = document.getElementById('close-guest-modal');
+const guestCheckoutForm = document.getElementById('guest-checkout-form');
+const guestNameInput = document.getElementById('guest-name');
+const guestMobileInput = document.getElementById('guest-mobile');
+const guestAddressInput = document.getElementById('guest-address');
+const guestDistrict = document.getElementById('guest-district');
+const guestThana = document.getElementById('guest-thana');
+const guestModalLoginLink = document.getElementById('guest-modal-login-link');
+
+
 const checkoutConfirmBtn = document.getElementById('checkout-confirm-btn');
 const checkoutCancelBtn = document.getElementById('checkout-cancel-btn');
 const mainLayoutContainer = document.querySelector('main'); // Target standard HTML body to toggle vis
@@ -151,9 +172,6 @@ const newCategoryNameInput = document.getElementById('new-category-name');
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-    if (homeTitle) homeTitle.textContent = homeTitleText;
-    if (homeSubtitle) homeSubtitle.textContent = homeSubtitleText;
-
     toggleAdminMode(isAdmin);
 
     // Check local storage for persistent user session
@@ -203,6 +221,19 @@ function startFirebaseSync() {
                 renderCategoryTabs();
                 loadInventoryItems();
             }
+        }
+    });
+
+    // Real-time listener for Site Header Metadata
+    onSnapshot(doc(db, 'Settings', 'SiteMetadata'), (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (homeTitle) homeTitle.textContent = data.title || 'Toy & Craft';
+            if (homeSubtitle) homeSubtitle.textContent = data.subtitle || 'Premium Miniature Collections';
+        } else {
+            // Apply safe defaults if the document hasn't been created yet
+            if (homeTitle) homeTitle.textContent = 'Toy & Craft';
+            if (homeSubtitle) homeSubtitle.textContent = 'Premium Miniature Collections';
         }
     });
 }
@@ -421,6 +452,21 @@ function renderProducts(categorySlug) {
         if (product.isSale) badges += `<div class="product-badge badge-sale">SALE</div>`;
         else if (product.isNew) badges += `<div class="product-badge badge-new">NEW</div>`;
 
+        let stockBadge = '';
+        let cartButtonDisabled = '';
+        let adminStockView = '';
+
+        if (isAdmin) {
+            adminStockView = `<div style="font-size: 0.8rem; color: var(--primary); font-weight: bold; margin-bottom: 0.25rem;">(Stock: ${product.stock !== undefined ? product.stock : '∞'})</div>`;
+        }
+
+        if (product.stock === 0) {
+            stockBadge = `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-weight: bold; z-index: 10; letter-spacing: 1px; white-space: nowrap;">OUT OF STOCK</div>`;
+            cartButtonDisabled = 'disabled style="opacity: 0.5; cursor: not-allowed;"';
+        } else if (product.stock > 0 && product.stock < 3) {
+            stockBadge = `<div style="position: absolute; bottom: 8px; left: 8px; background: #ff9800; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; z-index: 10;">Low on stock</div>`;
+        }
+
         let adminActions = '';
         if (isAdmin) {
             adminActions = `
@@ -442,18 +488,20 @@ function renderProducts(categorySlug) {
 
         card.innerHTML = `
             ${adminActions}
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" style="position: relative;">
                 ${badges}
+                ${stockBadge}
                 ${imgDisplay}
             </div>
             <div class="product-info">
+                ${adminStockView}
                 <div class="product-category">${product.categoryId}</div>
                 <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
                 <div class="product-footer">
                     <div class="product-price-wrap">
                         ${priceDisplay}
                     </div>
-                    <button class="add-to-cart" onclick="window.addCartItem('${product.id}')" aria-label="Add to cart">
+                    <button class="add-to-cart" onclick="window.addCartItem('${product.id}')" aria-label="Add to cart" ${cartButtonDisabled}>
                         <span class="material-icons-round">add_shopping_cart</span>
                     </button>
                 </div>
@@ -469,8 +517,14 @@ function updateAuthUI() {
     if (isAdmin) {
         if (authLoginBtn) authLoginBtn.style.display = 'none';
         if (userProfileBadge) userProfileBadge.style.display = 'none';
+        if (cartToggleBtn) cartToggleBtn.style.display = 'none';
+        if (adminNavbarLogoutBtn) adminNavbarLogoutBtn.style.display = 'block';
         return;
     }
+
+    // Reset standard generic views if not admin
+    if (cartToggleBtn) cartToggleBtn.style.display = 'flex';
+    if (adminNavbarLogoutBtn) adminNavbarLogoutBtn.style.display = 'none';
 
     if (currentUser) {
         if (authLoginBtn) authLoginBtn.style.display = 'none';
@@ -535,6 +589,21 @@ function openAuthModal(view = 'login') {
         if (profileUseridInput) profileUseridInput.value = currentUser.id;
         if (profileMobileInput) profileMobileInput.value = currentUser.mobile || '';
         if (profileAddressInput) profileAddressInput.value = currentUser.address || '';
+
+        if (profileDistrictInput && currentUser.district) {
+            let mappedDistrict = currentUser.district;
+            if (mappedDistrict === "Dhaka City" || mappedDistrict === "Dhaka Sub-Urban") {
+                mappedDistrict = "Dhaka";
+            }
+            profileDistrictInput.value = mappedDistrict;
+
+            profileDistrictInput.dispatchEvent(new Event('change'));
+
+            if (profileThanaInput && currentUser.thana) {
+                profileThanaInput.value = currentUser.thana;
+            }
+        }
+
         loadProfileOrders();
     } else {
         if (view === 'login') {
@@ -561,6 +630,67 @@ const closeAuthModal = () => {
 if (authLoginBtn) authLoginBtn.addEventListener('click', () => openAuthModal('login'));
 if (userProfileBadge) userProfileBadge.addEventListener('click', () => openAuthModal());
 if (closeAuthModalBtn) closeAuthModalBtn.addEventListener('click', closeAuthModal);
+
+// --- Steadfast Locations Dropdowns ---
+function initLocationDropdowns() {
+    const districts = Object.keys(steadfastLocations).filter(d => d !== "Dhaka City" && d !== "Dhaka Sub-Urban");
+    districts.push("Dhaka");
+    districts.sort();
+
+    const populateDistrict = (selectElement) => {
+        if (!selectElement) return;
+        selectElement.innerHTML = '<option value="" disabled selected>Select District</option>';
+        districts.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = d;
+            selectElement.appendChild(opt);
+        });
+    };
+
+    populateDistrict(registerDistrictInput);
+    populateDistrict(profileDistrictInput);
+
+    const handleDistrictChange = (thanaSelect) => (e) => {
+        const selected = e.target.value;
+        if (!thanaSelect) return;
+        thanaSelect.innerHTML = '<option value="" disabled selected>Select Thana</option>';
+        thanaSelect.disabled = false;
+        thanaSelect.style.background = 'var(--bg-card)';
+        thanaSelect.style.cursor = 'pointer';
+
+        let thanas = [];
+        if (selected === "Dhaka") {
+            thanas = [...steadfastLocations["Dhaka City"], ...steadfastLocations["Dhaka Sub-Urban"]];
+        } else if (steadfastLocations[selected]) {
+            thanas = steadfastLocations[selected];
+        }
+
+        thanas.sort().forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t;
+            opt.textContent = t;
+            thanaSelect.appendChild(opt);
+        });
+    };
+
+    if (registerDistrictInput && registerThanaInput) {
+        registerDistrictInput.addEventListener('change', handleDistrictChange(registerThanaInput));
+    }
+    if (profileDistrictInput && profileThanaInput) {
+        profileDistrictInput.addEventListener('change', handleDistrictChange(profileThanaInput));
+    }
+}
+
+function getTrueDistrict(districtValue, thanaValue) {
+    if (districtValue === "Dhaka") {
+        if (steadfastLocations["Dhaka City"]?.includes(thanaValue)) return "Dhaka City";
+        if (steadfastLocations["Dhaka Sub-Urban"]?.includes(thanaValue)) return "Dhaka Sub-Urban";
+    }
+    return districtValue;
+}
+
+initLocationDropdowns();
 
 // Password Visibility Toggles
 document.querySelectorAll('.toggle-password').forEach(icon => {
@@ -614,6 +744,12 @@ if (registerUsernameInput) {
         if (!baseId) {
             registerUseridInput.value = '';
             registerSubmitBtn.disabled = false;
+            return;
+        }
+
+        if (baseId.includes('admin') || username.toLowerCase().includes('admin')) {
+            registerUseridInput.value = "Username cannot contain 'admin'";
+            registerSubmitBtn.disabled = true;
             return;
         }
 
@@ -725,10 +861,18 @@ if (registerForm) {
         const mobile = registerMobileInput.value.trim();
         const password = registerPasswordInput.value;
         const address = registerAddressInput.value.trim();
+        const rawDistrict = registerDistrictInput.value;
+        const rawThana = registerThanaInput.value;
         const remember = registerRememberInput.checked;
 
-        if (!username || !userid || !password || !mobile || userid.includes("Checking")) {
-            alert("Please fill all fields and wait for ID validation.");
+        if (!username || !userid || !password || !mobile || !rawDistrict || !rawThana || userid.includes("Checking") || userid.includes("contains")) {
+            alert("Please fill all fields properly (including District and Thana) and wait for ID validation.");
+            return;
+        }
+
+        if (username.toLowerCase().includes('admin') || userid.toLowerCase().includes('admin')) {
+            alert("Security Policy: Usernames and IDs cannot contain the word 'admin'.");
+            registerSubmitBtn.disabled = false;
             return;
         }
 
@@ -742,15 +886,19 @@ if (registerForm) {
             if (userSnap.exists()) {
                 alert("Conflict: The requested User ID '" + userid + "' is already heavily tracked! Please alter it manually.");
             } else {
+                const finalDistrict = getTrueDistrict(rawDistrict, rawThana);
+
                 await setDoc(userRef, {
                     username: username,
                     mobile: mobile,
                     password: password,
                     address: address,
+                    district: finalDistrict,
+                    thana: rawThana,
                     createdAt: Date.now()
                 });
 
-                currentUser = { id: userid, name: username, mobile: mobile, address: address };
+                currentUser = { id: userid, name: username, mobile: mobile, address: address, district: finalDistrict, thana: rawThana };
                 if (remember) {
                     localStorage.setItem('tc_user', JSON.stringify(currentUser));
                 } else {
@@ -784,16 +932,30 @@ if (profileForm) {
         e.preventDefault();
         const newAddress = profileAddressInput.value.trim();
         const newMobile = profileMobileInput.value.trim();
+        const rawDistrict = profileDistrictInput.value;
+        const rawThana = profileThanaInput.value;
 
         if (!currentUser) return;
+        if (!rawDistrict || !rawThana) {
+            alert("Please accurately select both a District and a Thana before saving.");
+            return;
+        }
 
         profileUpdateBtn.disabled = true;
         profileUpdateBtn.textContent = "Updating...";
 
         try {
-            await updateDoc(doc(db, 'Users', currentUser.id), { address: newAddress, mobile: newMobile });
+            const finalDistrict = getTrueDistrict(rawDistrict, rawThana);
+            await updateDoc(doc(db, 'Users', currentUser.id), {
+                address: newAddress,
+                mobile: newMobile,
+                district: finalDistrict,
+                thana: rawThana
+            });
             currentUser.address = newAddress;
             currentUser.mobile = newMobile;
+            currentUser.district = finalDistrict;
+            currentUser.thana = rawThana;
 
             if (localStorage.getItem('tc_user')) {
                 localStorage.setItem('tc_user', JSON.stringify(currentUser));
@@ -823,17 +985,23 @@ function toggleAdminMode(state) {
             currentUser = null;
             localStorage.removeItem('tc_user');
             sessionStorage.removeItem('tc_user');
-            updateUserUI();
+            updateAuthUI();
         }
         if (adminToolsBanner) adminToolsBanner.style.display = 'flex';
         if (adminHeaderEditContainer) adminHeaderEditContainer.style.display = 'block';
+        if (routingInitialized) updateUrlState('admin');
     } else {
         if (adminToolsBanner) adminToolsBanner.style.display = 'none';
         if (adminHeaderEditContainer) adminHeaderEditContainer.style.display = 'none';
+        if (routingInitialized && categories && categories.length > 0) {
+            currentCategorySlug = categories[0].slug;
+            updateUrlState(currentCategorySlug);
+        }
     }
 
     renderCategoryTabs();
     renderProducts(currentCategorySlug);
+    updateAuthUI();
 }
 
 // Secret Admin Login Trigger (Hold 'Toy & Craft' logic for 2 seconds)
@@ -844,6 +1012,7 @@ if (siteTitle) {
 
         holdTimer = setTimeout(() => {
             if (!isAdmin) {
+                if (routingInitialized) updateUrlState('authenticate-admin');
                 promptPassword("Enter Admin Password", (pass) => {
                     if (pass === atob("MDEyNw==")) {
                         toggleAdminMode(true);
@@ -865,10 +1034,36 @@ if (siteTitle) {
     siteTitle.addEventListener('mouseleave', cancelHold);
     siteTitle.addEventListener('touchend', cancelHold);
     siteTitle.addEventListener('touchcancel', cancelHold);
+    siteTitle.addEventListener('click', (e) => {
+        // Double as a Home Button when clicked normally
+        if (routingInitialized && categories && categories.length > 0) {
+            // Pick first generic slug to act as physical Home
+            currentCategorySlug = categories[0].slug;
+            updateUrlState(currentCategorySlug);
+            renderCategoryTabs();
+            renderProducts(currentCategorySlug);
+            closeCart();
+        }
+    });
 }
 
-if (adminLogoutBtn) {
-    adminLogoutBtn.addEventListener('click', () => toggleAdminMode(false));
+// Add duplicate home-button functionality directly to the physical image logo too
+const siteLogoImg = document.querySelector('.site-logo-img');
+if (siteLogoImg) {
+    siteLogoImg.style.cursor = 'pointer';
+    siteLogoImg.addEventListener('click', (e) => {
+        if (routingInitialized && categories && categories.length > 0) {
+            currentCategorySlug = categories[0].slug;
+            updateUrlState(currentCategorySlug);
+            renderCategoryTabs();
+            renderProducts(currentCategorySlug);
+            closeCart();
+        }
+    });
+}
+
+if (adminNavbarLogoutBtn) {
+    adminNavbarLogoutBtn.addEventListener('click', () => toggleAdminMode(false));
 }
 
 // --- Custom Password Modal ---
@@ -883,6 +1078,16 @@ function promptPassword(title, callback) {
 function closePasswordModal() {
     if (passwordModal) passwordModal.style.display = 'none';
     currentPasswordCallback = null;
+
+    // Bounce unauthenticated probers back to home if they cancel out of the Admin auth challenge route
+    if (window.location.pathname.includes('authenticate-admin') && !isAdmin) {
+        if (routingInitialized && categories && categories.length > 0) {
+            currentCategorySlug = categories[0].slug;
+            updateUrlState(currentCategorySlug);
+            renderCategoryTabs();
+            renderProducts(currentCategorySlug);
+        }
+    }
 }
 if (passwordCancelBtn) passwordCancelBtn.addEventListener('click', closePasswordModal);
 if (passwordInput) {
@@ -903,8 +1108,8 @@ if (passwordSubmitBtn) {
 // --- Admin Section Header Editing ---
 if (adminEditHeaderBtn) {
     adminEditHeaderBtn.addEventListener('click', () => {
-        if (adminHeaderTitleInput) adminHeaderTitleInput.value = homeTitleText || homeTitleDefault;
-        if (adminHeaderSubtitleInput) adminHeaderSubtitleInput.value = homeSubtitleText;
+        if (adminHeaderTitleInput) adminHeaderTitleInput.value = homeTitle ? homeTitle.textContent : 'Toy & Craft';
+        if (adminHeaderSubtitleInput) adminHeaderSubtitleInput.value = homeSubtitle ? homeSubtitle.textContent : 'Premium Miniature Collections';
         if (headerModal) headerModal.style.display = 'flex';
     });
 }
@@ -916,16 +1121,22 @@ if (headerCancelBtn) headerCancelBtn.addEventListener('click', closeHeaderModalF
 if (adminHeaderForm) {
     adminHeaderForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        homeTitleText = adminHeaderTitleInput.value.trim();
-        homeSubtitleText = adminHeaderSubtitleInput.value.trim();
+        const newTitle = adminHeaderTitleInput.value.trim();
+        const newSubtitle = adminHeaderSubtitleInput.value.trim();
 
-        if (homeTitle) homeTitle.textContent = homeTitleText;
-        if (homeSubtitle) homeSubtitle.textContent = homeSubtitleText;
-
-        localStorage.setItem('tc_home_title', homeTitleText);
-        localStorage.setItem('tc_home_subtitle', homeSubtitleText);
-
-        closeHeaderModalFn();
+        if (newTitle && newSubtitle) {
+            // Write directly to the persistent SiteMetadata singleton
+            setDoc(doc(db, 'Settings', 'SiteMetadata'), {
+                title: newTitle,
+                subtitle: newSubtitle,
+                updatedAt: Date.now()
+            }, { merge: true }).then(() => {
+                closeHeaderModalFn();
+            }).catch(err => {
+                console.error("Failed to update site metadata:", err);
+                alert("Failed to save changes to the database.");
+            });
+        }
     });
 }
 
@@ -1121,10 +1332,20 @@ window.addCartItem = function (productId) {
     const product = inventory.find(p => p.id === productId);
     if (!product) return;
 
+    // Hard block if literally zero stock somehow bypassed the HTML disabled state
+    if (product.stock === 0) {
+        alert("This item is currently out of stock.");
+        return;
+    }
+
     const existingItem = cart.find(item => item.id === productId);
     let targetPayload = null;
 
     if (existingItem) {
+        if (existingItem.qty >= product.stock) {
+            alert(`Sorry, only ${product.stock} units are available in stock.`);
+            return;
+        }
         existingItem.qty += 1;
         // Keep price synced with active inventory state
         existingItem.currentPrice = product.offerPrice || product.price;
@@ -1149,7 +1370,13 @@ window.addCartItem = function (productId) {
 
 window.updateQty = function (productId, delta) {
     const item = cart.find(item => item.id === productId);
+    const product = inventory.find(p => p.id === productId);
     if (item) {
+        // Prevent exceeding stock on + operations
+        if (delta > 0 && product && item.qty + delta > product.stock) {
+            alert(`Sorry, only ${product.stock} units are available in stock.`);
+            return;
+        }
         item.qty += delta;
         if (item.qty <= 0) {
             cart = cart.filter(x => x.id !== productId);
@@ -1312,6 +1539,20 @@ function initRouting() {
                 updateUrlState(maybeAction);
                 openAuthModal(maybeAction);
             }
+        } else if (maybeAction === 'admin' || maybeAction === 'authenticate-admin') {
+            currentCategorySlug = categories[0].slug;
+            if (isAdmin) {
+                updateUrlState('admin');
+            } else {
+                updateUrlState('authenticate-admin');
+                promptPassword("Enter Admin Password", (pass) => {
+                    if (pass === atob("MDEyNw==")) {
+                        toggleAdminMode(true);
+                    } else {
+                        alert("Incorrect password.");
+                    }
+                });
+            }
         } else if (rawAction === 'Details' || rawAction === 'Orders') {
             // Keep case-sensitive checking for Profile URLs due to IDs potentially passing here
             if (!currentUser || currentUser.id !== maybeUser) {
@@ -1359,72 +1600,205 @@ window.addEventListener('popstate', (e) => {
 // (We already trigger this via renderCategoryTabs when a category is clicked)
 
 // --- Checkout & Orders Flow ---
+
+function calculateDeliveryCharge(district, totalItems) {
+    if (districtsArrayEmpty(totalItems)) return 0;
+
+    if (district === "Dhaka City") {
+        if (totalItems <= 4) return 50;
+        if (totalItems <= 6) return 60;
+        if (totalItems <= 10) return 70;
+        return 70 + Math.ceil((totalItems - 10) / 10) * 20;
+    }
+    else if (district === "Dhaka Sub-Urban") {
+        if (totalItems <= 10) return 100;
+        return 100 + Math.ceil((totalItems - 10) / 10) * 20;
+    }
+    else {
+        // Other Districts
+        if (totalItems <= 5) return 110;
+        if (totalItems <= 10) return 130;
+        return 130 + Math.ceil((totalItems - 10) / 10) * 20;
+    }
+}
+
+function districtsArrayEmpty(total) {
+    return total <= 0;
+}
+
 const checkoutBtn = document.getElementById('checkout-btn');
 
 if (checkoutBtn) {
     checkoutBtn.addEventListener('click', () => {
-        if (!currentUser) {
-            alert("Please login to proceed to checkout.");
-            closeCart();
-            openAuthModal('login');
-            return;
-        }
-
         if (cart.length === 0) {
             alert("Your cart is empty.");
             return;
         }
 
-        // Setup Checkout View
-        closeCart();
-        mainLayoutContainer.style.display = 'none';
-        checkoutView.style.display = 'block';
-
-        // Peek Invoice logic
-        updateUrlState('Checkout...');
-        getDoc(doc(db, 'Counters', 'InvoiceCounter')).then(docSnap => {
-            let proposed = 2637;
-            if (docSnap.exists()) {
-                proposed = docSnap.data().lastInvoice + 1;
-            }
-            // Update URL to /{UserID}/{ProposedInvoiceNumber}
-            try {
-                const draftPath = `/${currentUser.id}/${proposed}`;
-                window.history.pushState({ path: draftPath }, '', draftPath);
-            } catch (e) { }
-        }).catch(err => console.log("Silent error reading counter predict", err));
-
-        // Populate User Details
-        if (checkoutUserDetails) {
-            checkoutUserDetails.innerHTML = `
-                <p><strong>Name:</strong> ${currentUser.name}</p>
-                <p><strong>Mobile:</strong> ${currentUser.mobile || 'Not provided'}</p>
-                <p><strong>Delivery Address:</strong><br>${currentUser.address || 'Not provided'}</p>
-            `;
-        }
-
-        // Populate Items & Total
-        if (checkoutItemsList) {
-            checkoutItemsList.innerHTML = '';
-            let total = 0;
-            cart.forEach(item => {
-                total += item.currentPrice * item.qty;
-                const el = document.createElement('div');
-                el.style.cssText = "display: flex; gap: 1rem; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;";
-                el.innerHTML = `
-                    <img src="${getAbsoluteImageUrl(item.image)}" style="width: 50px; height: 50px; object-fit: cover; border-radius: var(--radius-sm);" loading="lazy">
-                    <div style="flex-grow: 1;">
-                        <h4 style="margin: 0; font-size: 0.95rem;">${item.name}</h4>
-                        <span style="font-size: 0.85rem; color: var(--text-muted);">Qty: ${item.qty}</span>
-                    </div>
-                    <div style="font-weight: bold;">৳${(item.currentPrice * item.qty).toFixed(2)}</div>
-                `;
-                checkoutItemsList.appendChild(el);
-            });
-            if (checkoutTotalPrice) checkoutTotalPrice.textContent = `৳${total.toFixed(2)}`;
-            checkoutConfirmBtn.setAttribute('data-total', total);
+        if (!currentUser) {
+            openGuestModal();
+        } else {
+            openCheckoutView();
         }
     });
+}
+
+function openGuestModal() {
+    closeCart();
+    guestModal.style.display = 'flex';
+
+    // Bind Login redirect
+    if (guestModalLoginLink) {
+        // Clone to remove old listeners
+        const clonedLink = guestModalLoginLink.cloneNode(true);
+        guestModalLoginLink.parentNode.replaceChild(clonedLink, guestModalLoginLink);
+
+        clonedLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            guestModal.style.display = 'none';
+            openAuthModal('login');
+        });
+    }
+
+    // Populate Steadfast Dropdowns natively
+    const districts = Object.keys(steadfastLocations).filter(d => d !== "Dhaka City" && d !== "Dhaka Sub-Urban");
+    districts.push("Dhaka");
+    districts.sort();
+
+    guestDistrict.innerHTML = '<option value="" disabled selected>Select District</option>';
+    districts.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        guestDistrict.appendChild(opt);
+    });
+
+    guestDistrict.addEventListener('change', (e) => {
+        const selected = e.target.value;
+        guestThana.innerHTML = '<option value="" disabled selected>Select Thana</option>';
+        guestThana.disabled = false;
+        guestThana.style.background = 'var(--bg-card)';
+        guestThana.style.cursor = 'pointer';
+
+        let thanas = [];
+        if (selected === "Dhaka") {
+            thanas = [...steadfastLocations["Dhaka City"], ...steadfastLocations["Dhaka Sub-Urban"]];
+        } else if (steadfastLocations[selected]) {
+            thanas = steadfastLocations[selected];
+        }
+
+        thanas.sort().forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t;
+            opt.textContent = t;
+            guestThana.appendChild(opt);
+        });
+    });
+
+    // Close Guest Modal
+    if (closeGuestModalBtn) {
+        closeGuestModalBtn.onclick = () => { guestModal.style.display = 'none'; };
+    }
+
+    // Submit Guest Modal
+    guestCheckoutForm.onsubmit = (e) => {
+        e.preventDefault();
+
+        currentGuest = {
+            name: guestNameInput.value.trim(),
+            mobile: guestMobileInput.value.trim(),
+            address: guestAddressInput.value.trim(),
+            district: guestDistrict.value,
+            thana: guestThana.value
+        };
+
+        guestModal.style.display = 'none';
+        openCheckoutView();
+    };
+}
+
+function openCheckoutView() {
+    closeCart();
+    mainLayoutContainer.style.display = 'none';
+    checkoutView.style.display = 'block';
+
+    // Peek Invoice logic
+    updateUrlState('Checkout...');
+    let currentUserId = currentUser ? currentUser.id : "guest";
+    getDoc(doc(db, 'Counters', 'InvoiceCounter')).then(docSnap => {
+        let proposed = 2637;
+        if (docSnap.exists()) {
+            proposed = docSnap.data().lastInvoice + 1;
+        }
+        // Update URL to /{UserID}/{ProposedInvoiceNumber}
+        try {
+            const draftPath = `/${currentUserId}/${proposed}`;
+            window.history.pushState({ path: draftPath }, '', draftPath);
+        } catch (e) { }
+    }).catch(err => console.log("Silent error reading counter predict", err));
+
+    // Populate User Details Statically
+    if (checkoutUserDetails) {
+        const activeTarget = currentUser || currentGuest;
+        if (activeTarget) {
+            checkoutUserDetails.innerHTML = `
+                <p><strong>Name:</strong> ${activeTarget.name}</p>
+                <p><strong>Mobile:</strong> ${activeTarget.mobile || 'Not provided'}</p>
+                <p><strong>District:</strong> ${activeTarget.district || 'Not provided'}</p>
+                <p><strong>Thana:</strong> ${activeTarget.thana || 'Not provided'}</p>
+                <p><strong>Delivery Address:</strong><br>${activeTarget.address || 'Not provided'}</p>
+            `;
+        }
+    }
+
+    // Populate Items & Total
+    if (checkoutItemsList) {
+        checkoutItemsList.innerHTML = '';
+        let total = 0;
+        cart.forEach(item => {
+            total += item.currentPrice * item.qty;
+            const el = document.createElement('div');
+            el.style.cssText = "display: flex; gap: 1rem; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;";
+            el.innerHTML = `
+                <img src="${getAbsoluteImageUrl(item.image)}" style="width: 50px; height: 50px; object-fit: cover; border-radius: var(--radius-sm);" loading="lazy">
+                <div style="flex-grow: 1;">
+                    <h4 style="margin: 0; font-size: 0.95rem;">${item.name}</h4>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Qty: ${item.qty}</span>
+                </div>
+                <div style="font-weight: bold;">৳${(item.currentPrice * item.qty).toFixed(2)}</div>
+            `;
+            checkoutItemsList.appendChild(el);
+        });
+
+        const recalcCheckoutTotals = () => {
+            let currentDistrict = "";
+            const activeTarget = currentUser || currentGuest;
+            if (activeTarget && activeTarget.district) {
+                // If the user selected "Dhaka" mathematically map to the true district for fees
+                if (activeTarget.district === "Dhaka") {
+                    currentDistrict = getTrueDistrict(activeTarget.district, activeTarget.thana);
+                } else {
+                    currentDistrict = activeTarget.district;
+                }
+            }
+
+            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            const deliveryCharge = calculateDeliveryCharge(currentDistrict, totalItems);
+            const grandTotal = total + deliveryCharge;
+
+            if (checkoutSubtotalPrice) checkoutSubtotalPrice.textContent = `৳${total.toFixed(2)}`;
+            if (checkoutDeliveryCharge) checkoutDeliveryCharge.textContent = `৳${deliveryCharge.toFixed(2)}`;
+            if (checkoutTotalPrice) checkoutTotalPrice.textContent = `৳${grandTotal.toFixed(2)}`;
+            checkoutConfirmBtn.setAttribute('data-total', grandTotal);
+            checkoutConfirmBtn.setAttribute('data-delivery', deliveryCharge);
+        };
+
+        // Initial calculation on mount
+        recalcCheckoutTotals();
+
+        // Store it globally so other functions can trigger it safely if needed
+        window.recalcCheckoutTotals = recalcCheckoutTotals;
+    }
 }
 
 if (checkoutCancelBtn) {
@@ -1436,19 +1810,67 @@ if (checkoutCancelBtn) {
 
 if (checkoutConfirmBtn) {
     checkoutConfirmBtn.addEventListener('click', async () => {
-        if (!currentUser || cart.length === 0) return;
+        if (cart.length === 0) return;
+
+        // Extract Buyer Data
+        let orderUserId = "guest";
+        let orderUsername = "";
+        let orderMobile = "";
+        let orderAddress = "";
+        let orderDistrict = "";
+        let orderThana = "";
+
+        if (currentUser) {
+            orderUserId = currentUser.id;
+            orderUsername = currentUser.name || "Unknown User";
+            orderMobile = currentUser.mobile || "";
+            orderAddress = currentUser.address || "";
+            orderDistrict = currentUser.district || "Default";
+            orderThana = currentUser.thana || "Default";
+        } else if (currentGuest) {
+            if (!currentGuest.name || !currentGuest.mobile ||
+                !currentGuest.address || !currentGuest.district || !currentGuest.thana) {
+                alert("Guest details incomplete. Please restart checkout.");
+                return;
+            }
+
+            orderUsername = currentGuest.name;
+            orderMobile = currentGuest.mobile;
+            orderAddress = currentGuest.address;
+
+            // Map the True District securely the same way registered profiles do it
+            orderDistrict = getTrueDistrict(currentGuest.district, currentGuest.thana);
+            orderThana = currentGuest.thana;
+        } else {
+            alert("Please provide shipping details before confirming.");
+            return;
+        }
 
         checkoutConfirmBtn.disabled = true;
         checkoutConfirmBtn.textContent = "Processing...";
 
         try {
+            const payloadItemsQty = cart.reduce((sum, item) => sum + item.qty, 0);
+            const activeTarget = currentUser || currentGuest || {};
+            let currentDistrictCalc = activeTarget.district || "";
+            if (currentDistrictCalc === "Dhaka") {
+                currentDistrictCalc = getTrueDistrict(activeTarget.district, activeTarget.thana);
+            }
+            const secureDeliveryCharge = calculateDeliveryCharge(currentDistrictCalc, payloadItemsQty);
+            const rawSubtotal = cart.reduce((sum, item) => sum + (item.currentPrice * item.qty), 0);
+            const secureGrandTotal = rawSubtotal + secureDeliveryCharge;
+
             const orderPayload = {
-                userId: currentUser.id,
-                username: currentUser.name,
-                mobile: currentUser.mobile || '',
-                address: currentUser.address,
+                userId: orderUserId,
+                username: orderUsername,
+                mobile: orderMobile,
+                address: orderAddress,
+                district: orderDistrict,
+                thana: orderThana,
                 items: cart.map(i => ({ id: i.id, name: i.name, price: i.currentPrice, qty: i.qty })),
-                totalPrice: parseFloat(checkoutConfirmBtn.getAttribute('data-total')),
+                subtotal: rawSubtotal,
+                deliveryCharge: secureDeliveryCharge,
+                totalPrice: secureGrandTotal,
                 status: 'Pending',
                 createdAt: Date.now()
             };
@@ -1471,14 +1893,17 @@ if (checkoutConfirmBtn) {
 
             // Assign the exact secure invoice sequence to order ID
             const newOrderRef = doc(db, 'Orders', secureInvoiceId);
-            const userOrderRef = doc(db, 'Users', currentUser.id, 'Orders', secureInvoiceId);
 
             // Reassign the visual ID payload param so we store it internally as well
             orderPayload.id = secureInvoiceId;
 
             const batch = writeBatch(db);
             batch.set(newOrderRef, orderPayload);
-            batch.set(userOrderRef, orderPayload);
+
+            if (currentUser) {
+                const userOrderRef = doc(db, 'Users', currentUser.id, 'Orders', secureInvoiceId);
+                batch.set(userOrderRef, orderPayload);
+            }
 
             await batch.commit();
 

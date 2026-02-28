@@ -677,6 +677,54 @@ a {
   transform: scale(1.1);
 }
 
+/* --- Forms & Inputs --- */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-left: 0.2rem;
+  font-family: var(--font-body);
+}
+
+.auth-input,
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  transition: var(--transition);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.auth-input:focus,
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255, 92, 92, 0.15);
+}
+
+.auth-input:disabled,
+.form-group select:disabled {
+  opacity: 0.6;
+  background-color: var(--bg-subtle);
+  cursor: not-allowed;
+}
+
 /* --- Newsletter --- */
 .newsletter {
   padding: 5rem 1.5rem;
