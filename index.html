@@ -93,6 +93,74 @@
             <div class="product-grid" id="product-grid">
                 <!-- Products will be dynamically injected here by app.js -->
             </div>
+
+            <div id="pagination-controls"
+                style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 3rem; margin-bottom: 2rem;">
+                <button id="prev-page-btn" class="btn btn-secondary btn-sm" disabled>Previous</button>
+                <span id="page-indicator" style="font-weight: bold; color: var(--text-muted);">Page 1 of 1</span>
+                <button id="next-page-btn" class="btn btn-secondary btn-sm" disabled>Next</button>
+            </div>
+        </section>
+
+        <!-- Product Details Section -->
+        <section id="product-view" class="product-view-section"
+            style="display: none; padding: 2rem 1.5rem; max-width: 1200px; margin: 0 auto; min-height: 70vh;">
+            <button class="btn btn-secondary back-to-shop-btn" id="back-to-shop-btn" style="margin-bottom: 2rem;">
+                <span class="material-icons-round">arrow_back</span> Back to Shop
+            </button>
+            <div class="product-view-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;">
+                <div class="product-gallery">
+                    <div class="main-image-container"
+                        style="border-radius: var(--radius-md); overflow: hidden; background: var(--bg-card); position: relative; aspect-ratio: 1; cursor: pointer; border: 1px solid var(--border-color);">
+                        <img id="pv-main-image" src="/assets/placeholder.jpg" alt="Product"
+                            style="width: 100%; height: 100%; object-fit: contain;">
+                        <div
+                            style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; pointer-events: none;">
+                            <span class="material-icons-round"
+                                style="font-size: 16px; vertical-align: middle;">zoom_in</span> Click to expand
+                        </div>
+                    </div>
+                    <div id="pv-thumbnails" class="thumbnail-gallery"
+                        style="display: flex; gap: 10px; margin-top: 1rem; overflow-x: auto; padding-bottom: 5px;">
+                    </div>
+                </div>
+                <div class="product-details-content">
+                    <div id="pv-category"
+                        style="color: var(--primary); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        CATEGORY</div>
+                    <h2 id="pv-title" style="font-size: 2.5rem; font-family: var(--font-heading); margin-bottom: 1rem;">
+                        Product Name</h2>
+                    <div id="pv-price-container" style="margin-bottom: 1.5rem; font-size: 1.5rem;">
+                        <span id="pv-price" style="font-weight: bold; color: var(--text-main);">৳0.00</span>
+                    </div>
+                    <p id="pv-description"
+                        style="color: var(--text-muted); line-height: 1.6; margin-bottom: 2rem; font-size: 1.05rem;">
+                        No description available.
+                    </p>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                        <div
+                            style="display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: var(--radius-pill); overflow: hidden; background: var(--bg-card);">
+                            <button class="icon-btn" id="pv-qty-dec"
+                                style="width: 40px; height: 40px; border-radius: 0;">-</button>
+                            <span id="pv-qty"
+                                style="padding: 0 1rem; font-weight: bold; min-width: 40px; text-align: center;">1</span>
+                            <button class="icon-btn" id="pv-qty-inc"
+                                style="width: 40px; height: 40px; border-radius: 0;">+</button>
+                        </div>
+                        <span id="pv-stock-status" style="font-size: 0.9rem; color: var(--text-muted);">In Stock</span>
+                    </div>
+                    <button id="pv-add-to-cart" class="btn btn-primary"
+                        style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                        <span class="material-icons-round">add_shopping_cart</span> Add to Cart
+                    </button>
+                    <!-- Admin Edit Button in Product Detail -->
+                    <div id="pv-admin-actions"
+                        style="margin-top: 2rem; border-top: 1px dashed var(--border-color); padding-top: 1rem; display: none;">
+                        <button id="pv-admin-edit" class="btn btn-secondary btn-sm" style="width: 100%;">Edit
+                            Product</button>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- Connect with Us (Socials) -->
@@ -171,6 +239,20 @@
         </div>
     </div>
 
+    <!-- Image Expander Modal -->
+    <div class="modal-overlay" id="image-expander-modal" style="display: none; z-index: 5000;">
+        <div style="position: absolute; top: 20px; right: 20px;">
+            <button class="icon-btn close-modal" id="close-image-expander"
+                style="background: rgba(0,0,0,0.5); color: white;">
+                <span class="material-icons-round">close</span>
+            </button>
+        </div>
+        <div style="max-width: 90vw; max-height: 90vh; display: flex; align-items: center; justify-content: center;">
+            <img id="expanded-image" src="" alt="Expanded View"
+                style="max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: var(--radius-md); box-shadow: var(--shadow-xl);">
+        </div>
+    </div>
+
     <!-- Admin Management Modal -->
     <div class="modal-overlay" id="admin-modal" style="display: none;">
         <div class="modal-card">
@@ -210,8 +292,15 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="admin-product-image">Image URL</label>
-                        <input type="url" id="admin-product-image" placeholder="https://example.com/image.jpg">
+                        <label for="admin-product-description">Description</label>
+                        <textarea id="admin-product-description" rows="3" placeholder="Product details..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin-product-image">Images (Comma-separated URLs)</label>
+                        <textarea id="admin-product-image" rows="2"
+                            placeholder="https://example.com/img1.jpg, https://example.com/img2.jpg"></textarea>
+                        <small>First image is used as the main thumbnail.</small>
                     </div>
 
                     <div class="form-group">
