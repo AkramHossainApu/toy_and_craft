@@ -474,6 +474,12 @@ const errorMessageText = document.getElementById('error-message');
 window.showErrorPage = function (message) {
     if (shopSection) shopSection.style.display = 'none';
     if (productViewSection) productViewSection.style.display = 'none';
+    if (checkoutView) checkoutView.style.display = 'none';
+    if (adminOrdersView) adminOrdersView.style.display = 'none';
+
+    // Ensure the main layout container is visible so the error section inside it can be seen
+    if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
+
     if (errorViewSection) {
         errorViewSection.style.display = 'flex';
         if (message) {
@@ -1659,9 +1665,15 @@ function updateUrlState(categorySlug, pageNum = 1, productSlug = null) {
         newPath += `/${productSlug}`;
     }
 
+    // Get the base segment dynamically, so deployment on GitHub Pages still functions properly
+    let baseUri = '/';
+    if (window.location.pathname.startsWith('/toy_and_craft')) {
+        baseUri = '/toy_and_craft/';
+    }
+
     // Prevent DOM Exception on file:// if serving directly via HTML
     try {
-        window.history.pushState({ path: newPath }, '', newPath);
+        window.history.pushState({ path: baseUri + newPath.replace(/^\//, '') }, '', baseUri + newPath.replace(/^\//, ''));
     } catch (e) {
         console.warn("pushState failed, likely not running on a server.", e);
     }
@@ -1672,14 +1684,18 @@ function initRouting() {
     if (routingInitialized) return;
     routingInitialized = true;
 
-    const path = window.location.pathname;
-    const parts = path.split('/').filter(p => p.length > 0);
-
-    // Helper functions for auth redirects
     const bounceToRoot = () => {
         currentCategorySlug = categories[0].slug;
         updateUrlState(currentCategorySlug);
     };
+
+    // GitHub pages hosts repository at /toy_and_craft/ instead of literal root
+    const path = window.location.pathname;
+    let safePath = path;
+    if (safePath.startsWith('/toy_and_craft')) {
+        safePath = safePath.replace('/toy_and_craft', '');
+    }
+    const parts = safePath.split('/').filter(p => p.length > 0);
 
     if (parts.length === 0) {
         // Base URL loaded
@@ -1763,7 +1779,15 @@ function initRouting() {
                 let newPath = `/${targetCategory || categories[0].slug}`;
                 if (targetPage >= 1 && !targetProduct) newPath += `/page-${targetPage}`;
                 if (targetProduct) newPath += `/${targetProduct}`;
-                window.history.replaceState({ path: newPath }, '', newPath);
+
+                let baseUri = '/';
+                if (window.location.pathname.startsWith('/toy_and_craft')) {
+                    baseUri = '/toy_and_craft/';
+                }
+
+                try {
+                    window.history.replaceState({ path: baseUri + newPath.replace(/^\//, '') }, '', baseUri + newPath.replace(/^\//, ''));
+                } catch (e) { }
             }
 
             const catExists = targetCategory && categories.find(c => c.slug === targetCategory);
@@ -2109,7 +2133,11 @@ function openCheckoutView() {
         // Update URL to /{UserID}/{ProposedInvoiceNumber}
         try {
             const draftPath = `/${currentUserId}/${proposed}`;
-            window.history.pushState({ path: draftPath }, '', draftPath);
+            let baseUri = '/';
+            if (window.location.pathname.startsWith('/toy_and_craft')) {
+                baseUri = '/toy_and_craft/';
+            }
+            window.history.pushState({ path: baseUri + draftPath.replace(/^\//, '') }, '', baseUri + draftPath.replace(/^\//, ''));
         } catch (e) { }
     }).catch(err => console.log("Silent error reading counter predict", err));
 
