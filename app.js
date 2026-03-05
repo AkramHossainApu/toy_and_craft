@@ -3,7 +3,7 @@ import {
     getFirestore, collection, doc, setDoc, deleteDoc, updateDoc,
     onSnapshot, getDocs, getDoc, query, where, writeBatch, runTransaction
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { steadfastLocations } from "./locations.js";
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyARQW48lm5jEavNwCDG7tKlolxJPg1ggLg",
@@ -28,6 +28,10 @@ let isAdmin = sessionStorage.getItem('tc_admin') === 'true';
 // User Auth State
 let currentUser = null; // { id: '...', name: '...', address: '...' }
 let currentGuest = null; // { name: '...', mobile: '...', address: '...', district: '...', thana: '...' }
+
+// Database State
+let steadfastLocations = {};
+let deliveryRules = {};
 
 // Header State
 let homeTitleText = localStorage.getItem('tc_home_title');
@@ -237,6 +241,24 @@ function startFirebaseSync() {
             // Apply safe defaults if the document hasn't been created yet
             if (homeTitle) homeTitle.textContent = 'Toy & Craft';
             if (homeSubtitle) homeSubtitle.textContent = 'Premium Miniature Collections';
+        }
+    });
+
+    // Real-time listener for Locations Dropdowns
+    onSnapshot(doc(db, 'Settings', 'Locations'), (docSnap) => {
+        if (docSnap.exists()) {
+            steadfastLocations = docSnap.data().data || {};
+            // If they are on the register/profile form right now, re-init the dropdowns
+            if (Object.keys(steadfastLocations).length > 0) {
+                initLocationDropdowns();
+            }
+        }
+    });
+
+    // Real-time listener for Delivery Rules
+    onSnapshot(doc(db, 'Settings', 'DeliveryRules'), (docSnap) => {
+        if (docSnap.exists()) {
+            deliveryRules = docSnap.data() || {};
         }
     });
 }
@@ -642,6 +664,12 @@ function openAuthModal(view = 'login') {
     if (loginForm) loginForm.reset();
     if (registerForm) registerForm.reset();
     if (profileForm) profileForm.reset();
+
+    // Re-initialize location dropdowns just in case they were empty at boot 
+    // before the Firebase locations document finished syncing.
+    if (Object.keys(steadfastLocations).length > 0) {
+        initLocationDropdowns();
+    }
 
     if (currentUser) {
         if (authModalTitle) authModalTitle.textContent = "Your Profile";
@@ -1922,22 +1950,33 @@ closeImageExpander?.addEventListener('click', () => {
 function calculateDeliveryCharge(district, totalItems) {
     if (districtsArrayEmpty(totalItems)) return 0;
 
-    if (district === "Dhaka City") {
-        if (totalItems <= 4) return 50;
-        if (totalItems <= 6) return 60;
-        if (totalItems <= 10) return 70;
-        return 70 + Math.ceil((totalItems - 10) / 10) * 20;
+    // Fallback in case rules haven't loaded yet
+    if (!deliveryRules || Object.keys(deliveryRules).length === 0) {
+        return 130;
     }
-    else if (district === "Dhaka Sub-Urban") {
-        if (totalItems <= 10) return 100;
-        return 100 + Math.ceil((totalItems - 10) / 10) * 20;
+
+    let ruleset = deliveryRules[district];
+    if (!ruleset) {
+        ruleset = deliveryRules['default'];
     }
-    else {
-        // Other Districts
-        if (totalItems <= 5) return 110;
-        if (totalItems <= 10) return 130;
-        return 130 + Math.ceil((totalItems - 10) / 10) * 20;
+
+    if (!ruleset) return 130; // ultimate fallback
+
+    for (let tier of ruleset.tiers || []) {
+        if (totalItems <= tier.maxItems) {
+            return tier.charge;
+        }
     }
+
+    const maxTierItems = ruleset.tiers && ruleset.tiers.length > 0 ?
+        ruleset.tiers[ruleset.tiers.length - 1].maxItems : 10;
+
+    const extraCount = totalItems - maxTierItems;
+    if (extraCount > 0) {
+        return ruleset.baseChargeOver10 + Math.ceil(extraCount / 10) * ruleset.extraChargePer10Items;
+    }
+
+    return ruleset.baseChargeOver10;
 }
 
 function districtsArrayEmpty(total) {
@@ -1965,6 +2004,26 @@ function openGuestModal() {
     closeCart();
     guestModal.style.display = 'flex';
 
+    // Populate Steadfast Dropdowns natively for Guests
+    if (Object.keys(steadfastLocations).length > 0) {
+        const districts = Object.keys(steadfastLocations).filter(d => d !== "Dhaka City" && d !== "Dhaka Sub-Urban");
+        districts.push("Dhaka");
+        districts.sort();
+
+        // Prevent infinitely duplicate options if modal opened multiple times
+        guestDistrict.innerHTML = '<option value="" disabled selected>Select District</option>';
+        districts.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = d;
+            guestDistrict.appendChild(opt);
+        });
+
+        // If there's an existing valid selection that got wiped out, or we want to reset thana:
+        guestThana.innerHTML = '<option value="" disabled selected>Select Thana</option>';
+        guestThana.disabled = true;
+    }
+
     // Bind Login redirect
     if (guestModalLoginLink) {
         // Clone to remove old listeners
@@ -1978,19 +2037,6 @@ function openGuestModal() {
         });
     }
 
-    // Populate Steadfast Dropdowns natively
-    const districts = Object.keys(steadfastLocations).filter(d => d !== "Dhaka City" && d !== "Dhaka Sub-Urban");
-    districts.push("Dhaka");
-    districts.sort();
-
-    guestDistrict.innerHTML = '<option value="" disabled selected>Select District</option>';
-    districts.forEach(d => {
-        const opt = document.createElement('option');
-        opt.value = d;
-        opt.textContent = d;
-        guestDistrict.appendChild(opt);
-    });
-
     guestDistrict.addEventListener('change', (e) => {
         const selected = e.target.value;
         guestThana.innerHTML = '<option value="" disabled selected>Select Thana</option>';
@@ -2000,7 +2046,7 @@ function openGuestModal() {
 
         let thanas = [];
         if (selected === "Dhaka") {
-            thanas = [...steadfastLocations["Dhaka City"], ...steadfastLocations["Dhaka Sub-Urban"]];
+            thanas = [...(steadfastLocations["Dhaka City"] || []), ...(steadfastLocations["Dhaka Sub-Urban"] || [])];
         } else if (steadfastLocations[selected]) {
             thanas = steadfastLocations[selected];
         }
@@ -2018,21 +2064,33 @@ function openGuestModal() {
         closeGuestModalBtn.onclick = () => { guestModal.style.display = 'none'; };
     }
 
-    // Submit Guest Modal
-    guestCheckoutForm.onsubmit = (e) => {
+    // Submit Guest Modal (use Event Listener and ensure no duplicates)
+    guestCheckoutForm.onsubmit = null; // Clear any old direct assignments just in case
+    // We remove any previously bound listener by cloning the form to guarantee a pure state
+    const newGuestForm = guestCheckoutForm.cloneNode(true);
+    guestCheckoutForm.parentNode.replaceChild(newGuestForm, guestCheckoutForm);
+
+    newGuestForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
+        // Need to re-query elements since we cloned the form
+        const newGuestNameInput = document.getElementById('guest-name');
+        const newGuestMobileInput = document.getElementById('guest-mobile');
+        const newGuestAddressInput = document.getElementById('guest-address');
+        const newGuestDistrict = document.getElementById('guest-district');
+        const newGuestThana = document.getElementById('guest-thana');
+
         currentGuest = {
-            name: guestNameInput.value.trim(),
-            mobile: guestMobileInput.value.trim(),
-            address: guestAddressInput.value.trim(),
-            district: guestDistrict.value,
-            thana: guestThana.value
+            name: newGuestNameInput.value.trim(),
+            mobile: newGuestMobileInput.value.trim(),
+            address: newGuestAddressInput.value.trim(),
+            district: newGuestDistrict.value,
+            thana: newGuestThana.value
         };
 
         guestModal.style.display = 'none';
         openCheckoutView();
-    };
+    });
 }
 
 function openCheckoutView() {
