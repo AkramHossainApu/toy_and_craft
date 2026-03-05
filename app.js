@@ -174,6 +174,9 @@ const newCategoryNameInput = document.getElementById('new-category-name');
 document.addEventListener('DOMContentLoaded', () => {
     toggleAdminMode(isAdmin);
 
+    const errView = document.getElementById('error-view');
+    if (errView) errView.style.display = 'none';
+
     // Check local storage for persistent user session
     const savedUser = localStorage.getItem('tc_user') || sessionStorage.getItem('tc_user');
     if (savedUser) {
@@ -271,11 +274,14 @@ function loadInventoryItems() {
 
             // Re-render the grid if we are currently looking at this category
             if (cat.slug === currentCategorySlug && (!window.pendingProductSlug || shopSection.style.display !== 'none')) {
-                renderProducts(currentCategorySlug);
+                renderProducts(currentCategorySlug, currentPage);
             }
 
             if (window.pendingProductSlug && inventory.some(p => p.slug === window.pendingProductSlug && p.categorySlug === cat.slug)) {
                 window.renderProductPage(window.pendingProductSlug);
+                window.pendingProductSlug = null; // Consume
+            } else if (window.pendingProductSlug && cat.slug === currentCategorySlug) {
+                window.showErrorPage(`The page or product you are looking for doesn't exist or has been moved.`);
                 window.pendingProductSlug = null; // Consume
             }
 
@@ -440,10 +446,26 @@ const itemsPerPage = 8;
 const prevPageBtn = document.getElementById('prev-page-btn');
 const nextPageBtn = document.getElementById('next-page-btn');
 const pageIndicator = document.getElementById('page-indicator');
+const errorViewSection = document.getElementById('error-view');
+const errorMessageText = document.getElementById('error-message');
+
+window.showErrorPage = function (message) {
+    if (shopSection) shopSection.style.display = 'none';
+    if (productViewSection) productViewSection.style.display = 'none';
+    if (errorViewSection) {
+        errorViewSection.style.display = 'flex';
+        if (message) {
+            errorMessageText.textContent = message;
+        } else {
+            errorMessageText.textContent = "The page or product you are looking for doesn't exist or has been moved.";
+        }
+    }
+};
 
 function renderProducts(categorySlug, page = 1) {
     if (!productGrid) return;
     productGrid.innerHTML = '';
+    if (errorViewSection) errorViewSection.style.display = 'none';
 
     currentPage = page;
 
@@ -472,8 +494,12 @@ function renderProducts(categorySlug, page = 1) {
 
     // Pagination Logic
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
-    if (currentPage > totalPages) currentPage = totalPages;
-    if (currentPage < 1) currentPage = 1;
+
+    // Hard error on out-of-bounds pagination navigation
+    if (currentPage > totalPages || currentPage < 1) {
+        window.showErrorPage(`Page ${currentPage} does not exist in the ${getCategoryNameFromSlug(categorySlug)} category. There are only ${totalPages} pages.`);
+        return;
+    }
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -1597,7 +1623,7 @@ function updateUrlState(categorySlug, pageNum = 1, productSlug = null) {
         newPath = `/${currentUser.id}/${categorySlug}`;
     }
 
-    if (pageNum > 1 && !productSlug) {
+    if (pageNum >= 1 && !productSlug) {
         newPath += `/page-${pageNum}`;
     }
 
@@ -1707,12 +1733,19 @@ function initRouting() {
 
             if (!currentUser && urlUserId) {
                 let newPath = `/${targetCategory || categories[0].slug}`;
-                if (targetPage > 1) newPath += `/page-${targetPage}`;
+                if (targetPage >= 1 && !targetProduct) newPath += `/page-${targetPage}`;
                 if (targetProduct) newPath += `/${targetProduct}`;
                 window.history.replaceState({ path: newPath }, '', newPath);
             }
 
             const catExists = targetCategory && categories.find(c => c.slug === targetCategory);
+
+            // 404 Guard: Invalid Category in URL
+            if (targetCategory && !catExists) {
+                window.showErrorPage(`Category "${targetCategory}" does not exist.`);
+                return;
+            }
+
             currentCategorySlug = catExists ? targetCategory : (categories.length > 0 ? categories[0].slug : null);
 
             currentPage = targetPage;
@@ -1765,13 +1798,17 @@ let pvCurrentQty = 1;
 
 window.renderProductPage = function (productSlug) {
     const product = inventory.find(p => p.slug === productSlug);
-    if (!product) return;
+    if (!product) {
+        window.showErrorPage(`Product could not be found.`);
+        return;
+    }
 
     currentViewedProduct = product;
     pvCurrentQty = 1;
 
     shopSection.style.display = 'none';
     productViewSection.style.display = 'block';
+    if (errorViewSection) errorViewSection.style.display = 'none';
 
     pvCategory.textContent = getCategoryNameFromSlug(product.categoryId);
     pvTitle.textContent = product.name;
@@ -1838,6 +1875,7 @@ if (backToShopBtn) {
     backToShopBtn.addEventListener('click', () => {
         productViewSection.style.display = 'none';
         shopSection.style.display = 'block';
+        if (errorViewSection) errorViewSection.style.display = 'none';
         if (currentCategorySlug) {
             updateUrlState(currentCategorySlug);
         }

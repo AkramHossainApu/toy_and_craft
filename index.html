@@ -20,7 +20,7 @@
     <!-- Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <!-- Styles -->
-    <link rel="stylesheet" href="style.css?v=202418">
+    <link rel="stylesheet" href="style.css?v=202422">
 </head>
 
 <body>
@@ -161,6 +161,25 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <!-- Error/404 Section -->
+        <section id="error-view"
+            style="display: none; padding: 4rem 1.5rem; text-align: center; min-height: 60vh; flex-direction: column; justify-content: center; align-items: center;">
+            <span class="material-icons-round"
+                style="font-size: 80px; color: var(--text-muted); margin-bottom: 1rem;">error_outline</span>
+            <h2
+                style="font-family: var(--font-heading); font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-main);">
+                Oops! Page Not Found</h2>
+            <p id="error-message"
+                style="color: var(--text-muted); font-size: 1.2rem; margin-bottom: 2rem; max-width: 600px;">
+                The page or product you are looking for doesn't exist or has been moved.
+            </p>
+            <button class="btn btn-primary" onclick="window.location.href='/'"
+                style="padding: 1rem 2rem; font-size: 1.1rem;">
+                <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">home</span> Return
+                to Home
+            </button>
         </section>
 
         <!-- Connect with Us (Socials) -->
@@ -697,7 +716,7 @@
     </div>
 
     <!-- Config & Main Application Logic -->
-    <script type="module" src="app.js?v=202417"></script>
+    <script type="module" src="app.js?v=202422"></script>
 </body>
 
 </html>

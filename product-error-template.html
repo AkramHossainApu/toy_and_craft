@@ -1,0 +1,11 @@
+            <div id="pagination-error-view" class="error-view" style="display: none; text-align: center; padding: 4rem 1.5rem; max-width: 600px; margin: 0 auto; min-height: 50vh;">
+                <span class="material-icons-round" style="font-size: 64px; color: var(--text-muted); margin-bottom: 2rem;">sentiment_very_dissatisfied</span>
+                <h2 style="font-family: var(--font-heading); font-size: 2rem; color: var(--primary); margin-bottom: 1rem;">Page Not Found</h2>
+                <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2.5rem; line-height: 1.6;">
+                    The page you are trying to access doesn't exist, has no available products, or is out of bounds for the current category.
+                </p>
+                <button class="btn btn-primary" onclick="currentCategorySlug ? updateUrlState(currentCategorySlug, 1) : window.location.href='/' ; window.location.reload();" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                    <span class="material-icons-round" style="vertical-align: middle; margin-right: 8px;">home</span>
+                    Return to Category
+                </button>
+            </div>
