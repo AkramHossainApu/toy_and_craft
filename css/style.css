@@ -1124,3 +1124,118 @@ a {
   border-color: var(--primary);
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
 }
+
+/* --- Skeleton Loading Screen --- */
+#app-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bg-main);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.skeleton-nav {
+  height: 73px;
+  width: 100%;
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skeleton-nav-left {
+  width: 150px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-nav-right {
+  display: flex;
+  gap: 15px;
+}
+
+.skeleton-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeleton-btn {
+  width: 80px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+}
+
+.skeleton-body {
+  flex-grow: 1;
+  max-width: 1200px;
+  margin: 3rem auto;
+  width: 100%;
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.skeleton-title {
+  width: 300px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+}
+
+.skeleton-subtitle {
+  width: 450px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 2.5rem;
+}
+
+.skeleton-tabs {
+  width: 250px;
+  height: 50px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 4rem;
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2.5rem;
+  width: 100%;
+}
+
+.skeleton-card {
+  height: 380px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+}
+
+.skeleton-animate {
+  background: linear-gradient(90deg, var(--bg-subtle) 25%, var(--border-color) 50%, var(--bg-subtle) 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s infinite;
+}
+
+[data-theme="dark"] .skeleton-animate {
+  background: linear-gradient(90deg, var(--bg-card) 25%, #333 50%, var(--bg-card) 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes skeletonLoading {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}

@@ -20,15 +20,42 @@
     <!-- Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <!-- Styles -->
-    <link rel="stylesheet" href="style.css?v=202422">
+    <link rel="stylesheet" href="css/style.css?v=skeletonfinal">
 </head>
 
 <body>
+    <!-- App Loading Skeleton -->
+    <div id="app-loader">
+        <div class="skeleton-nav">
+            <div class="skeleton-nav-left skeleton-animate"></div>
+            <div class="skeleton-nav-right">
+                <div class="skeleton-circle skeleton-animate"></div>
+                <div class="skeleton-circle skeleton-animate"></div>
+                <div class="skeleton-btn skeleton-animate"></div>
+            </div>
+        </div>
+        <div class="skeleton-body">
+            <div class="skeleton-title skeleton-animate"></div>
+            <div class="skeleton-subtitle skeleton-animate"></div>
+            <div class="skeleton-tabs skeleton-animate"></div>
+            <div class="skeleton-grid">
+                <div class="skeleton-card skeleton-animate"></div>
+                <div class="skeleton-card skeleton-animate"></div>
+                <div class="skeleton-card skeleton-animate"></div>
+                <div class="skeleton-card skeleton-animate"></div>
+                <div class="skeleton-card skeleton-animate"></div>
+                <div class="skeleton-card skeleton-animate"></div>
+                <div class="skeleton-card skeleton-animate"></div>
+                <div class="skeleton-card skeleton-animate"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Navigation -->
-    <nav class="navbar" id="navbar">
+    <nav class="navbar" id="navbar" style="display: none;">
         <div class="nav-container">
             <div class="logo">
-                <img src="/assets/tc_logo.png" alt="Logo" class="site-logo-img">
+                <img src="assets/tc_logo.png" alt="Logo" class="site-logo-img">
                 <span class="logo-text" id="site-title"
                     style="cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; margin-left: 10px;">Toy
                     & Craft</span>
@@ -69,7 +96,7 @@
     </div>
 
     <!-- Removed Hero and Features Sections -->
-    <main id="main-content">
+    <main id="main-content" style="display: none;">
         <!-- Shop Section -->
         <section id="shop" class="shop-section">
             <div class="section-header" style="position: relative;">
@@ -112,7 +139,7 @@
                 <div class="product-gallery">
                     <div class="main-image-container"
                         style="border-radius: var(--radius-md); overflow: hidden; background: var(--bg-card); position: relative; aspect-ratio: 1; cursor: pointer; border: 1px solid var(--border-color);">
-                        <img id="pv-main-image" src="/assets/placeholder.jpg" alt="Product"
+                        <img id="pv-main-image" src="assets/placeholder.jpg" alt="Product"
                             style="width: 100%; height: 100%; object-fit: contain;">
                         <div
                             style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; pointer-events: none;">
@@ -716,7 +743,7 @@
     </div>
 
     <!-- Config & Main Application Logic -->
-    <script type="module" src="app.js?v=202422"></script>
+    <script type="module" src="js/app.js?v=skeletonui"></script>
 </body>
 
 </html>

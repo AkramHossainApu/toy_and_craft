@@ -1,0 +1,1353 @@
+127.0.0.1 - - [06/Mar/2026 11:18:17] "GET /js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:19:01] "GET /index.html?t=busted2 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:19:01] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:19:01] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:19:28] "GET /index.html?t=busted2 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:19:28] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:19:28] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:21:08] "GET /index.html?t=busted3 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:21:08] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:21:08] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:26:20] "GET /index.html?t=100 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:26:20] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:26:20] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:26:20] "GET /js/app.js?v=100 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:26:20] "GET /js/core/dom.js HTTP/1.1" 304 -
+127.0.0.1 - - [06/Mar/2026 11:26:45] "GET /index.html?t=200 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:26:45] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:26:45] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:26:45] "GET /js/app.js?v=100 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:26:45] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:26:45] "GET /js/core/state.js HTTP/1.1" 304 -
+127.0.0.1 - - [06/Mar/2026 11:30:58] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:32:57] "GET /index.html?t=300 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:32:59] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:32:59] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:32:59] "GET /js/app.js?v=100 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:33:01] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:33:02] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:33:03] "GET /js/config/firebase.js HTTP/1.1" 304 -
+127.0.0.1 - - [06/Mar/2026 11:33:03] "GET /js/features/auth.js HTTP/1.1" 304 -
+127.0.0.1 - - [06/Mar/2026 11:33:03] "GET /js/features/cart.js HTTP/1.1" 304 -
+127.0.0.1 - - [06/Mar/2026 11:33:03] "GET /js/features/shop.js HTTP/1.1" 304 -
+127.0.0.1 - - [06/Mar/2026 11:33:03] "GET /js/features/admin.js HTTP/1.1" 304 -
+127.0.0.1 - - [06/Mar/2026 11:33:03] "GET /js/features/router.js HTTP/1.1" 304 -
+127.0.0.1 - - [06/Mar/2026 11:33:03] "GET /js/core/utils.js HTTP/1.1" 304 -
+127.0.0.1 - - [06/Mar/2026 11:38:45] "GET /index.html?t=100 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:38:47] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:38:47] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:38:47] "GET /js/app.js?v=100 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:38:48] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:38:50] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:38:51] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:38:52] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:38:54] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:38:54] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:38:54] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:38:55] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:38:55] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:44:43] "GET /index.html?t=final HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:44:43] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:44:43] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:44:43] "GET /js/app.js?v=100 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:44:45] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:44:46] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:44:48] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:44:48] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:44:49] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:44:50] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:44:52] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:44:53] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:44:55] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:47:58] "GET /index.html?t=101 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:47:59] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:47:59] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:47:59] "GET /js/app.js?v=100 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:47:59] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:47:59] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:47:59] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:47:59] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:47:59] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:47:59] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:47:59] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:47:59] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:47:59] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:16] "GET /mini-bricks/page-23 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:18] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:59:18] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:59:18] "GET /js/app.js?v=100 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:20] "GET /mini-bricks/page-23 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:20] "GET /js/core/state.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 58938)
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 318, in _handle_request_noblock
+    self.process_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 349, in process_request
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/Users/akramhossainopu/Desktop/toy_and_craft/server.py", line 29, in do_GET
+    return super().do_GET()
+           ~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+127.0.0.1 - - [06/Mar/2026 11:59:22] "GET /js/config/firebase.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 58941)
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 318, in _handle_request_noblock
+    self.process_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 349, in process_request
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/Users/akramhossainopu/Desktop/toy_and_craft/server.py", line 29, in do_GET
+    return super().do_GET()
+           ~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+127.0.0.1 - - [06/Mar/2026 11:59:24] "GET /js/core/dom.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 58943)
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 318, in _handle_request_noblock
+    self.process_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 349, in process_request
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/Users/akramhossainopu/Desktop/toy_and_craft/server.py", line 29, in do_GET
+    return super().do_GET()
+           ~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+127.0.0.1 - - [06/Mar/2026 11:59:25] "GET /js/features/auth.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 58944)
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 318, in _handle_request_noblock
+    self.process_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 349, in process_request
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/Users/akramhossainopu/Desktop/toy_and_craft/server.py", line 29, in do_GET
+    return super().do_GET()
+           ~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+127.0.0.1 - - [06/Mar/2026 11:59:26] "GET /js/features/cart.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 58947)
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 318, in _handle_request_noblock
+    self.process_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 349, in process_request
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/Users/akramhossainopu/Desktop/toy_and_craft/server.py", line 29, in do_GET
+    return super().do_GET()
+           ~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+127.0.0.1 - - [06/Mar/2026 11:59:28] "GET /js/features/shop.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 58948)
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 318, in _handle_request_noblock
+    self.process_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 349, in process_request
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/Users/akramhossainopu/Desktop/toy_and_craft/server.py", line 29, in do_GET
+    return super().do_GET()
+           ~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+127.0.0.1 - - [06/Mar/2026 11:59:29] "GET /js/app.js?v=100 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:29] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:59:29] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:59:29] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:29] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:29] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:29] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:29] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:29] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:29] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:30] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:31] "GET /js/core/utils.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 58972)
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 318, in _handle_request_noblock
+    self.process_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 349, in process_request
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/Users/akramhossainopu/Desktop/toy_and_craft/server.py", line 29, in do_GET
+    return super().do_GET()
+           ~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+127.0.0.1 - - [06/Mar/2026 11:59:33] "GET /mini-bricks/page-23 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:33] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:59:33] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:59:33] "GET /js/app.js?v=100 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:33] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:33] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:33] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:33] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:33] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:33] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:33] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:33] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:33] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:38] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:38] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:59:38] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:59:38] "GET /js/app.js?v=100 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:38] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:38] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:38] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:38] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:38] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:38] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:38] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:38] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:38] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:42] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:42] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 11:59:42] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 11:59:42] "GET /js/app.js?v=100 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:42] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:42] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:42] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:42] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:42] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:42] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:42] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:42] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 11:59:42] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:05:50] "GET /index.html?t=routefix HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:05:50] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:05:50] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:05:50] "GET /js/app.js?v=routefix HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:05:50] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:05:50] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:05:50] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:05:50] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:05:50] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:05:50] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:05:50] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:05:50] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:05:50] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:11:42] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:11:44] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:11:44] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:11:44] "GET /js/app.js?v=routefix HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:11:45] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:11:46] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:11:48] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:11:49] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:11:51] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:11:52] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:11:53] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:11:54] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:11:56] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:25] "GET /mini-bricks/pag?t=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:25] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:18:25] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:18:25] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:25] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:25] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:25] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:25] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:25] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:25] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:25] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:25] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:25] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:52] "GET /mini-bricks/pag?t=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:52] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:18:52] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:18:52] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:52] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:52] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:52] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:52] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:52] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:52] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:52] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:52] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:18:52] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:03] "GET /mini-bricks/pag?t=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:04] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:26:04] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:26:04] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:06] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:07] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:08] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:10] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:11] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:12] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:14] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:15] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:16] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:20] "GET /mini-bricks HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:20] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:26:20] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:26:20] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:20] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:20] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:20] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:20] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:20] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:20] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:20] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:20] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:20] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:25] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:25] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:26:25] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:26:25] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:25] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:25] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:25] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:25] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:25] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:25] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:25] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:25] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:25] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:28] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:28] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:26:28] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:26:28] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:28] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:28] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:28] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:28] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:28] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:28] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:28] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:28] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:28] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:34] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:34] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:26:34] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:26:34] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:34] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:34] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:34] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:34] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:34] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:34] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:34] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:34] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:26:34] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:45] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:45] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:27:45] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:27:45] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:45] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:45] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:45] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:45] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:45] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:45] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:45] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:45] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:45] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:51] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:51] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:27:51] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:27:51] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:51] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:51] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:51] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:51] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:51] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:51] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:51] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:51] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:27:51] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:25] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:27] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:33:27] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:33:27] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:27] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:27] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:27] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:27] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:27] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:27] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:27] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:27] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:27] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:44] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:44] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:33:44] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:33:44] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:44] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:44] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:44] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:44] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:44] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:44] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:44] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:44] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:44] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:57] "GET /mini-bricks HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:57] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:33:57] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:33:57] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:57] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:57] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:57] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:57] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:57] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:57] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:57] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:57] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:33:57] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:11] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:11] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:34:11] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:34:11] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:11] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:11] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:11] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:11] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:11] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:11] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:11] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:11] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:11] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:14] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:14] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:34:14] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:34:14] "GET /js/app.js?v=fast404 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:14] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:14] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:14] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:14] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:14] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:14] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:14] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:14] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:14] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:26] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:26] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:34:26] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:34:26] "GET /js/app.js?v=uifix HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:26] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:26] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:26] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:26] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:26] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:26] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:26] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:26] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:34:26] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:35:15] "GET /mini-bricks/pag?t=uifix HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:35:15] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:35:15] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:35:15] "GET /js/app.js?v=uifix HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:35:15] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:35:15] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:35:15] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:35:15] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:35:15] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:35:15] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:35:15] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:35:15] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:35:16] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:18] "GET /mini-bricks/pag?t=uifix HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:20] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:36:20] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:36:20] "GET /js/app.js?v=uifix HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:22] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:23] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:24] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:25] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:27] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:28] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:29] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:31] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:32] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:33] "GET /mini-bricks/pa HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:33] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:36:33] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:36:33] "GET /js/app.js?v=uifix HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:33] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:33] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:33] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:33] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:33] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:33] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:33] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:33] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:36:33] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:37:15] "GET /mini-bricks/pag?t=uifix HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:37:15] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:37:15] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:37:15] "GET /js/app.js?v=uifix HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:37:15] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:37:15] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:37:15] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:37:15] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:37:15] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:37:15] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:37:15] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:37:15] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:37:15] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:22] "GET /mini-bricks/page-1?t=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:24] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:47:24] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:47:24] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:25] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:26] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:28] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:28] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:30] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:31] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:32] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:35] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:36] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:52] "GET /mini-bricks/page-1?t=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:52] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:47:52] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:47:52] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:52] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:52] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:52] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:52] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:52] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:52] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:52] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:52] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:47:52] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:17] "GET /mini-bricks/page-1?t=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:17] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:48:17] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:48:17] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:17] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:17] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:17] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:17] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:17] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:17] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:17] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:17] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:17] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:50] "GET /mini-bricks/page-1?t=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:50] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:48:50] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:48:50] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:50] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:50] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:50] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:50] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:50] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:50] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:50] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:50] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:48:50] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:23] "GET /mini-bricks/page-1?t=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:23] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:50:23] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:50:23] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:23] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:23] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:23] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:23] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:23] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:23] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:23] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:23] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:23] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:42] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:42] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:50:42] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:50:42] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:42] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:42] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:42] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:42] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:42] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:42] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:42] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:42] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:42] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:47] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:47] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:50:47] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:50:47] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:47] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:47] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:47] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:47] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:47] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:47] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:47] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:47] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:47] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:52] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:52] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:50:52] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:50:52] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:52] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:52] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:52] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:52] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:52] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:52] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:52] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:52] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:52] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:53] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:53] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:50:53] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:50:53] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:53] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:53] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:53] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:53] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:53] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:53] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:53] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:53] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:53] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:55] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:55] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:50:55] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:50:55] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:55] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:55] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:55] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:55] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:55] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:55] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:55] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:55] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:50:55] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:06] "GET /mini-bricks/page-1?t=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:06] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:51:06] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:51:06] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:06] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:06] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:06] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:06] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:06] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:06] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:06] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:06] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:06] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:21] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:21] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:51:21] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:51:21] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:21] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:21] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:21] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:21] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:21] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:21] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:21] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:21] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:21] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:24] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:24] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:51:24] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:51:24] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:24] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:24] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:24] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:24] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:24] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:24] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:24] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:24] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:24] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:30] "GET /mini-bricks/page-1?t=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:30] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:51:30] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:51:30] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:30] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:30] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:30] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:30] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:30] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:30] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:30] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:30] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:30] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:33] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:33] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:51:33] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:51:33] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:33] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:33] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:33] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:33] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:33] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:33] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:33] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:33] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:33] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:37] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:37] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:51:37] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:51:37] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:37] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:37] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:37] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:37] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:37] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:37] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:37] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:37] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:51:37] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:18] "GET /mini-bricks/page-1?t=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:20] "GET /css/style.css?v=202422 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:21] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:23] "GET /assets/tc_logo.png HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:24] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:53:24] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 12:53:24] "GET /css/admin-styles.css HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:26] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:27] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:28] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:30] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:31] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:32] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:33] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:35] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:36] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 12:53:38] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 12:53:38] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:03:57] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:00] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:04:00] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:04:00] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:01] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:02] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:04] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:05] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:07] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:08] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:09] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:10] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:12] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:16] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:16] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:04:16] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:04:16] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:16] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:16] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:16] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:16] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:16] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:16] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:16] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:16] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:16] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:19] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:19] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:04:19] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:04:19] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:19] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:19] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:19] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:19] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:19] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:19] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:19] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:19] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:19] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:20] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:20] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:04:20] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:04:20] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:20] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:20] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:20] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:20] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:20] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:20] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:20] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:20] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:20] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:22] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:22] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:04:22] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:04:22] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:22] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:22] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:22] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:22] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:22] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:22] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:22] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:22] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:22] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:28] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:28] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:04:28] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:04:28] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:28] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:28] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:28] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:28] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:28] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:28] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:28] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:28] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:28] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:31] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:32] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:04:32] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:04:32] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:32] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:32] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:32] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:32] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:32] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:32] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:32] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:32] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:32] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:33] "GET /mini-bricks/pag HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:33] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:04:33] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:04:33] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:33] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:33] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:33] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:33] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:33] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:33] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:33] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:33] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:04:33] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:12] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:14] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:05:14] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:05:14] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:15] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:16] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:18] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:19] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:20] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:21] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:23] "GET /js/features/admin.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 61409)
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 318, in _handle_request_noblock
+    self.process_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 349, in process_request
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/Users/akramhossainopu/Desktop/toy_and_craft/server.py", line 29, in do_GET
+    return super().do_GET()
+           ~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+127.0.0.1 - - [06/Mar/2026 13:05:24] "GET /js/features/router.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 61411)
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 318, in _handle_request_noblock
+    self.process_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 349, in process_request
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/Users/akramhossainopu/Desktop/toy_and_craft/server.py", line 29, in do_GET
+    return super().do_GET()
+           ~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+127.0.0.1 - - [06/Mar/2026 13:05:25] "GET /js/core/utils.js HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 61413)
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 318, in _handle_request_noblock
+    self.process_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 349, in process_request
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/Users/akramhossainopu/Desktop/toy_and_craft/server.py", line 29, in do_GET
+    return super().do_GET()
+           ~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+127.0.0.1 - - [06/Mar/2026 13:05:27] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:28] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:05:28] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:05:28] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:29] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:30] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:30] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:30] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:30] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:30] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:30] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:30] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:05:30] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:12:14] "GET /mini-bricks/page-1?t=skeletonfinal HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:12:16] "GET /css/style.css?v=skeletonfinal HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:12:17] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:12:19] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:12:19] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:12:19] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:12:20] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:12:21] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:12:22] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:12:24] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:12:25] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:12:26] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:12:28] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:12:29] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:15:56] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:15:58] "GET /css/style.css?v=skeletonfinal HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:15:59] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:16:01] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:16:01] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:16:01] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:16:02] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:16:03] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:16:05] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:16:06] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:16:08] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:16:09] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:16:10] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:16:12] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:32] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:34] "GET /css/style.css?v=skeletonfinal HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:35] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:35] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:28:35] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:28:35] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:36] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:37] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:39] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:40] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:40] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:40] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:40] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:40] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:58] "GET /mini-bricks/page-1/kulomi HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:58] "GET /css/style.css?v=skeletonfinal HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:58] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 13:28:58] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 13:28:58] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:58] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:58] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:58] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:58] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:58] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:58] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:58] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:58] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 13:28:58] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:15] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:17] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:17] "GET /css/style.css?v=skeletonfinal HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:18] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:19] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 14:43:19] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 14:43:19] "GET /css/admin-styles.css HTTP/1.1" 304 -
+127.0.0.1 - - [06/Mar/2026 14:43:19] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:21] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:22] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:23] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:25] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:26] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:27] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:29] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:30] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:35] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:35] "GET /css/style.css?v=skeletonfinal HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:35] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:35] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 14:43:35] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 14:43:35] "GET /css/admin-styles.css HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:37] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:37] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:37] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:37] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:37] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:37] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:37] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:37] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:43:37] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /css/style.css?v=skeletonfinal HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /css/admin-styles.css HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:45:15] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:09] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:09] "GET /css/style.css?v=skeletonfinal HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:12] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 62615)
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 318, in _handle_request_noblock
+    self.process_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 349, in process_request
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/Users/akramhossainopu/Desktop/toy_and_craft/server.py", line 29, in do_GET
+    return super().do_GET()
+           ~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+127.0.0.1 - - [06/Mar/2026 14:52:13] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 14:52:13] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 14:52:13] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:13] "GET /css/style.css?v=skeletonfinal HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:13] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 14:52:13] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 14:52:13] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:13] "GET /css/admin-styles.css HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:14] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:16] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:17] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:18] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:20] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:21] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:22] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:22] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:24] "GET /js/features/router.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /mini-bricks/page-1 HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /css/style.css?v=skeletonfinal HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /js/app.js?v=skeletonui HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] code 404, message File not found
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /assets/placeholder.jpg HTTP/1.1" 404 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /css/admin-styles.css HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /js/core/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /js/config/firebase.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /js/core/dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /js/core/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /js/features/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /js/features/cart.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /js/features/shop.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /js/features/admin.js HTTP/1.1" 200 -
+127.0.0.1 - - [06/Mar/2026 14:52:27] "GET /js/features/router.js HTTP/1.1" 200 -
