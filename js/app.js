@@ -1,13 +1,13 @@
 console.log("APP.JS STARTING: Module evaluation has begun.");
 import { state, setAdmin } from './core/state.js';
-import { db, collection, getDocs } from './config/firebase.js';
+import { db, doc, getDoc, collection, getDocs } from './config/firebase.js';
 import {
     homeTitle, homeSubtitle, siteTitle, shopSection, errorViewSection,
     mainLayoutContainer, errorMessageText, appLoader, navbar, mainContent
 } from './core/dom.js';
 import { generateSlug } from './core/utils.js';
 
-import { setupAuthListeners, updateAuthUI } from './features/auth.js';
+import { setupAuthListeners, updateAuthUI, initLocationDropdowns } from './features/auth.js';
 import { setupCartListeners, handleFirebaseCartSync } from './features/cart.js';
 import { setupShopListeners, renderCategoryTabs, renderProducts } from './features/shop.js';
 import { setupAdminListeners, setupAdminOrderListeners } from './features/admin.js';
@@ -38,10 +38,24 @@ async function fetchSiteMetadata() {
 
 async function fetchSteadfastLocations() {
     try {
-        const locSnap = await getDocs(collection(db, 'SteadfastLocations'));
-        locSnap.forEach(d => {
-            state.steadfastLocations[d.id] = d.data().thanas || [];
-        });
+        const locDocRef = doc(db, 'Settings', 'Locations');
+        const locSnap = await getDoc(locDocRef);
+
+        if (locSnap.exists()) {
+            const docData = locSnap.data();
+            const locationData = docData.data || docData;
+            console.log("PAYLOAD_DUMP:", JSON.stringify(locationData));
+            for (const district in locationData) {
+                // Ignore any internal Firebase meta keys if they exist
+                if (Array.isArray(locationData[district])) {
+                    state.steadfastLocations[district] = locationData[district];
+                } else if (typeof locationData[district] === 'object' && locationData[district].thanas) {
+                    state.steadfastLocations[district] = locationData[district].thanas;
+                }
+            }
+        } else {
+            console.warn("Settings/Locations document is missing from Firebase.");
+        }
     } catch (e) {
         console.warn("Could not fetch location list", e);
     }
@@ -111,12 +125,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 3. Global Error Recovery handler (Removed RetryBtn as it doesn't exist in HTML)
 
     // 4. Initial Bootstrap Data Fetch
-    await fetchSteadfastLocations();
-    fetchSiteMetadata(); // Non blocking
+    fetchSiteMetadata(); // Non blocking metadata fetch
 
     try {
-        await fetchCategories();
-        await fetchAllProducts();
+        // Parallelize independent queries. Product fetching MUST wait for Categories to populate first.
+        await Promise.all([
+            fetchCategories().then(() => fetchAllProducts()),
+            fetchSteadfastLocations().then(() => {
+                console.log("APP.JS: fetchSteadfastLocations completed. Data length:", Object.keys(state.steadfastLocations).length);
+                initLocationDropdowns();
+            })
+        ]);
     } catch (err) {
         if (window.showErrorPage) window.showErrorPage("Failed to load store data. Please check your connection.");
         return; // Halt initialization if critical data fails

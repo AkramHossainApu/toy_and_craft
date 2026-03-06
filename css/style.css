@@ -175,7 +175,7 @@ a {
 }
 
 .nav-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 1rem 1.5rem;
   display: flex;
@@ -253,7 +253,7 @@ a {
 /* --- Hero Section --- */
 .hero {
   position: relative;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 2rem auto;
   padding: 4rem 1.5rem;
   display: grid;
@@ -478,7 +478,7 @@ a {
 
 /* --- Shop Section --- */
 .shop-section {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 3rem auto;
   padding: 0 1.5rem;
 }
@@ -554,8 +554,8 @@ a {
 /* Product Grid */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 2rem;
 }
 
 .product-card {
@@ -807,7 +807,7 @@ a {
 }
 
 .footer-grid {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
@@ -868,7 +868,7 @@ a {
 }
 
 .footer-bottom {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding-top: 2rem;
   border-top: 1px solid var(--border-color);
@@ -1175,7 +1175,7 @@ a {
 
 .skeleton-body {
   flex-grow: 1;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 3rem auto;
   width: 100%;
   padding: 0 1.5rem;
@@ -1207,8 +1207,8 @@ a {
 
 .skeleton-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 2rem;
   width: 100%;
 }
 

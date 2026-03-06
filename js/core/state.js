@@ -24,7 +24,7 @@ export const state = {
 
     // Pagination & Navigation State
     currentPage: 1,
-    itemsPerPage: 8,
+    itemsPerPage: 20,
     routingInitialized: false,
     draggedCategorySlug: null
 };

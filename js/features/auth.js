@@ -46,15 +46,68 @@ export function updateAuthUI() {
     }
 }
 
+export function initLocationDropdowns() {
+    console.log("AUTH.JS: initLocationDropdowns triggered. Locations count:", Object.keys(state.steadfastLocations).length);
+    if (Object.keys(state.steadfastLocations).length === 0) {
+        console.warn("AUTH.JS: Aborting dropdown init because SteadfastLocations is empty.");
+        return;
+    }
+
+    const districts = Object.keys(state.steadfastLocations).filter(d => d !== "Dhaka City" && d !== "Dhaka Sub-Urban");
+    districts.push("Dhaka");
+    districts.sort();
+
+    const populateDistrict = (selectEl) => {
+        if (!selectEl) return;
+        // Preserve empty first option
+        selectEl.innerHTML = '<option value="" disabled selected>Select District</option>';
+        districts.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = d;
+            selectEl.appendChild(opt);
+        });
+    };
+
+    populateDistrict(registerDistrictInput);
+    populateDistrict(profileDistrictInput);
+
+    const handleDistrictChange = (thanaSelectEl) => (e) => {
+        if (!thanaSelectEl) return;
+        const selected = e.target.value;
+        thanaSelectEl.innerHTML = '<option value="" disabled selected>Select Thana</option>';
+        thanaSelectEl.disabled = false;
+        thanaSelectEl.style.background = 'var(--bg-card)';
+        thanaSelectEl.style.cursor = 'pointer';
+
+        let thanas = [];
+        if (selected === "Dhaka") {
+            thanas = [...(state.steadfastLocations["Dhaka City"] || []), ...(state.steadfastLocations["Dhaka Sub-Urban"] || [])];
+        } else if (state.steadfastLocations[selected]) {
+            thanas = state.steadfastLocations[selected];
+        }
+
+        thanas.sort().forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t;
+            opt.textContent = t;
+            thanaSelectEl.appendChild(opt);
+        });
+    };
+
+    if (registerDistrictInput && registerThanaInput) {
+        registerDistrictInput.addEventListener('change', handleDistrictChange(registerThanaInput));
+    }
+    if (profileDistrictInput && profileThanaInput) {
+        profileDistrictInput.addEventListener('change', handleDistrictChange(profileThanaInput));
+    }
+}
+window.initLocationDropdowns = initLocationDropdowns;
+
 export function openAuthModal(view = 'login') {
     if (loginForm) loginForm.reset();
     if (registerForm) registerForm.reset();
     if (profileForm) profileForm.reset();
-
-    // Re-initialize location dropdowns just in case they were empty at boot 
-    if (Object.keys(state.steadfastLocations).length > 0 && window.initLocationDropdowns) {
-        window.initLocationDropdowns();
-    }
 
     if (state.currentUser) {
         if (authModalTitle) authModalTitle.textContent = "Your Profile";
@@ -128,6 +181,7 @@ export function openAuthModal(view = 'login') {
         }
         if (window.updateUrlState) window.updateUrlState(view); // Instantly update URL to /login or /register
     }
+
     if (authModal) authModal.style.display = 'flex';
 }
 
