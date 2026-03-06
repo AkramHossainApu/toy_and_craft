@@ -5,7 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toy & Craft</title>
-    <base href="/">
+    <script>
+        (function () {
+            var base = document.createElement('base');
+            if (window.location.pathname.startsWith('/toy_and_craft')) {
+                base.href = '/toy_and_craft/';
+            } else {
+                base.href = '/';
+            }
+            document.head.appendChild(base);
+        })();
+    </script>
     <meta name="description"
         content="Discover the joy of creating with our premium Mini Bricks and accessorize with our handcrafted Key Rings.">
     <!-- Networking optimizations for image speed -->
