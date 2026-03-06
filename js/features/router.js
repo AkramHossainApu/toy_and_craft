@@ -102,6 +102,45 @@ export function processRoute() {
                     });
                 }
             }
+        } else if (maybeAction === 'search' || (parts.length === 2 && parts[0] === 'search')) {
+            // --- Search URL routing ---
+            let searchKeyword = null;
+
+            if (parts[0] === 'search' && parts.length >= 2) {
+                // /search/keyword — guest URL
+                searchKeyword = decodeURIComponent(parts.slice(1).join('/'));
+                if (state.currentUser) {
+                    // Logged-in user accessing guest search URL — redirect to /userid/search/keyword
+                    let baseUri = '/';
+                    if (window.location.pathname.startsWith('/toy_and_craft')) baseUri = '/toy_and_craft/';
+                    const newPath = `${state.currentUser.id}/search/${encodeURIComponent(searchKeyword)}`;
+                    try {
+                        window.history.replaceState({ path: baseUri + newPath }, '', baseUri + newPath);
+                    } catch (e) { }
+                }
+            } else if (maybeAction === 'search' && parts.length >= 3) {
+                // /userid/search/keyword — user URL
+                searchKeyword = decodeURIComponent(parts.slice(2).join('/'));
+                if (!state.currentUser) {
+                    // Non-logged-in user accessing user search URL — redirect to /search/keyword
+                    let baseUri = '/';
+                    if (window.location.pathname.startsWith('/toy_and_craft')) baseUri = '/toy_and_craft/';
+                    const newPath = `search/${encodeURIComponent(searchKeyword)}`;
+                    try {
+                        window.history.replaceState({ path: baseUri + newPath }, '', baseUri + newPath);
+                    } catch (e) { }
+                }
+            }
+
+            if (searchKeyword) {
+                // Set default category so tabs render, then trigger search
+                if (state.categories.length > 0) {
+                    state.currentCategorySlug = state.categories[0].slug;
+                }
+                window.pendingSearchKeyword = searchKeyword;
+            } else {
+                bounceToRoot();
+            }
         } else if (rawAction === 'Details' || rawAction === 'Orders') {
             // Keep case-sensitive checking for Profile URLs due to IDs potentially passing here
             if (!state.currentUser || state.currentUser.id !== maybeUser) {
@@ -200,6 +239,21 @@ export function processRoute() {
         if (shopSection) shopSection.style.display = 'none';
 
         if (window.renderProductPage) window.renderProductPage(tempSlug);
+    } else if (window.pendingSearchKeyword) {
+        const keyword = window.pendingSearchKeyword;
+        window.pendingSearchKeyword = null;
+
+        if (productViewSection) productViewSection.style.display = 'none';
+        if (shopSection) shopSection.style.display = 'block';
+
+        // Render default products first so grid exists, then trigger search
+        if (window.renderProducts && state.currentCategorySlug) {
+            window.renderProducts(state.currentCategorySlug, 1);
+        }
+        // Trigger search after a short delay to let DOM settle
+        setTimeout(() => {
+            if (window.triggerSearchFromUrl) window.triggerSearchFromUrl(keyword);
+        }, 100);
     } else if (state.currentCategorySlug) {
 
         if (!window.location.pathname.includes('/Details') && !window.location.pathname.includes('/Orders')) {

@@ -184,6 +184,7 @@ export function openAuthModal(view = 'login') {
 
     if (authModal) authModal.style.display = 'flex';
 }
+window.openAuthModal = openAuthModal;
 
 export const closeAuthModal = () => {
     if (authModal) authModal.style.display = 'none';

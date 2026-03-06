@@ -26,13 +26,24 @@ export function toggleAdminMode(isAdminState) {
         }
         if (adminToolsBanner) adminToolsBanner.style.display = 'flex';
         if (adminHeaderEditContainer) adminHeaderEditContainer.style.display = 'block';
-        if (state.routingInitialized && window.updateUrlState) window.updateUrlState('admin');
+
+        // Force admin to base product grid view
+        if (state.categories && state.categories.length > 0) {
+            state.currentCategorySlug = state.categories[0].slug;
+        }
+        if (window.updateUrlState) window.updateUrlState('admin');
+        const productViewSection = document.getElementById('product-view');
+        if (productViewSection) productViewSection.style.display = 'none';
+        const shopSection = document.getElementById('shop');
+        if (shopSection) shopSection.style.display = 'block';
+
     } else {
         if (adminToolsBanner) adminToolsBanner.style.display = 'none';
         if (adminHeaderEditContainer) adminHeaderEditContainer.style.display = 'none';
-        if (state.routingInitialized && state.categories && state.categories.length > 0 && window.updateUrlState) {
+
+        if (state.categories && state.categories.length > 0) {
             state.currentCategorySlug = state.categories[0].slug;
-            window.updateUrlState(state.currentCategorySlug);
+            if (window.updateUrlState) window.updateUrlState(state.currentCategorySlug);
         }
     }
 
@@ -196,8 +207,13 @@ export function setupAdminListeners() {
             const mainImage = imagesRaw.length > 0 ? imagesRaw[0] : '';
             const adminProductStock = document.getElementById('admin-product-stock');
 
+            const targetCatId = adminProductCategory.value;
+            const productId = adminProductId.value; // May be empty for new products
+
+            const productNameTrimmed = adminProductName.value.trim();
             const productData = {
-                name: adminProductName.value.trim(),
+                name: productNameTrimmed,
+                slug: generateSlug(productNameTrimmed),
                 description: adminProductDesc ? adminProductDesc.value.trim() : '',
                 images: imagesRaw,
                 price: parseFloat(adminProductPrice.value),
@@ -205,27 +221,73 @@ export function setupAdminListeners() {
                 image: mainImage,
                 isNew: adminProductNew.checked,
                 isSale: adminProductSale.checked,
-                stock: adminProductStock ? parseInt(adminProductStock.value) : 10,
+                stock: adminProductStock && adminProductStock.value ? parseInt(adminProductStock.value) : 10,
                 updatedAt: Date.now()
             };
 
-            const targetCatId = adminProductCategory.value;
-            const productId = adminProductId.value;
-            const targetRef = productId ?
-                doc(db, 'Products', targetCatId, 'Items', productId) :
-                doc(collection(db, 'Products', targetCatId, 'Items')); // Auto-gen ID for new
-
             try {
-                const originalCatId = adminProductId.getAttribute('data-original-cat');
-                if (productId && originalCatId && originalCatId !== targetCatId) {
-                    await deleteDoc(doc(db, 'Products', originalCatId, 'Items', productId));
+                let targetRef;
+                if (productId) {
+                    // Update existing
+                    targetRef = doc(db, 'Products', targetCatId, 'Items', productId);
+                    const originalCatId = adminProductId.getAttribute('data-original-cat');
+
+                    if (originalCatId && originalCatId !== targetCatId) {
+                        // Category changed, delete old document first
+                        await deleteDoc(doc(db, 'Products', originalCatId, 'Items', productId));
+                    }
+                } else {
+                    // Create new
+                    const itemsCollectionRef = collection(db, 'Products', targetCatId, 'Items');
+                    targetRef = doc(itemsCollectionRef);
+                    // Explicitly inject the newly generated ID into the document body to match the user's DB schema
+                    productData.id = targetRef.id;
                 }
+
                 await setDoc(targetRef, productData, { merge: true });
-                state.currentCategorySlug = generateSlug(targetCatId);
-                closeAdminModalFn();
+
+                // Keep the UI in sync physically in State
+                let existingProd = state.inventory.find(p => p.id === productId);
+                if (existingProd) {
+                    Object.assign(existingProd, productData);
+                    existingProd.categoryId = targetCatId; // In case it moved
+                    existingProd.categorySlug = generateSlug(targetCatId);
+                } else {
+                    // new product
+                    state.inventory.push({
+                        ...productData,
+                        id: productData.id,
+                        categoryId: targetCatId,
+                        categorySlug: generateSlug(targetCatId)
+                    });
+                }
+
+                // Show success feedback on the button, then close modal after delay
+                const btn = adminProductForm.querySelector('button[type="submit"]');
+                if (btn) {
+                    const oldText = btn.textContent;
+                    btn.textContent = "Saved to Database!";
+                    btn.style.backgroundColor = '#00c853';
+                    btn.style.color = '#fff';
+                    setTimeout(() => {
+                        btn.textContent = oldText;
+                        btn.style.backgroundColor = '';
+                        btn.style.color = '';
+                        // Close modal and re-render after feedback is shown
+                        state.currentCategorySlug = generateSlug(targetCatId);
+                        closeAdminModalFn();
+                        if (window.renderProducts) window.renderProducts(state.currentCategorySlug);
+                    }, 1500);
+                } else {
+                    // Fallback if button not found — close immediately
+                    state.currentCategorySlug = generateSlug(targetCatId);
+                    closeAdminModalFn();
+                    if (window.renderProducts) window.renderProducts(state.currentCategorySlug);
+                }
+
             } catch (err) {
-                console.error("Error saving product:", err);
-                alert("Database Error: Failed to save product.");
+                console.error("DIAGNOSTIC ERROR:", err.message || err);
+                alert("Database Error! Message: " + (err.message || JSON.stringify(err)));
             }
         });
     }

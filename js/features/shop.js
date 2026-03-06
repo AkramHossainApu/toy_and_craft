@@ -129,6 +129,7 @@ export function renderCategoryTabs() {
                 categoryTabsContainer.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 state.currentCategorySlug = cat.slug;
+                if (window.updateTabSlider) window.updateTabSlider(); // Visually move slider before load
                 renderProducts(state.currentCategorySlug);
                 if (window.updateUrlState) window.updateUrlState(state.currentCategorySlug);
             };
@@ -146,6 +147,38 @@ export function renderCategoryTabs() {
         };
         categoryTabsContainer.appendChild(addBtn);
     }
+
+    // --- Sliding Tab Indicator Logic ---
+    let slider = categoryTabsContainer.querySelector('.tab-slider');
+    if (!slider) {
+        slider = document.createElement('div');
+        slider.className = 'tab-slider';
+        categoryTabsContainer.appendChild(slider);
+    }
+
+    const updateTabSlider = () => {
+        const activeBtn = categoryTabsContainer.querySelector('.tab-btn.active');
+        if (activeBtn && slider) {
+            slider.style.width = activeBtn.offsetWidth + 'px';
+            slider.style.height = activeBtn.offsetHeight + 'px';
+            slider.style.left = activeBtn.offsetLeft + 'px';
+            slider.style.top = activeBtn.offsetTop + 'px';
+        }
+    };
+
+    // Delay initial render slightly to ensure DOM has painted widths
+    setTimeout(updateTabSlider, 50);
+
+    // Make update method exposed globally if needed
+    window.updateTabSlider = updateTabSlider;
+
+    // Remove old listeners to avoid memory leaks if re-rendered
+    if (window._tabResizeListener) {
+        window.removeEventListener('resize', window._tabResizeListener);
+    }
+    window._tabResizeListener = updateTabSlider;
+    window.addEventListener('resize', window._tabResizeListener);
+
 }
 window.renderCategoryTabs = renderCategoryTabs;
 
@@ -217,7 +250,7 @@ export function renderProducts(categorySlug, page = 1) {
         pageIndicator.textContent = `Page ${state.currentPage} of ${totalPages}`;
     }
 
-    paginatedProducts.forEach(product => {
+    paginatedProducts.forEach((product, index) => {
         const hasOffer = product.offerPrice !== null && product.offerPrice > 0;
         const priceDisplay = hasOffer ?
             `<span class="product-price">৳${product.offerPrice.toFixed(2)}</span><span class="price-strike">৳${product.price.toFixed(2)}</span>` :
@@ -255,13 +288,14 @@ export function renderProducts(categorySlug, page = 1) {
         }
 
         const card = document.createElement('div');
-        card.className = 'product-card';
+        card.className = 'product-card category-slide-in';
+        card.style.animationDelay = `${index * 0.05}s`;
         const imgSrc = getAbsoluteImageUrl(product.image);
         const imgDisplay = product.image ? `<img src="${imgSrc}" alt="${product.name}" class="product-img" loading="lazy">` : `<div class="product-img" style="display:flex; align-items:center; justify-content:center; background:#eee; color:#aaa; height: 200px; width: 100%;">No Image</div>`;
 
         card.innerHTML = `
             ${adminActions}
-            <div onclick="window.renderProductPage('${product.slug}')" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;">
+            <div onclick="${state.isAdmin ? '' : `window.renderProductPage('${product.slug}')`}" style="cursor: ${state.isAdmin ? 'default' : 'pointer'}; display: flex; flex-direction: column; flex-grow: 1;">
                 <div class="product-img-wrap" style="position: relative;">
                     ${badges}
                     ${stockBadge}
@@ -277,9 +311,9 @@ export function renderProducts(categorySlug, page = 1) {
                 <div class="product-price-wrap">
                     ${priceDisplay}
                 </div>
-                <button class="add-to-cart" onclick="window.addCartItem('${product.id}')" aria-label="Add to cart" ${cartButtonDisabled}>
+                ${!state.isAdmin ? `<button class="add-to-cart" onclick="window.addCartItem('${product.id}')" aria-label="Add to cart" ${cartButtonDisabled}>
                     <span class="material-icons-round">add_shopping_cart</span>
-                </button>
+                </button>` : ''}
             </div>
         `;
         productGrid.appendChild(card);

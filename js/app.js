@@ -3,14 +3,15 @@ import { state, setAdmin } from './core/state.js';
 import { db, doc, getDoc, collection, getDocs } from './config/firebase.js';
 import {
     homeTitle, homeSubtitle, siteTitle, shopSection, errorViewSection,
-    mainLayoutContainer, errorMessageText, appLoader, navbar, mainContent
+    mainLayoutContainer, errorMessageText, appLoader, navbar, mainContent, themeToggleBtn
 } from './core/dom.js';
 import { generateSlug } from './core/utils.js';
 
 import { setupAuthListeners, updateAuthUI, initLocationDropdowns } from './features/auth.js';
 import { setupCartListeners, handleFirebaseCartSync } from './features/cart.js';
 import { setupShopListeners, renderCategoryTabs, renderProducts } from './features/shop.js';
-import { setupAdminListeners, setupAdminOrderListeners } from './features/admin.js';
+import { setupAdminListeners, setupAdminOrderListeners, toggleAdminMode } from './features/admin.js';
+import { setupSearchListeners } from './features/search.js';
 import { initRouting } from './features/router.js';
 
 import { getTrueDistrict } from './features/cart.js'; // Needed globally locally by forms
@@ -80,11 +81,11 @@ export async function fetchAllProducts() {
             return itemsSnap.docs.map(doc => {
                 const data = doc.data();
                 return {
+                    ...data,
                     id: doc.id,
                     categoryId: cat.id,
                     categorySlug: cat.slug,
-                    slug: data.name ? generateSlug(data.name) : doc.id.toLowerCase().replace(/ /g, '-'),
-                    ...data
+                    slug: data.name ? generateSlug(data.name) : doc.id.toLowerCase().replace(/ /g, '-')
                 };
             });
         });
@@ -119,6 +120,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupShopListeners();
     setupAdminListeners();
     setupAdminOrderListeners();
+    setupSearchListeners();
+
+    // 2.5 Initialize Visual Toggles & Stored Global States
+    if (themeToggleBtn) {
+        if (localStorage.getItem('tc_theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeToggleBtn.innerHTML = '<span class="material-icons-round">light_mode</span>';
+        }
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            if (newTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+
+            localStorage.setItem('tc_theme', newTheme);
+            themeToggleBtn.innerHTML = newTheme === 'dark' ?
+                '<span class="material-icons-round">light_mode</span>' :
+                '<span class="material-icons-round">dark_mode</span>';
+        });
+    }
+
+    if (state.isAdmin) {
+        toggleAdminMode(true);
+    }
 
     updateAuthUI();
 
