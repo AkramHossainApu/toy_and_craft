@@ -511,6 +511,38 @@ a {
   border: 1px solid var(--border-color);
   position: relative;
   margin: 0 auto;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Floating category tabs when scrolled */
+.category-tabs-floating {
+  position: fixed !important;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(var(--float-offset-y, 0px));
+  z-index: 998;
+  background: rgba(var(--bg-card-rgb, 255, 255, 255), 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 123, 255, 0.15);
+  margin: 0;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s ease,
+    background 0.3s ease;
+}
+
+[data-theme="dark"] .category-tabs-floating {
+  background: rgba(30, 30, 30, 0.92);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 123, 255, 0.2);
+}
+
+/* Placeholder to hold space when tabs are floating */
+.category-tabs-placeholder {
+  display: none;
+}
+
+.category-tabs-placeholder.active {
+  display: block;
 }
 
 .tab-slider {
@@ -1243,6 +1275,12 @@ a {
   .sort-bar select {
     font-size: 0.7rem;
     padding: 0.3rem 0.5rem;
+  }
+
+  /* -- Floating tabs: compact on mobile -- */
+  .category-tabs-floating {
+    bottom: 1rem;
+    max-width: 95vw;
   }
 
   /* -- Product grid: 2 columns -- */
