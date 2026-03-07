@@ -121,9 +121,20 @@
                     your
                     keys.</p>
 
-                <div class="category-tabs">
-                    <button class="tab-btn active" data-category="mini-bricks">Mini Bricks</button>
-                    <button class="tab-btn" data-category="key-rings">Key Rings</button>
+                <div class="category-search-row">
+                    <div class="category-tabs">
+                        <button class="tab-btn active" data-category="mini-bricks">Mini Bricks</button>
+                        <button class="tab-btn" data-category="key-rings">Key Rings</button>
+                    </div>
+                    <div class="inline-search-wrap" id="inline-search-wrap">
+                        <span class="material-icons-round inline-search-icon">search</span>
+                        <input type="text" id="search-input" placeholder="Search products..." autocomplete="off"
+                            spellcheck="false">
+                        <button class="inline-search-clear" id="search-clear-btn" style="display: none;"
+                            aria-label="Clear search">
+                            <span class="material-icons-round">close</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
