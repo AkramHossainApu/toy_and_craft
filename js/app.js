@@ -149,6 +149,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         toggleAdminMode(true);
     }
 
+    // Logo/Title click → navigate to home
+    const logoEl = document.querySelector('.logo');
+    if (logoEl) {
+        logoEl.addEventListener('click', () => {
+            // Hide any open views
+            const productViewSection = document.getElementById('product-view');
+            const errorViewSection = document.getElementById('error-view');
+            const checkoutViewEl = document.getElementById('checkout-view');
+            const adminOrdersView = document.getElementById('admin-orders-view');
+            const mainContentEl = document.getElementById('main-content');
+            const shopEl = document.getElementById('shop');
+
+            if (productViewSection) productViewSection.style.display = 'none';
+            if (errorViewSection) errorViewSection.style.display = 'none';
+            if (checkoutViewEl) checkoutViewEl.style.display = 'none';
+            if (adminOrdersView) adminOrdersView.style.display = 'none';
+            if (mainContentEl) mainContentEl.style.display = 'block';
+            if (shopEl) shopEl.style.display = 'block';
+
+            // Navigate to first category
+            if (state.categories.length > 0) {
+                state.currentCategorySlug = state.categories[0].slug;
+                state.currentPage = 1;
+                if (window.updateUrlState) window.updateUrlState(state.currentCategorySlug, 1);
+                if (window.renderCategoryTabs) window.renderCategoryTabs();
+                if (window.renderProducts) window.renderProducts(state.currentCategorySlug, 1);
+            }
+        });
+    }
+
     updateAuthUI();
 
     // 3. Global Error Recovery handler (Removed RetryBtn as it doesn't exist in HTML)

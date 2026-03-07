@@ -187,16 +187,44 @@ window.closeCart = closeCart;
 
 // --- Checkout System ---
 
+const DEFAULT_DELIVERY_RULES = {
+    'Dhaka City': {
+        tiers: [
+            { maxItems: 4, charge: 50 },
+            { maxItems: 6, charge: 60 },
+            { maxItems: 10, charge: 70 }
+        ],
+        baseChargeOver10: 70,
+        extraChargePer10Items: 20
+    },
+    'Dhaka Sub-Urban': {
+        tiers: [
+            { maxItems: 10, charge: 100 }
+        ],
+        baseChargeOver10: 100,
+        extraChargePer10Items: 20
+    },
+    'default': {
+        tiers: [
+            { maxItems: 5, charge: 110 },
+            { maxItems: 10, charge: 130 }
+        ],
+        baseChargeOver10: 130,
+        extraChargePer10Items: 20
+    }
+};
+
 function calculateDeliveryCharge(district, totalItems) {
     if (totalItems <= 0) return 0;
 
-    if (!state.deliveryRules || Object.keys(state.deliveryRules).length === 0) {
-        return 130;
-    }
+    // Use Firebase rules if available, otherwise use hardcoded defaults
+    const rules = (state.deliveryRules && Object.keys(state.deliveryRules).length > 0)
+        ? state.deliveryRules
+        : DEFAULT_DELIVERY_RULES;
 
-    let ruleset = state.deliveryRules[district];
+    let ruleset = rules[district];
     if (!ruleset) {
-        ruleset = state.deliveryRules['default'];
+        ruleset = rules['default'];
     }
 
     if (!ruleset) return 130;
