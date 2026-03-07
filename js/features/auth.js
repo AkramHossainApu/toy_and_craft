@@ -1,5 +1,5 @@
 import { state, updateCart, setAdmin } from '../core/state.js';
-import { db, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from '../config/firebase.js';
+import { db, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, where, getDocs, writeBatch } from '../config/firebase.js';
 import {
     authLoginBtn, userProfileBadge, cartToggleBtn, adminNavbarLogoutBtn, userProfileName,
     loginForm, registerForm, profileForm, authModalTitle, loginView, registerView, profileView,
@@ -221,28 +221,32 @@ export function setupAuthListeners() {
         });
     }
 
-    // UserID Auto-generation logic (Debounced)
+    // UserID Auto-generation logic (Debounced) — triggered by username input
     let debounceTimer;
     if (registerUsernameInput) {
         registerUsernameInput.addEventListener('input', () => {
             clearTimeout(debounceTimer);
             const username = registerUsernameInput.value.trim();
             const baseId = generateSlug(username);
+            const hint = document.getElementById('register-userid-hint');
 
             if (!baseId) {
                 registerUseridInput.value = '';
                 registerSubmitBtn.disabled = false;
+                if (hint) { hint.textContent = 'Leave matching your username for best results.'; hint.style.color = 'var(--text-muted)'; }
                 return;
             }
 
             if (baseId.includes('admin') || username.toLowerCase().includes('admin')) {
                 registerUseridInput.value = "Username cannot contain 'admin'";
                 registerSubmitBtn.disabled = true;
+                if (hint) { hint.textContent = 'Admin keyword is not allowed.'; hint.style.color = '#ff4444'; }
                 return;
             }
 
             registerUseridInput.value = "Checking availability...";
             registerSubmitBtn.disabled = true;
+            if (hint) { hint.textContent = 'Checking...'; hint.style.color = 'var(--text-muted)'; }
 
             debounceTimer = setTimeout(async () => {
                 try {
@@ -253,6 +257,7 @@ export function setupAuthListeners() {
                         if (!docSnap.exists()) {
                             registerUseridInput.value = candidate;
                             registerSubmitBtn.disabled = false;
+                            if (hint) { hint.textContent = '✓ ID is available.'; hint.style.color = '#28a745'; }
                             break;
                         }
                         i++;
@@ -262,8 +267,102 @@ export function setupAuthListeners() {
                     console.error("Error auto-generating ID:", e);
                     registerUseridInput.value = "Error checking ID";
                     registerSubmitBtn.disabled = false;
+                    if (hint) { hint.textContent = 'Error checking availability.'; hint.style.color = '#ff4444'; }
                 }
             }, 600);
+        });
+    }
+
+    // Real-time validation when user manually edits the register userid
+    let regIdDebounce;
+    if (registerUseridInput) {
+        registerUseridInput.addEventListener('input', () => {
+            clearTimeout(regIdDebounce);
+            const hint = document.getElementById('register-userid-hint');
+            const rawId = registerUseridInput.value.trim();
+            const candidateId = generateSlug(rawId);
+
+            if (!candidateId) {
+                registerSubmitBtn.disabled = true;
+                if (hint) { hint.textContent = 'Please enter a valid ID.'; hint.style.color = '#ff4444'; }
+                return;
+            }
+
+            if (candidateId.includes('admin')) {
+                registerSubmitBtn.disabled = true;
+                if (hint) { hint.textContent = 'ID cannot contain "admin".'; hint.style.color = '#ff4444'; }
+                return;
+            }
+
+            registerSubmitBtn.disabled = true;
+            if (hint) { hint.textContent = 'Checking availability...'; hint.style.color = 'var(--text-muted)'; }
+
+            regIdDebounce = setTimeout(async () => {
+                try {
+                    const docSnap = await getDoc(doc(db, 'Users', candidateId));
+                    if (!docSnap.exists()) {
+                        registerUseridInput.value = candidateId;
+                        registerSubmitBtn.disabled = false;
+                        if (hint) { hint.textContent = '✓ ID is available.'; hint.style.color = '#28a745'; }
+                    } else {
+                        registerSubmitBtn.disabled = true;
+                        if (hint) { hint.textContent = '✗ ID is already taken. Try another.'; hint.style.color = '#ff4444'; }
+                    }
+                } catch (e) {
+                    registerSubmitBtn.disabled = false;
+                    if (hint) { hint.textContent = 'Error checking availability.'; hint.style.color = '#ff4444'; }
+                }
+            }, 500);
+        });
+    }
+
+    // Real-time validation for profile userid changes
+    let profileIdDebounce;
+    if (profileUseridInput) {
+        profileUseridInput.addEventListener('input', () => {
+            clearTimeout(profileIdDebounce);
+            const hint = document.getElementById('profile-userid-hint');
+            const rawId = profileUseridInput.value.trim();
+            const candidateId = generateSlug(rawId);
+
+            if (!candidateId) {
+                if (profileUpdateBtn) profileUpdateBtn.disabled = true;
+                if (hint) { hint.textContent = 'Please enter a valid ID.'; hint.style.color = '#ff4444'; }
+                return;
+            }
+
+            if (candidateId.includes('admin')) {
+                if (profileUpdateBtn) profileUpdateBtn.disabled = true;
+                if (hint) { hint.textContent = 'ID cannot contain "admin".'; hint.style.color = '#ff4444'; }
+                return;
+            }
+
+            // If same as current, no check needed
+            if (candidateId === state.currentUser?.id) {
+                if (profileUpdateBtn) profileUpdateBtn.disabled = false;
+                if (hint) { hint.textContent = 'This is your current ID.'; hint.style.color = 'var(--text-muted)'; }
+                return;
+            }
+
+            if (profileUpdateBtn) profileUpdateBtn.disabled = true;
+            if (hint) { hint.textContent = 'Checking availability...'; hint.style.color = 'var(--text-muted)'; }
+
+            profileIdDebounce = setTimeout(async () => {
+                try {
+                    const docSnap = await getDoc(doc(db, 'Users', candidateId));
+                    if (!docSnap.exists()) {
+                        profileUseridInput.value = candidateId;
+                        if (profileUpdateBtn) profileUpdateBtn.disabled = false;
+                        if (hint) { hint.textContent = '✓ ID is available.'; hint.style.color = '#28a745'; }
+                    } else {
+                        if (profileUpdateBtn) profileUpdateBtn.disabled = true;
+                        if (hint) { hint.textContent = '✗ ID is already taken. Try another.'; hint.style.color = '#ff4444'; }
+                    }
+                } catch (e) {
+                    if (profileUpdateBtn) profileUpdateBtn.disabled = false;
+                    if (hint) { hint.textContent = 'Error checking availability.'; hint.style.color = '#ff4444'; }
+                }
+            }, 500);
         });
     }
 
@@ -283,16 +382,10 @@ export function setupAuthListeners() {
             try {
                 let userSnap = await getDoc(doc(db, 'Users', identifier));
                 if (!userSnap.exists()) {
-                    const qUser = query(collection(db, 'Users'), where('username', '==', identifier));
-                    const qsUser = await getDocs(qUser);
-                    if (!qsUser.empty) {
-                        userSnap = qsUser.docs[0];
-                    } else {
-                        const qMobile = query(collection(db, 'Users'), where('mobile', '==', identifier));
-                        const qsMobile = await getDocs(qMobile);
-                        if (!qsMobile.empty) {
-                            userSnap = qsMobile.docs[0];
-                        }
+                    const qMobile = query(collection(db, 'Users'), where('mobile', '==', identifier));
+                    const qsMobile = await getDocs(qMobile);
+                    if (!qsMobile.empty) {
+                        userSnap = qsMobile.docs[0];
                     }
                 }
 
@@ -303,7 +396,9 @@ export function setupAuthListeners() {
                             id: userSnap.id,
                             name: data.username || '',
                             mobile: data.mobile || '',
-                            address: data.address || ''
+                            address: data.address || '',
+                            district: data.district || '',
+                            thana: data.thana || ''
                         };
 
                         if (remember) {
@@ -349,8 +444,15 @@ export function setupAuthListeners() {
             const rawThana = registerThanaInput.value;
             const remember = registerRememberInput.checked;
 
-            if (!username || !userid || !password || !mobile || !rawDistrict || !rawThana || userid.includes("Checking") || userid.includes("contains")) {
+            if (!username || !userid || !password || !mobile || !rawDistrict || !rawThana || userid.includes("Checking") || userid.includes("contains") || userid.includes("Error")) {
                 alert("Please fill all fields properly (including District and Thana) and wait for ID validation.");
+                return;
+            }
+
+            // Check if register button was disabled due to taken ID
+            const regHint = document.getElementById('register-userid-hint');
+            if (regHint && regHint.style.color === 'rgb(255, 68, 68)') {
+                alert("The User ID '" + userid + "' is not available. Please choose a different one.");
                 return;
             }
 
@@ -413,12 +515,32 @@ export function setupAuthListeners() {
     if (profileForm) {
         profileForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const newUsername = profileUsernameInput.value.trim();
+            const newUserid = generateSlug(profileUseridInput.value.trim());
             const newAddress = profileAddressInput.value.trim();
             const newMobile = profileMobileInput.value.trim();
             const rawDistrict = profileDistrictInput.value;
             const rawThana = profileThanaInput.value;
 
             if (!state.currentUser) return;
+            if (!newUsername) {
+                alert("Username cannot be empty.");
+                return;
+            }
+            if (!newUserid) {
+                alert("User ID cannot be empty.");
+                return;
+            }
+            if (newUserid.includes('admin')) {
+                alert("User ID cannot contain 'admin'.");
+                return;
+            }
+            // Check if profile userid hint shows an error (taken/invalid)
+            const profHint = document.getElementById('profile-userid-hint');
+            if (profHint && profHint.style.color === 'rgb(255, 68, 68)') {
+                alert("The User ID '" + newUserid + "' is not available. Please choose a different one.");
+                return;
+            }
             if (!rawDistrict || !rawThana) {
                 alert("Please accurately select both a District and a Thana before saving.");
                 return;
@@ -430,12 +552,66 @@ export function setupAuthListeners() {
             try {
                 let finalDistrict = rawDistrict;
                 if (window.getTrueDistrict) finalDistrict = window.getTrueDistrict(rawDistrict, rawThana);
-                await updateDoc(doc(db, 'Users', state.currentUser.id), {
-                    address: newAddress,
-                    mobile: newMobile,
-                    district: finalDistrict,
-                    thana: rawThana
-                });
+
+                const oldId = state.currentUser.id;
+                const idChanged = newUserid !== oldId;
+
+                if (idChanged) {
+                    // Check collision one final time
+                    const checkSnap = await getDoc(doc(db, 'Users', newUserid));
+                    if (checkSnap.exists()) {
+                        alert("This User ID is already taken. Please choose another.");
+                        profileUpdateBtn.disabled = false;
+                        profileUpdateBtn.textContent = "Update Profile";
+                        return;
+                    }
+
+                    // Read old user data
+                    const oldSnap = await getDoc(doc(db, 'Users', oldId));
+                    const oldData = oldSnap.exists() ? oldSnap.data() : {};
+
+                    // Merge new data
+                    const newData = {
+                        ...oldData,
+                        username: newUsername,
+                        address: newAddress,
+                        mobile: newMobile,
+                        district: finalDistrict,
+                        thana: rawThana
+                    };
+
+                    // Create new doc
+                    await setDoc(doc(db, 'Users', newUserid), newData);
+
+                    // Migrate Cart subcollection
+                    try {
+                        const cartSnap = await getDocs(collection(db, 'Users', oldId, 'Cart'));
+                        if (!cartSnap.empty) {
+                            const batch = writeBatch(db);
+                            cartSnap.docs.forEach(d => {
+                                batch.set(doc(db, 'Users', newUserid, 'Cart', d.id), d.data());
+                                batch.delete(doc(db, 'Users', oldId, 'Cart', d.id));
+                            });
+                            await batch.commit();
+                        }
+                    } catch (migErr) { console.warn('Cart migration partial:', migErr); }
+
+                    // Delete old doc
+                    await deleteDoc(doc(db, 'Users', oldId));
+
+                    state.currentUser.id = newUserid;
+                } else {
+                    // Just update existing doc
+                    await updateDoc(doc(db, 'Users', oldId), {
+                        username: newUsername,
+                        address: newAddress,
+                        mobile: newMobile,
+                        district: finalDistrict,
+                        thana: rawThana
+                    });
+                }
+
+                state.currentUser.name = newUsername;
                 state.currentUser.address = newAddress;
                 state.currentUser.mobile = newMobile;
                 state.currentUser.district = finalDistrict;
@@ -446,8 +622,15 @@ export function setupAuthListeners() {
                 } else {
                     sessionStorage.setItem('tc_user', JSON.stringify(state.currentUser));
                 }
-                alert("Profile updated successfully!");
+
+                updateAuthUI();
+                alert("Profile updated successfully!" + (idChanged ? " Your new ID is: " + newUserid : ""));
                 closeAuthModal();
+
+                // Update URL to reflect new user ID
+                if (idChanged && state.currentCategorySlug && window.updateUrlState) {
+                    window.updateUrlState(state.currentCategorySlug);
+                }
             } catch (err) {
                 console.error("Profile Update Error:", err);
                 alert("Failed to update profile.");

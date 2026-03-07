@@ -205,6 +205,16 @@ export function renderProducts(categorySlug, page = 1) {
 
     const filteredProducts = state.inventory.filter(p => p.categorySlug === categorySlug);
 
+    // Apply sorting
+    if (state.currentSort === 'a-z') {
+        filteredProducts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    } else if (state.currentSort === 'z-a') {
+        filteredProducts.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+    } else if (state.currentSort === 'price-low') {
+        filteredProducts.sort((a, b) => (a.offerPrice || a.price) - (b.offerPrice || b.price));
+    } else if (state.currentSort === 'price-high') {
+        filteredProducts.sort((a, b) => (b.offerPrice || b.price) - (a.offerPrice || a.price));
+    }
     if (filteredProducts.length === 0 && !state.isAdmin) {
         productGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">No products found in this category.</div>';
         if (prevPageBtn) prevPageBtn.disabled = true;
@@ -405,6 +415,16 @@ export function renderProductPage(productSlug) {
 window.renderProductPage = renderProductPage;
 
 export function setupShopListeners() {
+    // Sort dropdown listener
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', (e) => {
+            state.currentSort = e.target.value;
+            state.currentPage = 1;
+            renderProducts(state.currentCategorySlug, 1);
+            if (window.updateUrlState) window.updateUrlState(state.currentCategorySlug, 1);
+        });
+    }
     if (backToShopBtn) {
         backToShopBtn.addEventListener('click', () => {
             if (productViewSection) productViewSection.style.display = 'none';

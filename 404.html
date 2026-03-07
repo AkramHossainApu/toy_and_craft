@@ -121,11 +121,11 @@
                     your
                     keys.</p>
 
-                <div class="category-search-row">
-                    <div class="category-tabs">
-                        <button class="tab-btn active" data-category="mini-bricks">Mini Bricks</button>
-                        <button class="tab-btn" data-category="key-rings">Key Rings</button>
-                    </div>
+                <div class="category-tabs">
+                    <button class="tab-btn active" data-category="mini-bricks">Mini Bricks</button>
+                    <button class="tab-btn" data-category="key-rings">Key Rings</button>
+                </div>
+                <div class="search-sort-row">
                     <div class="inline-search-wrap" id="inline-search-wrap">
                         <span class="material-icons-round inline-search-icon">search</span>
                         <input type="text" id="search-input" placeholder="Search products..." autocomplete="off"
@@ -134,6 +134,17 @@
                             aria-label="Clear search">
                             <span class="material-icons-round">close</span>
                         </button>
+                    </div>
+                    <div class="sort-bar" id="sort-bar">
+                        <label for="sort-select"><span class="material-icons-round"
+                                style="font-size: 18px; vertical-align: middle;">sort</span> Sort:</label>
+                        <select id="sort-select">
+                            <option value="default">Default</option>
+                            <option value="a-z">Name: A → Z</option>
+                            <option value="z-a">Name: Z → A</option>
+                            <option value="price-low">Price: Low → High</option>
+                            <option value="price-high">Price: High → Low</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -551,13 +562,14 @@
                         <form id="profile-form">
                             <div class="form-group">
                                 <label for="profile-username">Username</label>
-                                <input type="text" id="profile-username" readonly
-                                    style="background: var(--bg-hover); color: var(--text-muted); cursor: not-allowed;">
+                                <input type="text" id="profile-username" required>
                             </div>
                             <div class="form-group">
                                 <label>Unique User ID</label>
-                                <input type="text" id="profile-userid" readonly
-                                    style="background: var(--bg-hover); color: var(--text-muted); cursor: not-allowed;">
+                                <input type="text" id="profile-userid" required>
+                                <small id="profile-userid-hint"
+                                    style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Editing
+                                    will migrate your account to the new ID.</small>
                             </div>
                             <div class="form-group">
                                 <label for="profile-mobile">Mobile Number</label>

@@ -25,6 +25,7 @@ export const state = {
     // Pagination & Navigation State
     currentPage: 1,
     itemsPerPage: 20,
+    currentSort: 'default',
     routingInitialized: false,
     draggedCategorySlug: null
 };
