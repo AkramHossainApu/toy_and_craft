@@ -514,36 +514,58 @@ a {
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* Floating category tabs when scrolled */
-.category-tabs-floating {
-  position: fixed !important;
+/* ── Floating tab clone (always fixed, only translates) ── */
+.category-tabs-clone {
+  position: fixed;
   bottom: 1.5rem;
   left: 50%;
-  transform: translateX(-50%) translateY(var(--float-offset-y, 0px));
+  transform: translateX(-50%) translateY(120%);
+  /* hidden below screen */
   z-index: 998;
   background: rgba(var(--bg-card-rgb, 255, 255, 255), 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 123, 255, 0.15);
   margin: 0;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.3s ease,
-    background 0.3s ease;
+  pointer-events: none;
+  opacity: 0;
+  transition: transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease;
 }
 
-[data-theme="dark"] .category-tabs-floating {
+.category-tabs-clone.clone-visible {
+  transform: translateX(-50%) translateY(0);
+  /* slides into view */
+  opacity: 1;
+  pointer-events: auto;
+}
+
+[data-theme="dark"] .category-tabs-clone {
   background: rgba(30, 30, 30, 0.92);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 123, 255, 0.2);
 }
 
-/* Placeholder to hold space when tabs are floating */
-.category-tabs-placeholder {
+/* Clone: hide the slider (it won't align), style active tab directly instead */
+.category-tabs-clone .tab-slider {
   display: none;
 }
 
-.category-tabs-placeholder.active {
-  display: block;
+.category-tabs-clone .tab-btn.active {
+  background-color: var(--primary);
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
 }
+
+.category-tabs-clone .tab-btn:not(.active) {
+  color: var(--text-muted);
+}
+
+.category-tabs-clone {
+  overflow: visible;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+}
+
 
 .tab-slider {
   position: absolute;
@@ -1278,7 +1300,7 @@ a {
   }
 
   /* -- Floating tabs: compact on mobile -- */
-  .category-tabs-floating {
+  .category-tabs-clone {
     bottom: 1rem;
     max-width: 95vw;
   }

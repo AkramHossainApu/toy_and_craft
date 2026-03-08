@@ -129,7 +129,8 @@ export function renderCategoryTabs() {
                 categoryTabsContainer.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 state.currentCategorySlug = cat.slug;
-                if (window.updateTabSlider) window.updateTabSlider(); // Visually move slider before load
+                if (window.updateTabSlider) window.updateTabSlider();
+                if (window._syncFloatingClone) window._syncFloatingClone();
                 renderProducts(state.currentCategorySlug);
                 if (window.updateUrlState) window.updateUrlState(state.currentCategorySlug);
             };
@@ -426,105 +427,58 @@ export function setupShopListeners() {
         });
     }
 
-    // Floating category tabs on scroll
+    // --- Floating category tabs on scroll (portal/clone pattern — no glitches) ---
+    // Trick: the original tabs NEVER change position type.
+    // A separate fixed clone slides in/out via translateY only.
     if (categoryTabsContainer) {
-        // Create a placeholder to hold space when tabs float
-        let placeholder = document.getElementById('category-tabs-placeholder');
-        if (!placeholder) {
-            placeholder = document.createElement('div');
-            placeholder.id = 'category-tabs-placeholder';
-            placeholder.className = 'category-tabs-placeholder';
-            categoryTabsContainer.parentNode.insertBefore(placeholder, categoryTabsContainer.nextSibling);
+        // Create the always-fixed clone element
+        let clone = document.getElementById('category-tabs-clone');
+        if (!clone) {
+            clone = document.createElement('div');
+            clone.id = 'category-tabs-clone';
+            clone.className = 'category-tabs category-tabs-clone';
+            document.body.appendChild(clone);
         }
 
-        let isFloating = false;
-        let originalRect = null;
-
-        const captureOriginalPosition = () => {
-            if (!isFloating) {
-                originalRect = categoryTabsContainer.getBoundingClientRect();
-                originalRect = {
-                    top: categoryTabsContainer.offsetTop + (categoryTabsContainer.offsetParent ? categoryTabsContainer.offsetParent.offsetTop : 0),
-                    height: categoryTabsContainer.offsetHeight
-                };
-            }
-        };
-
-        // Capture on first load
-        setTimeout(captureOriginalPosition, 200);
-
-        const handleScroll = () => {
-            if (!categoryTabsContainer || !placeholder) return;
-
-            // Re-capture if not floating
-            if (!isFloating) {
-                captureOriginalPosition();
-            }
-
-            const scrollY = window.scrollY || window.pageYOffset;
-            const triggerPoint = (originalRect ? originalRect.top + originalRect.height : 400);
-
-            if (scrollY > triggerPoint && !isFloating) {
-                // FLIP: First — capture current position
-                const firstRect = categoryTabsContainer.getBoundingClientRect();
-
-                // Apply floating class
-                isFloating = true;
-                placeholder.style.height = categoryTabsContainer.offsetHeight + 'px';
-                placeholder.classList.add('active');
-                categoryTabsContainer.classList.add('category-tabs-floating');
-
-                // FLIP: Last — get the final fixed position
-                const lastRect = categoryTabsContainer.getBoundingClientRect();
-
-                // FLIP: Invert — offset so it visually starts at the original location
-                const deltaY = firstRect.top - lastRect.top;
-                categoryTabsContainer.style.transition = 'none';
-                categoryTabsContainer.style.setProperty('--float-offset-y', deltaY + 'px');
-
-                // FLIP: Play — animate to final position
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        categoryTabsContainer.style.transition = '';
-                        categoryTabsContainer.style.setProperty('--float-offset-y', '0px');
-                        setTimeout(() => { if (window.updateTabSlider) window.updateTabSlider(); }, 500);
-                    });
+        // Copy inner HTML from real tabs + wire up click delegation
+        const syncClone = () => {
+            clone.innerHTML = categoryTabsContainer.innerHTML;
+            clone.querySelectorAll('.tab-btn').forEach((btn, i) => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const real = categoryTabsContainer.querySelectorAll('.tab-btn')[i];
+                    if (real) real.click();
                 });
+                // Remove any delete/admin buttons from clone
+                btn.querySelectorAll('.delete-category-btn').forEach(d => d.remove());
+            });
+        };
+        setTimeout(syncClone, 300);
+        window._syncFloatingClone = syncClone;
 
-            } else if (scrollY <= triggerPoint && isFloating) {
-                // Reverse FLIP: travel from bottom back up to original position
-                const floatingRect = categoryTabsContainer.getBoundingClientRect();
-                const placeholderRect = placeholder.getBoundingClientRect();
+        let isFloating = false;
+        let ticking = false;
 
-                // Distance to travel upward (negative = upward)
-                const deltaY = placeholderRect.top - floatingRect.top;
+        const updateFloat = () => {
+            const rect = categoryTabsContainer.getBoundingClientRect();
+            const pastTabs = rect.bottom < 80; // tabs scrolled above viewport
 
-                // Hide placeholder so we don't see double tabs during animation
-                placeholder.style.visibility = 'hidden';
-
-                // Animate floating tabs upward to original position
-                categoryTabsContainer.style.setProperty('--float-offset-y', deltaY + 'px');
-
-                // After transition, swap back to inline
-                const onDone = () => {
-                    isFloating = false;
-                    categoryTabsContainer.classList.remove('category-tabs-floating');
-                    categoryTabsContainer.style.removeProperty('--float-offset-y');
-                    categoryTabsContainer.style.transition = '';
-                    placeholder.style.visibility = '';
-                    placeholder.classList.remove('active');
-                    placeholder.style.height = '0';
-                    setTimeout(() => { if (window.updateTabSlider) window.updateTabSlider(); }, 50);
-                };
-                setTimeout(onDone, 520);
+            if (pastTabs && !isFloating) {
+                isFloating = true;
+                syncClone();
+                clone.classList.add('clone-visible');
+            } else if (!pastTabs && isFloating) {
+                isFloating = false;
+                clone.classList.remove('clone-visible');
             }
         };
 
-        // Use passive listener for better scroll performance
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        window.addEventListener('resize', () => {
-            if (!isFloating) captureOriginalPosition();
-        });
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                ticking = true;
+                requestAnimationFrame(() => { updateFloat(); ticking = false; });
+            }
+        }, { passive: true });
     }
     if (backToShopBtn) {
         backToShopBtn.addEventListener('click', () => {
