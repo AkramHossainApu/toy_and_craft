@@ -43,8 +43,11 @@ export async function runImageMigration() {
         try {
             const newUrls = [];
             const oldImages = (product.images && product.images.length > 0) ? product.images : (product.image ? [product.image] : []);
+            const baseName = product.name.trim() || 'product';
+            const safeBaseName = baseName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-            for (const oldUrl of oldImages) {
+            for (let j = 0; j < oldImages.length; j++) {
+                const oldUrl = oldImages[j];
                 if (oldUrl.includes('drive.google.com')) {
                     newUrls.push(oldUrl);
                     continue;
@@ -57,11 +60,13 @@ export async function runImageMigration() {
 
                 // Create a File object
                 const ext = oldUrl.split('.').pop().split('?')[0] || 'jpg';
-                const file = new File([blob], `migrated_${product.id}_${Date.now()}.${ext}`, { type: blob.type || 'image/jpeg' });
+                const fileIndex = newUrls.length + 1;
+                const customFileName = `${safeBaseName}-${fileIndex}.${ext}`;
+                const file = new File([blob], customFileName, { type: blob.type || 'image/jpeg' });
 
                 // Upload to Drive
                 const catSlug = product.categoryId || 'products';
-                const driveUrl = await uploadImageToDrive(file, catSlug);
+                const driveUrl = await uploadImageToDrive(file, catSlug, customFileName);
                 newUrls.push(driveUrl);
             }
 

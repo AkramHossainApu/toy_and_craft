@@ -224,13 +224,13 @@ async function ensureCategoryFolder(categorySlug, accessToken) {
  * Upload an image file to Google Drive under Toy&Craft/Products/<categorySlug>/
  * Returns a public thumbnail URL.
  */
-export async function uploadImageToDrive(file, categorySlug) {
+export async function uploadImageToDrive(file, categorySlug, customFileName = null) {
     const accessToken = await getDriveAccessToken();
     const folderId = await ensureCategoryFolder(categorySlug, accessToken);
 
-    // Generate a unique filename with timestamp
+    // Use custom name or generate a unique filename with timestamp
     const ext = file.name.split('.').pop();
-    const safeName = `${categorySlug}_${Date.now()}.${ext}`;
+    const safeName = customFileName ? customFileName : `${categorySlug}_${Date.now()}.${ext}`;
 
     // Multipart upload: metadata + file body
     const metadata = {
@@ -266,6 +266,32 @@ export async function uploadImageToDrive(file, categorySlug) {
 
     // Return a fast-loading thumbnail URL (600px wide)
     return `https://drive.google.com/thumbnail?id=${fileData.id}&sz=w800`;
+}
+
+/** Rename an existing file in Drive. Extracts ID from thumbnail URL. */
+export async function renameDriveFile(driveUrl, newName) {
+    const match = driveUrl.match(/[?&]id=([^&]+)/);
+    if (!match || !match[1]) return false; // Not a valid drive thumbnail URL
+
+    const fileId = match[1];
+    const accessToken = await getDriveAccessToken();
+
+    try {
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+            method: 'PATCH',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: newName }),
+        });
+
+        if (!res.ok) throw new Error('Drive rename failed');
+        return true;
+    } catch (e) {
+        console.error("Error renaming drive file:", e);
+        return false;
+    }
 }
 
 /** Check if Drive is already authorized (refresh token exists). */

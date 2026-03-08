@@ -11,7 +11,7 @@ import {
 } from '../core/dom.js';
 
 import { updateAuthUI } from './auth.js';
-import { uploadImageToDrive, isDriveAuthorized, getDriveAccessToken, handleDriveAuthRedirect } from './drive.js';
+import { uploadImageToDrive, isDriveAuthorized, getDriveAccessToken, handleDriveAuthRedirect, renameDriveFile } from './drive.js';
 import { runImageMigration } from './migrate.js';
 
 // Handle Drive OAuth redirect (runs on page load)
@@ -259,9 +259,17 @@ export function setupAdminListeners() {
                 });
 
                 pendingUploadPromise = (async () => {
-                    for (const { file, row } of uploadItems) {
+                    const baseName = adminProductName.value.trim() || 'product';
+                    const safeBaseName = baseName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+                    for (let i = 0; i < uploadItems.length; i++) {
+                        const { file, row } = uploadItems[i];
                         try {
-                            const url = await uploadImageToDrive(file, catSlug);
+                            const ext = file.name.split('.').pop();
+                            const index = allUrls.length + 1;
+                            const customFileName = `${safeBaseName}-${index}.${ext}`;
+
+                            const url = await uploadImageToDrive(file, catSlug, customFileName);
                             allUrls.push(url);
                             row.innerHTML = `<span class="material-icons-round" style="font-size:16px;color:#22c55e;">check_circle</span> <span>${file.name}</span>`;
 
@@ -305,6 +313,31 @@ export function setupAdminListeners() {
             const productId = adminProductId.value; // May be empty for new products
 
             const productNameTrimmed = adminProductName.value.trim();
+            const safeBaseName = productNameTrimmed.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+            // Check if name changed && rename existing drive files
+            if (productId) {
+                const existingProd = state.inventory.find(p => p.id === productId);
+                if (existingProd && existingProd.name !== productNameTrimmed && imagesRaw.length > 0) {
+                    // Name changed! Rename files in Drive
+                    const submitBtn = adminProductForm.querySelector('[type="submit"]');
+                    if (submitBtn) submitBtn.textContent = 'Renaming images...';
+
+                    for (let i = 0; i < imagesRaw.length; i++) {
+                        const url = imagesRaw[i];
+                        if (url.includes('drive.google.com')) {
+                            // Extract extension from old URL if possible, default to jpg
+                            let ext = 'jpg';
+                            // We don't have the real extension in the thumbnail URL easily, 
+                            // but we can just use .jpg for the drive filename as it's display-only
+                            const newFileName = `${safeBaseName}-${i + 1}.${ext}`;
+                            await renameDriveFile(url, newFileName);
+                        }
+                    }
+                    if (submitBtn) submitBtn.textContent = 'Save Product';
+                }
+            }
+
             const productData = {
                 name: productNameTrimmed,
                 slug: generateSlug(productNameTrimmed),
