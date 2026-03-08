@@ -12,7 +12,7 @@ import {
 
 import { updateAuthUI } from './auth.js';
 import { uploadImageToDrive, isDriveAuthorized, getDriveAccessToken, handleDriveAuthRedirect, renameDriveFile } from './drive.js';
-import { runImageMigration } from './migrate.js';
+import { syncDriveImages } from './sync.js';
 
 // Handle Drive OAuth redirect (runs on page load)
 handleDriveAuthRedirect();
@@ -593,12 +593,12 @@ export function setupAdminOrderListeners() {
     }
 }
 
-// Attach Migrate Images button listener
+// Attach Sync Images button listener
 document.addEventListener('DOMContentLoaded', () => {
-    const migrateBtn = document.getElementById('admin-migrate-btn');
-    if (migrateBtn) {
-        migrateBtn.addEventListener('click', () => {
-            runImageMigration();
+    const syncBtn = document.getElementById('admin-sync-btn');
+    if (syncBtn) {
+        syncBtn.addEventListener('click', () => {
+            syncDriveImages();
         });
     }
 });
