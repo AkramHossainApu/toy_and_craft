@@ -1,0 +1,10 @@
+# Dependencies
+node_modules/
+
+# Environment / Secrets — DO NOT COMMIT
+client_secret_*.json
+*.env
+.env.local
+
+# Build artifacts
+dist/

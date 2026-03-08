@@ -11,6 +11,11 @@ import {
 } from '../core/dom.js';
 
 import { updateAuthUI } from './auth.js';
+import { uploadImageToDrive, isDriveAuthorized, getDriveAccessToken, handleDriveAuthRedirect } from './drive.js';
+
+// Handle Drive OAuth redirect (runs on page load)
+handleDriveAuthRedirect();
+
 
 // --- Admin Authentication & Triggers ---
 export function toggleAdminMode(isAdminState) {
@@ -197,8 +202,96 @@ export function setupAdminListeners() {
     if (adminCancelBtn) adminCancelBtn.addEventListener('click', closeAdminModalFn);
 
     if (adminProductForm) {
+        // ── Drive file picker: upload images on selection ──
+        const fileInput = document.getElementById('admin-product-file-input');
+        const statusDiv = document.getElementById('drive-upload-status');
+        const previewDiv = document.getElementById('admin-image-previews');
+        const imageTextarea = document.getElementById('admin-product-image');
+        const driveAuthNotice = document.getElementById('drive-auth-notice');
+        const driveConnectBtn = document.getElementById('drive-connect-btn');
+
+        // Show Drive auth notice if not connected
+        const checkDriveAuth = () => {
+            if (driveAuthNotice) {
+                driveAuthNotice.style.display = isDriveAuthorized() ? 'none' : 'block';
+            }
+        };
+        checkDriveAuth();
+
+        if (driveConnectBtn) {
+            driveConnectBtn.addEventListener('click', async () => {
+                driveConnectBtn.textContent = 'Connecting...';
+                driveConnectBtn.disabled = true;
+                try {
+                    await getDriveAccessToken();
+                    checkDriveAuth();
+                } catch (e) {
+                    alert('Drive connection failed: ' + e.message);
+                    driveConnectBtn.textContent = 'Connect Drive';
+                    driveConnectBtn.disabled = false;
+                }
+            });
+        }
+
+        // Track pending uploads promise
+        let pendingUploadPromise = null;
+
+        if (fileInput) {
+            fileInput.addEventListener('change', async () => {
+                const files = Array.from(fileInput.files);
+                if (!files.length) return;
+
+                const catSlug = adminProductCategory.value || 'products';
+                if (statusDiv) statusDiv.innerHTML = '';
+                if (previewDiv) previewDiv.innerHTML = '';
+
+                // Get current URLs from textarea
+                const existingUrls = imageTextarea ? imageTextarea.value.split(',').map(s => s.trim()).filter(Boolean) : [];
+                const allUrls = [...existingUrls];
+
+                const uploadItems = files.map(file => {
+                    const row = document.createElement('div');
+                    row.style.cssText = 'display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;margin:0.2rem 0;';
+                    row.innerHTML = `<span class="material-icons-round" style="font-size:16px;animation:spin 1s linear infinite;">sync</span> <span>${file.name}</span>`;
+                    if (statusDiv) statusDiv.appendChild(row);
+                    return { file, row };
+                });
+
+                pendingUploadPromise = (async () => {
+                    for (const { file, row } of uploadItems) {
+                        try {
+                            const url = await uploadImageToDrive(file, catSlug);
+                            allUrls.push(url);
+                            row.innerHTML = `<span class="material-icons-round" style="font-size:16px;color:#22c55e;">check_circle</span> <span>${file.name}</span>`;
+
+                            // Show preview
+                            if (previewDiv) {
+                                const img = document.createElement('img');
+                                img.src = url;
+                                img.style.cssText = 'width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border-color);';
+                                previewDiv.appendChild(img);
+                            }
+                        } catch (err) {
+                            row.innerHTML = `<span class="material-icons-round" style="font-size:16px;color:#ef4444;">error</span> <span>${file.name}: ${err.message}</span>`;
+                        }
+                    }
+                    // Sync to hidden textarea
+                    if (imageTextarea) imageTextarea.value = allUrls.join(', ');
+                })();
+            });
+        }
+
         adminProductForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Wait for any in-progress uploads
+            if (pendingUploadPromise) {
+                const submitBtn = adminProductForm.querySelector('[type="submit"]');
+                if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Uploading...'; }
+                try { await pendingUploadPromise; } catch { }
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Save Product'; }
+                pendingUploadPromise = null;
+            }
 
             const offerVal = parseFloat(adminProductOffer.value);
             const adminProductImageEl = document.getElementById('admin-product-image');
@@ -315,6 +408,20 @@ export function setupAdminListeners() {
             const adminProductImageEl = document.getElementById('admin-product-image');
             const adminProductDesc = document.getElementById('admin-product-description');
             if (adminProductImageEl) adminProductImageEl.value = (product.images && product.images.length > 0) ? product.images.join(', ') : (product.image || '');
+            // Pre-populate image previews
+            const editPreviewDiv = document.getElementById('admin-image-previews');
+            const editStatusDiv = document.getElementById('drive-upload-status');
+            if (editPreviewDiv) {
+                editPreviewDiv.innerHTML = '';
+                const existingUrls = adminProductImageEl ? adminProductImageEl.value.split(',').map(s => s.trim()).filter(Boolean) : [];
+                existingUrls.forEach(url => {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.style.cssText = 'width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border-color);';
+                    editPreviewDiv.appendChild(img);
+                });
+            }
+            if (editStatusDiv) editStatusDiv.innerHTML = '';
             if (adminProductDesc) adminProductDesc.value = product.description || '';
             const adminProductStock = document.getElementById('admin-product-stock');
             if (adminProductStock && product.stock !== undefined) adminProductStock.value = product.stock;

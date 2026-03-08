@@ -374,11 +374,39 @@
                         <textarea id="admin-product-description" rows="3" placeholder="Product details..."></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label for="admin-product-image">Images (Comma-separated URLs)</label>
-                        <textarea id="admin-product-image" rows="2"
-                            placeholder="https://example.com/img1.jpg, https://example.com/img2.jpg"></textarea>
-                        <small>First image is used as the main thumbnail.</small>
+                    <div class="form-group" id="admin-image-group">
+                        <label>Product Images</label>
+
+                        <!-- Drive auth notice (shown when not yet connected) -->
+                        <div id="drive-auth-notice"
+                            style="display:none; margin-bottom:0.75rem; padding:0.6rem 0.8rem; background:rgba(0,123,255,0.08); border-radius:8px; font-size:0.85rem;">
+                            <span class="material-icons-round"
+                                style="font-size:16px; vertical-align:middle; margin-right:4px;">cloud_off</span>
+                            Google Drive not connected.
+                            <button type="button" id="drive-connect-btn" class="btn btn-primary btn-sm"
+                                style="margin-left:8px; padding:0.25rem 0.7rem; font-size:0.8rem;">Connect
+                                Drive</button>
+                        </div>
+
+                        <!-- File picker -->
+                        <label for="admin-product-file-input" class="drive-upload-label" id="drive-upload-area">
+                            <span class="material-icons-round">cloud_upload</span>
+                            <span>Click to select images (JPG, PNG, WEBP)</span>
+                            <input type="file" id="admin-product-file-input" multiple accept="image/*"
+                                style="display:none;">
+                        </label>
+
+                        <!-- Per-image upload status list -->
+                        <div id="drive-upload-status"></div>
+
+                        <!-- Image preview strip -->
+                        <div id="admin-image-previews"
+                            style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.5rem;"></div>
+
+                        <!-- Hidden textarea holds the final comma-separated URLs -->
+                        <textarea id="admin-product-image" rows="2" style="display:none;"
+                            placeholder="https://drive.google.com/thumbnail?id=..."></textarea>
+                        <small>Images upload to Google Drive automatically. First image = main thumbnail.</small>
                     </div>
 
                     <div class="form-group">
