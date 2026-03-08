@@ -59,7 +59,16 @@ export async function runImageMigration() {
                 const blob = await res.blob();
 
                 // Create a File object
-                const ext = oldUrl.split('.').pop().split('?')[0] || 'jpg';
+                // Old Firebase URLs often don't have a clean extension, so we default to jpg to ensure valid filenames
+                let ext = 'jpg';
+                const urlParts = oldUrl.split('?')[0].split('.');
+                if (urlParts.length > 1) {
+                    const possibleExt = urlParts.pop().toLowerCase();
+                    if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(possibleExt)) {
+                        ext = possibleExt;
+                    }
+                }
+
                 const fileIndex = newUrls.length + 1;
                 const customFileName = `${safeBaseName}-${fileIndex}.${ext}`;
                 const file = new File([blob], customFileName, { type: blob.type || 'image/jpeg' });
