@@ -12,7 +12,6 @@ import {
 
 import { updateAuthUI } from './auth.js';
 import { uploadImageToDrive, isDriveAuthorized, getDriveAccessToken, handleDriveAuthRedirect, renameDriveFile } from './drive.js';
-import { syncDriveImages } from './sync.js';
 
 // Handle Drive OAuth redirect (runs on page load)
 handleDriveAuthRedirect();
@@ -592,16 +591,6 @@ export function setupAdminOrderListeners() {
         });
     }
 }
-
-// Attach Sync Images button listener
-document.addEventListener('DOMContentLoaded', () => {
-    const syncBtn = document.getElementById('admin-sync-btn');
-    if (syncBtn) {
-        syncBtn.addEventListener('click', () => {
-            syncDriveImages();
-        });
-    }
-});
 
 export async function loadAdminOrders() {
     const adminOrdersList = document.getElementById('admin-orders-list');

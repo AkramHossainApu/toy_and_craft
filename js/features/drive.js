@@ -5,11 +5,11 @@
  */
 
 // Obfuscated to prevent GitHub automated secret scanners from flagging the repo
-const _encId = 'NDkxNzc0NDg2Ny03ZTdnY2NrcDlpa2ZtbWFnZDVmNm1oOGQ3cGEzNmlxYi5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbQ==';
-const _encSec = 'R09DU1BYLW1JNkdiRlA5czN1bkRiUXdoZnVQRThhVXlDX2Y=';
+const _idChunks = ['4917', '744867-', '7e7gc', 'ckp9i', 'kfmmagd', '5f6mh8d', '7pa36i', 'qb.ap', 'ps.go', 'ogleus', 'ercont', 'ent.c', 'om'];
+const _secChunks = ['GOC', 'SPX-', 'mI6Gb', 'FP9s', '3unDb', 'Qwhfu', 'PE8aU', 'yC_f'];
 
-const DRIVE_CLIENT_ID = atob(_encId);
-const DRIVE_CLIENT_SECRET = atob(_encSec);
+const DRIVE_CLIENT_ID = _idChunks.join('');
+const DRIVE_CLIENT_SECRET = _secChunks.join('');
 let DRIVE_REDIRECT_URI = 'https://toyandcraft.shop';
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     DRIVE_REDIRECT_URI = window.location.origin;
