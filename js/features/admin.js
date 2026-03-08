@@ -12,6 +12,7 @@ import {
 
 import { updateAuthUI } from './auth.js';
 import { uploadImageToDrive, isDriveAuthorized, getDriveAccessToken, handleDriveAuthRedirect } from './drive.js';
+import { runImageMigration } from './migrate.js';
 
 // Handle Drive OAuth redirect (runs on page load)
 handleDriveAuthRedirect();
@@ -408,12 +409,17 @@ export function setupAdminListeners() {
             const adminProductImageEl = document.getElementById('admin-product-image');
             const adminProductDesc = document.getElementById('admin-product-description');
             if (adminProductImageEl) adminProductImageEl.value = (product.images && product.images.length > 0) ? product.images.join(', ') : (product.image || '');
-            // Pre-populate image previews
+
+            // Handle image cover UI and previews
             const editPreviewDiv = document.getElementById('admin-image-previews');
             const editStatusDiv = document.getElementById('drive-upload-status');
+            const coverSection = document.getElementById('admin-cover-image-section');
+            const coverImage = document.getElementById('admin-cover-image');
+            const uploadArea = document.getElementById('drive-upload-area');
+            const existingUrls = adminProductImageEl ? adminProductImageEl.value.split(',').map(s => s.trim()).filter(Boolean) : [];
+
             if (editPreviewDiv) {
                 editPreviewDiv.innerHTML = '';
-                const existingUrls = adminProductImageEl ? adminProductImageEl.value.split(',').map(s => s.trim()).filter(Boolean) : [];
                 existingUrls.forEach(url => {
                     const img = document.createElement('img');
                     img.src = url;
@@ -422,6 +428,17 @@ export function setupAdminListeners() {
                 });
             }
             if (editStatusDiv) editStatusDiv.innerHTML = '';
+
+            // Toggle cover image layout
+            if (existingUrls.length > 0) {
+                if (coverSection) coverSection.style.display = 'block';
+                if (coverImage) coverImage.src = existingUrls[0];
+                if (uploadArea) uploadArea.style.display = 'none';
+            } else {
+                if (coverSection) coverSection.style.display = 'none';
+                if (uploadArea) uploadArea.style.display = 'flex';
+            }
+
             if (adminProductDesc) adminProductDesc.value = product.description || '';
             const adminProductStock = document.getElementById('admin-product-stock');
             if (adminProductStock && product.stock !== undefined) adminProductStock.value = product.stock;
@@ -434,6 +451,19 @@ export function setupAdminListeners() {
             if (adminProductForm) adminProductForm.reset();
             if (adminProductId) adminProductId.value = '';
             if (adminProductId) adminProductId.removeAttribute('data-original-cat');
+
+            // Reset image layout for new product
+            const coverSection = document.getElementById('admin-cover-image-section');
+            const uploadArea = document.getElementById('drive-upload-area');
+            const editPreviewDiv = document.getElementById('admin-image-previews');
+            const editStatusDiv = document.getElementById('drive-upload-status');
+            const adminProductImageEl = document.getElementById('admin-product-image');
+
+            if (coverSection) coverSection.style.display = 'none';
+            if (uploadArea) uploadArea.style.display = 'flex';
+            if (editPreviewDiv) editPreviewDiv.innerHTML = '';
+            if (editStatusDiv) editStatusDiv.innerHTML = '';
+            if (adminProductImageEl) adminProductImageEl.value = '';
 
             let catName = "";
             let catCheck = state.categories.find(c => c.slug === state.currentCategorySlug);
@@ -529,6 +559,16 @@ export function setupAdminOrderListeners() {
         });
     }
 }
+
+// Attach Migrate Images button listener
+document.addEventListener('DOMContentLoaded', () => {
+    const migrateBtn = document.getElementById('admin-migrate-btn');
+    if (migrateBtn) {
+        migrateBtn.addEventListener('click', () => {
+            runImageMigration();
+        });
+    }
+});
 
 export async function loadAdminOrders() {
     const adminOrdersList = document.getElementById('admin-orders-list');
