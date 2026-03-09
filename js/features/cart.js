@@ -535,7 +535,25 @@ export function setupCartListeners() {
                     batch.set(userOrderRef, orderPayload);
                 }
 
+                // Update product stock counts
+                state.cart.forEach(item => {
+                    const newStock = Math.max(0, (item.stock || 1) - item.qty);
+                    // Use categoryId from the item if it exists 
+                    if (item.categoryId) {
+                        const prodRef = doc(db, 'Products', item.categoryId, 'Items', item.id);
+                        batch.update(prodRef, { stock: newStock });
+                    }
+                });
+
                 await batch.commit();
+
+                // Update local memory inventory array
+                state.cart.forEach(item => {
+                    const invProd = state.inventory.find(p => p.id === item.id);
+                    if (invProd) {
+                        invProd.stock = Math.max(0, (invProd.stock || 1) - item.qty);
+                    }
+                });
 
                 alert("Order Confirmed! Your Invoice Number is: " + secureInvoiceId);
 

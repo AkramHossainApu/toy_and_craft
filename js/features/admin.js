@@ -1,6 +1,6 @@
 import { state, setAdmin } from '../core/state.js';
 import { db, doc, getDoc, setDoc, deleteDoc, getDocs, collection, writeBatch } from '../config/firebase.js';
-import { generateSlug } from '../core/utils.js';
+import { generateSlug, getAbsoluteImageUrl } from '../core/utils.js';
 import {
     adminToolsBanner, adminHeaderEditContainer, siteTitle, adminNavbarLogoutBtn,
     passwordModal, passwordModalTitle, passwordInput, passwordSubmitBtn, passwordCancelBtn,
@@ -454,7 +454,7 @@ export function setupAdminListeners() {
                 editPreviewDiv.innerHTML = '';
                 existingUrls.forEach(url => {
                     const img = document.createElement('img');
-                    img.src = url;
+                    img.src = getAbsoluteImageUrl(url);
                     img.style.cssText = 'width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border-color);';
                     editPreviewDiv.appendChild(img);
                 });
@@ -464,7 +464,7 @@ export function setupAdminListeners() {
             // Toggle cover image layout
             if (existingUrls.length > 0) {
                 if (coverSection) coverSection.style.display = 'block';
-                if (coverImage) coverImage.src = existingUrls[0];
+                if (coverImage) coverImage.src = getAbsoluteImageUrl(existingUrls[0]);
                 if (uploadArea) uploadArea.style.display = 'none';
             } else {
                 if (coverSection) coverSection.style.display = 'none';
@@ -569,6 +569,7 @@ window.promptDeleteCategory = promptDeleteCategory;
 // --- Admin Orders Engine ---
 export function setupAdminOrderListeners() {
     const adminOrdersBtn = document.getElementById('admin-orders-btn');
+    const adminSoldOrdersBtn = document.getElementById('admin-sold-orders-btn');
     const adminOrdersCloseBtn = document.getElementById('admin-orders-close-btn');
     const adminOrdersView = document.getElementById('admin-orders-view');
     const checkoutView = document.getElementById('checkout-view');
@@ -580,7 +581,25 @@ export function setupAdminOrderListeners() {
             if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
             if (checkoutView) checkoutView.style.display = 'none';
             if (adminOrdersView) adminOrdersView.style.display = 'block';
+
+            if (adminSoldOrdersBtn) adminSoldOrdersBtn.style.opacity = '0.6';
+            if (adminOrdersBtn) adminOrdersBtn.style.opacity = '1';
+
             loadAdminOrders();
+        });
+    }
+
+    if (adminSoldOrdersBtn) {
+        adminSoldOrdersBtn.addEventListener('click', () => {
+            if (window.closeCart) window.closeCart();
+            if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
+            if (checkoutView) checkoutView.style.display = 'none';
+            if (adminOrdersView) adminOrdersView.style.display = 'block';
+
+            if (adminSoldOrdersBtn) adminSoldOrdersBtn.style.opacity = '1';
+            if (adminOrdersBtn) adminOrdersBtn.style.opacity = '0.6';
+
+            loadAdminOrders('Delivered');
         });
     }
 
@@ -592,7 +611,7 @@ export function setupAdminOrderListeners() {
     }
 }
 
-export async function loadAdminOrders() {
+export async function loadAdminOrders(filterStatus = null) {
     const adminOrdersList = document.getElementById('admin-orders-list');
     if (!adminOrdersList) return;
     adminOrdersList.innerHTML = '<div style="color: var(--text-muted);">Fetching systems orders...</div>';
@@ -606,7 +625,16 @@ export async function loadAdminOrders() {
             return;
         }
 
-        const orders = snapshots.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.createdAt - a.createdAt);
+        let orders = snapshots.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.createdAt - a.createdAt);
+
+        if (filterStatus) {
+            orders = orders.filter(o => o.status === filterStatus);
+        }
+
+        if (orders.length === 0) {
+            adminOrdersList.innerHTML = '<div style="color: var(--text-muted);">No orders match the current view.</div>';
+            return;
+        }
 
         orders.forEach(order => {
             const dateStr = new Date(order.createdAt).toLocaleString();
@@ -666,6 +694,9 @@ export async function loadAdminOrders() {
 
                     const spanLbl = e.target.previousElementSibling;
                     spanLbl.style.color = newStatus === 'Delivered' ? '#00c853' : (newStatus === 'Sent' ? '#2979ff' : '#ff9100');
+
+                    // If we are currently filtering by Sold and this is changed, we might want to reload, 
+                    // but for now, just let the color change reflect it.
                 } catch (err) {
                     console.error("Status Update Failed", err);
                     alert("Failed to update status");
