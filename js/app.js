@@ -205,5 +205,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (navbar) navbar.style.display = 'block';
     if (mainContent) mainContent.style.display = 'block';
 
+    // Floating Chat Widget Toggle
+    const chatWidget = document.getElementById('floating-chat-widget');
+    const chatToggleBtn = document.getElementById('chat-toggle-btn');
+    if (chatWidget && chatToggleBtn) {
+        chatToggleBtn.addEventListener('click', () => {
+            chatWidget.classList.toggle('active');
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!chatWidget.contains(e.target) && chatWidget.classList.contains('active')) {
+                chatWidget.classList.remove('active');
+            }
+        });
+    }
+
     initRouting();
 });

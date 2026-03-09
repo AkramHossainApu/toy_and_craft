@@ -1942,3 +1942,130 @@ a {
     flex: 1;
   }
 }
+
+/* --- Floating Chat Widget --- */
+.floating-chat-widget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 15px;
+}
+
+.chat-toggle-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s;
+}
+
+.chat-toggle-btn:hover {
+  transform: scale(1.1);
+  background-color: var(--primary-hover);
+}
+
+.chat-toggle-btn .material-icons-round {
+  font-size: 28px;
+  transition: transform 0.3s ease;
+}
+
+.chat-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px) scale(0.8);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-origin: bottom center;
+}
+
+.floating-chat-widget.active .chat-options {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.floating-chat-widget.active .chat-toggle-btn {
+  background-color: #ef4444;
+}
+
+.floating-chat-widget.active .chat-toggle-btn .chat-icon-main {
+  display: none;
+}
+
+.floating-chat-widget.active .chat-toggle-btn .chat-icon-close {
+  display: block !important;
+  transform: rotate(90deg);
+}
+
+.chat-option {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s ease;
+  overflow: hidden;
+}
+
+.chat-option img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.chat-option.messenger:hover {
+  transform: scale(1.1);
+  background-color: #e0f2fe;
+}
+
+.chat-option.whatsapp:hover {
+  transform: scale(1.1);
+  background-color: #dcfce7;
+}
+
+.chat-option.instagram:hover {
+  transform: scale(1.1);
+  background-color: #fce7f3;
+}
+
+@media (max-width: 768px) {
+  .floating-chat-widget {
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .chat-toggle-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .chat-toggle-btn .material-icons-round {
+    font-size: 24px;
+  }
+
+  .chat-option {
+    width: 40px;
+    height: 40px;
+  }
+
+  .chat-option img {
+    width: 20px;
+    height: 20px;
+  }
+}
