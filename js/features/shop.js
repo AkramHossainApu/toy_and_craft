@@ -460,6 +460,24 @@ export function setupShopListeners() {
         let ticking = false;
 
         const updateFloat = () => {
+            // Only show floating clone on the main product grid page
+            const pvSection = document.getElementById('product-view');
+            const checkoutViewSection = document.getElementById('checkout-view');
+            const adminOrdersViewSection = document.getElementById('admin-orders-view');
+            const isOnMainGrid = shopSection
+                && shopSection.style.display !== 'none'
+                && (!pvSection || pvSection.style.display === 'none')
+                && (!checkoutViewSection || checkoutViewSection.style.display === 'none')
+                && (!adminOrdersViewSection || adminOrdersViewSection.style.display === 'none');
+
+            if (!isOnMainGrid) {
+                if (isFloating) {
+                    isFloating = false;
+                    clone.classList.remove('clone-visible');
+                }
+                return;
+            }
+
             const rect = categoryTabsContainer.getBoundingClientRect();
             const pastTabs = rect.bottom < 80; // tabs scrolled above viewport
 

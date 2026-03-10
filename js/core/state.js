@@ -7,6 +7,7 @@ export const state = {
     categories: [],
     currentCategorySlug: '',
     cart: [],
+    cartSelections: {}, // { productId: true/false } — tracks which items are selected for checkout
     isAdmin: sessionStorage.getItem('tc_admin') === 'true',
 
     // User Auth State
@@ -27,7 +28,8 @@ export const state = {
     itemsPerPage: 20,
     currentSort: 'default',
     routingInitialized: false,
-    draggedCategorySlug: null
+    draggedCategorySlug: null,
+    adminIntendedUrl: sessionStorage.getItem('tc_admin_redirect') || null
 };
 
 // State Mutators Ensure Reactivity where needed, or simply provide safe modification interfaces

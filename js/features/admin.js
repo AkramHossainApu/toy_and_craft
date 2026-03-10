@@ -32,19 +32,56 @@ export function toggleAdminMode(isAdminState) {
         if (adminToolsBanner) adminToolsBanner.style.display = 'flex';
         if (adminHeaderEditContainer) adminHeaderEditContainer.style.display = 'block';
 
-        // Force admin to base product grid view
+        // Always redirect admin to main page regardless of current page
+        const productViewSection = document.getElementById('product-view');
+        const shopSection = document.getElementById('shop');
+        const checkoutView = document.getElementById('checkout-view');
+        const adminOrdersView = document.getElementById('admin-orders-view');
+        const mainLayoutContainer = document.getElementById('main-content');
+
+        // Ensure main layout visible, hide other views
+        if (checkoutView) checkoutView.style.display = 'none';
+        if (adminOrdersView) adminOrdersView.style.display = 'none';
+        if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
+        if (productViewSection) productViewSection.style.display = 'none';
+        if (shopSection) shopSection.style.display = 'block';
+
+        // Hide chat widget in admin mode
+        const chatWidget = document.getElementById('floating-chat-widget');
+        if (chatWidget) chatWidget.style.display = 'none';
+
+        // Check if admin was redirected from a specific URL
+        const intendedUrl = sessionStorage.getItem('tc_admin_redirect');
+        sessionStorage.removeItem('tc_admin_redirect');
+        state.adminIntendedUrl = null;
+
+        if (intendedUrl && intendedUrl.startsWith('/admin/')) {
+            // Navigate to the intended admin page
+            const basePath = intendedUrl.replace(/^\//, '');
+            let baseUri = '/';
+            if (window.location.pathname.startsWith('/toy_and_craft')) baseUri = '/toy_and_craft/';
+            try {
+                window.history.pushState({ path: baseUri + basePath }, '', baseUri + basePath);
+            } catch (e) { }
+            // Re-process the route to handle the intended page
+            if (window.processRoute) window.processRoute();
+            updateAuthUI();
+            return;
+        }
+
+        // Default: go to first category
         if (state.categories && state.categories.length > 0) {
             state.currentCategorySlug = state.categories[0].slug;
         }
-        if (window.updateUrlState) window.updateUrlState('admin');
-        const productViewSection = document.getElementById('product-view');
-        if (productViewSection) productViewSection.style.display = 'none';
-        const shopSection = document.getElementById('shop');
-        if (shopSection) shopSection.style.display = 'block';
+        if (window.updateUrlState) window.updateUrlState(state.currentCategorySlug, 1);
 
     } else {
         if (adminToolsBanner) adminToolsBanner.style.display = 'none';
         if (adminHeaderEditContainer) adminHeaderEditContainer.style.display = 'none';
+
+        // Show chat widget when leaving admin mode
+        const chatWidget = document.getElementById('floating-chat-widget');
+        if (chatWidget) chatWidget.style.display = 'block';
 
         if (state.categories && state.categories.length > 0) {
             state.currentCategorySlug = state.categories[0].slug;
@@ -567,46 +604,63 @@ export function promptDeleteCategory(cat) {
 window.promptDeleteCategory = promptDeleteCategory;
 
 // --- Admin Orders Engine ---
-export function setupAdminOrderListeners() {
-    const adminOrdersBtn = document.getElementById('admin-orders-btn');
-    const adminSoldOrdersBtn = document.getElementById('admin-sold-orders-btn');
-    const adminOrdersCloseBtn = document.getElementById('admin-orders-close-btn');
+
+// Navigate to an admin sub-page via URL
+function navigateToAdminPage(page) {
+    if (window.closeCart) window.closeCart();
+    if (window.updateUrlState) window.updateUrlState(page);
+
     const adminOrdersView = document.getElementById('admin-orders-view');
     const checkoutView = document.getElementById('checkout-view');
-    const mainLayoutContainer = document.getElementById('main-layout-container');
+    const mainLayoutContainer = document.getElementById('main-content');
+    const productViewSection = document.getElementById('product-view');
+    const shopSection = document.getElementById('shop');
+
+    if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
+    if (checkoutView) checkoutView.style.display = 'none';
+    if (productViewSection) productViewSection.style.display = 'none';
+    if (shopSection) shopSection.style.display = 'none';
+    if (adminOrdersView) adminOrdersView.style.display = 'block';
+}
+window.navigateToAdminPage = navigateToAdminPage;
+
+export function setupAdminOrderListeners() {
+    const adminOrdersBtn = document.getElementById('admin-orders-btn');
+    const adminSoldProductsBtn = document.getElementById('admin-sold-products-btn');
+    const adminOrdersCloseBtn = document.getElementById('admin-orders-close-btn');
 
     if (adminOrdersBtn) {
         adminOrdersBtn.addEventListener('click', () => {
-            if (window.closeCart) window.closeCart();
-            if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
-            if (checkoutView) checkoutView.style.display = 'none';
-            if (adminOrdersView) adminOrdersView.style.display = 'block';
-
-            if (adminSoldOrdersBtn) adminSoldOrdersBtn.style.opacity = '0.6';
+            navigateToAdminPage('all-orders');
+            if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '0.6';
             if (adminOrdersBtn) adminOrdersBtn.style.opacity = '1';
-
             loadAdminOrders();
         });
     }
 
-    if (adminSoldOrdersBtn) {
-        adminSoldOrdersBtn.addEventListener('click', () => {
-            if (window.closeCart) window.closeCart();
-            if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
-            if (checkoutView) checkoutView.style.display = 'none';
-            if (adminOrdersView) adminOrdersView.style.display = 'block';
-
-            if (adminSoldOrdersBtn) adminSoldOrdersBtn.style.opacity = '1';
+    if (adminSoldProductsBtn) {
+        adminSoldProductsBtn.addEventListener('click', () => {
+            navigateToAdminPage('sold-products');
+            if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '1';
             if (adminOrdersBtn) adminOrdersBtn.style.opacity = '0.6';
-
-            loadAdminOrders('Delivered');
+            renderAdminSoldProducts();
         });
     }
 
     if (adminOrdersCloseBtn) {
         adminOrdersCloseBtn.addEventListener('click', () => {
+            const adminOrdersView = document.getElementById('admin-orders-view');
+            const mainLayoutContainer = document.getElementById('main-content');
             if (adminOrdersView) adminOrdersView.style.display = 'none';
             if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
+            // Navigate back to admin main page
+            if (state.categories && state.categories.length > 0) {
+                state.currentCategorySlug = state.categories[0].slug;
+            }
+            if (window.updateUrlState) window.updateUrlState(state.currentCategorySlug, 1);
+            const shopSection = document.getElementById('shop');
+            if (shopSection) shopSection.style.display = 'block';
+            if (window.renderProducts) window.renderProducts(state.currentCategorySlug, 1);
         });
     }
 }
@@ -710,3 +764,141 @@ export async function loadAdminOrders(filterStatus = null) {
     }
 }
 window.loadAdminOrders = loadAdminOrders;
+
+// --- Admin Sold Products Analytics ---
+export async function renderAdminSoldProducts() {
+    const adminOrdersList = document.getElementById('admin-orders-list');
+    if (!adminOrdersList) return;
+    adminOrdersList.innerHTML = '<div style="color: var(--text-muted);">Analyzing sold products...</div>';
+
+    try {
+        const snapshots = await getDocs(collection(db, 'Orders'));
+        adminOrdersList.innerHTML = '';
+
+        if (snapshots.empty) {
+            adminOrdersList.innerHTML = '<div style="color: var(--text-muted);">No orders in the system.</div>';
+            return;
+        }
+
+        const deliveredOrders = snapshots.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .filter(o => o.status === 'Delivered');
+
+        if (deliveredOrders.length === 0) {
+            adminOrdersList.innerHTML = '<div style="color: var(--text-muted);">No sold products yet.</div>';
+            return;
+        }
+
+        // Aggregate products
+        const productMap = {};
+        let grandTotalRevenue = 0;
+        let grandTotalItemsSold = 0;
+
+        deliveredOrders.forEach(order => {
+            (order.items || []).forEach(item => {
+                const key = item.id || item.name;
+                if (!productMap[key]) {
+                    productMap[key] = {
+                        name: item.name,
+                        totalQty: 0,
+                        totalRevenue: 0,
+                        prices: [],
+                        orderCount: 0
+                    };
+                }
+                productMap[key].totalQty += item.qty;
+                productMap[key].totalRevenue += item.price * item.qty;
+                productMap[key].prices.push(item.price);
+                productMap[key].orderCount += 1;
+                grandTotalRevenue += item.price * item.qty;
+                grandTotalItemsSold += item.qty;
+            });
+        });
+
+        const products = Object.values(productMap).sort((a, b) => b.totalRevenue - a.totalRevenue);
+
+        // Summary card
+        const summaryCard = document.createElement('div');
+        summaryCard.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;';
+        summaryCard.innerHTML = `
+            <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1.5rem; border-radius: var(--radius-md); text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold;">${deliveredOrders.length}</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Completed Orders</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; padding: 1.5rem; border-radius: var(--radius-md); text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold;">${grandTotalItemsSold}</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Total Items Sold</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 1.5rem; border-radius: var(--radius-md); text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold;">${products.length}</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Unique Products</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; padding: 1.5rem; border-radius: var(--radius-md); text-align: center;">
+                <div style="font-size: 2rem; font-weight: bold;">৳${grandTotalRevenue.toFixed(2)}</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Total Revenue</div>
+            </div>
+        `;
+        adminOrdersList.appendChild(summaryCard);
+
+        // Product table
+        const tableWrap = document.createElement('div');
+        tableWrap.style.cssText = 'overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border-color);';
+
+        let tableHTML = `
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="background: var(--bg-hover); text-align: left;">
+                        <th style="padding: 1rem; border-bottom: 2px solid var(--border-color); font-weight: 600;">#</th>
+                        <th style="padding: 1rem; border-bottom: 2px solid var(--border-color); font-weight: 600;">Product Name</th>
+                        <th style="padding: 1rem; border-bottom: 2px solid var(--border-color); font-weight: 600; text-align: center;">Qty Sold</th>
+                        <th style="padding: 1rem; border-bottom: 2px solid var(--border-color); font-weight: 600; text-align: center;">Orders</th>
+                        <th style="padding: 1rem; border-bottom: 2px solid var(--border-color); font-weight: 600; text-align: right;">Unit Price</th>
+                        <th style="padding: 1rem; border-bottom: 2px solid var(--border-color); font-weight: 600; text-align: right;">Avg Price</th>
+                        <th style="padding: 1rem; border-bottom: 2px solid var(--border-color); font-weight: 600; text-align: right;">Total Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        products.forEach((prod, idx) => {
+            const avgPrice = prod.totalRevenue / prod.totalQty;
+            const minPrice = Math.min(...prod.prices);
+            const maxPrice = Math.max(...prod.prices);
+            const priceRange = minPrice === maxPrice ? `৳${minPrice.toFixed(2)}` : `৳${minPrice.toFixed(2)} - ৳${maxPrice.toFixed(2)}`;
+
+            tableHTML += `
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 0.85rem 1rem; color: var(--text-muted);">${idx + 1}</td>
+                    <td style="padding: 0.85rem 1rem; font-weight: 500;">${prod.name}</td>
+                    <td style="padding: 0.85rem 1rem; text-align: center; font-weight: bold; color: var(--primary);">${prod.totalQty}</td>
+                    <td style="padding: 0.85rem 1rem; text-align: center; color: var(--text-muted);">${prod.orderCount}</td>
+                    <td style="padding: 0.85rem 1rem; text-align: right; color: var(--text-muted);">${priceRange}</td>
+                    <td style="padding: 0.85rem 1rem; text-align: right;">৳${avgPrice.toFixed(2)}</td>
+                    <td style="padding: 0.85rem 1rem; text-align: right; font-weight: bold; color: #22c55e;">৳${prod.totalRevenue.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `
+                </tbody>
+                <tfoot>
+                    <tr style="background: var(--bg-hover); font-weight: bold;">
+                        <td colspan="2" style="padding: 1rem;">Grand Total</td>
+                        <td style="padding: 1rem; text-align: center; color: var(--primary);">${grandTotalItemsSold}</td>
+                        <td style="padding: 1rem; text-align: center;">${deliveredOrders.length}</td>
+                        <td colspan="2" style="padding: 1rem;"></td>
+                        <td style="padding: 1rem; text-align: right; color: #22c55e;">৳${grandTotalRevenue.toFixed(2)}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        `;
+
+        tableWrap.innerHTML = tableHTML;
+        adminOrdersList.appendChild(tableWrap);
+
+    } catch (e) {
+        console.error("Admin Sold Products Error", e);
+        if (adminOrdersList) adminOrdersList.innerHTML = '<div style="color: #ff4444;">Failed to load sold products. Check console.</div>';
+    }
+}
+window.renderAdminSoldProducts = renderAdminSoldProducts;

@@ -21,6 +21,34 @@ export function getTrueDistrict(districtValue, thanaValue) {
 }
 window.getTrueDistrict = getTrueDistrict;
 
+// --- Cart Selection Helpers ---
+
+function isItemSelected(itemId) {
+    // Default: selected (true) unless explicitly set to false
+    return state.cartSelections[itemId] !== false;
+}
+
+function setItemSelected(itemId, selected) {
+    state.cartSelections[itemId] = selected;
+    // Persist to Firebase if logged in
+    if (state.currentUser) {
+        setDoc(doc(db, 'Users', state.currentUser.id, 'CartSelections', 'data'), state.cartSelections)
+            .catch(e => console.warn("CartSelection sync fail", e));
+    }
+}
+
+export async function loadCartSelections(uid) {
+    try {
+        const snap = await getDoc(doc(db, 'Users', uid, 'CartSelections', 'data'));
+        if (snap.exists()) {
+            state.cartSelections = snap.data();
+        }
+    } catch (e) {
+        console.warn("Silent cart selection load fail", e);
+    }
+}
+window.loadCartSelections = loadCartSelections;
+
 // --- Cart System ---
 
 export function saveCart() {
@@ -45,6 +73,9 @@ export async function handleFirebaseCartSync(uid) {
             state.cart = [];
             saveCart();
         }
+        // Also load cart selections
+        await loadCartSelections(uid);
+        updateCartUI(); // Re-render with selections
     } catch (e) {
         console.warn("Silent cart hydration failure", e);
     }
@@ -79,6 +110,8 @@ window.addCartItem = function (productId) {
         };
         state.cart.push(newItem);
         targetPayload = newItem;
+        // New items default to selected
+        state.cartSelections[productId] = true;
     }
 
     saveCart();
@@ -100,6 +133,7 @@ window.updateQty = function (productId, delta) {
         item.qty += delta;
         if (item.qty <= 0) {
             state.cart = state.cart.filter(x => x.id !== productId);
+            delete state.cartSelections[productId];
             if (state.currentUser) {
                 deleteDoc(doc(db, 'Users', state.currentUser.id, 'Cart', productId)).catch(e => console.error(e));
             }
@@ -114,6 +148,7 @@ window.updateQty = function (productId, delta) {
 
 window.removeFromCart = function (productId) {
     state.cart = state.cart.filter(item => item.id !== productId);
+    delete state.cartSelections[productId];
     saveCart();
 
     if (state.currentUser) {
@@ -122,6 +157,7 @@ window.removeFromCart = function (productId) {
 };
 
 export function updateCartUI() {
+    // Sync prices from inventory
     state.cart.forEach(cartItem => {
         const invProduct = state.inventory.find(p => p.id === cartItem.id);
         if (invProduct) {
@@ -141,25 +177,53 @@ export function updateCartUI() {
     if (state.cart.length === 0) {
         cartItemsContainer.innerHTML = '<div class="empty-cart-msg">Your cart is empty. <br> Start exploring our collection! ✨</div>';
         if (cartTotalPrice) cartTotalPrice.textContent = '৳0.00';
+        // Hide warning
+        const stockWarning = document.getElementById('cart-stock-warning');
+        if (stockWarning) stockWarning.style.display = 'none';
         return;
     }
 
     let totalAmount = 0;
+    let hasOutOfStock = false;
+    let outOfStockNames = [];
+
     state.cart.forEach(item => {
-        totalAmount += item.currentPrice * item.qty;
+        const invProduct = state.inventory.find(p => p.id === item.id);
+        const isOutOfStock = invProduct && invProduct.stock === 0;
+        const isSelected = !isOutOfStock && isItemSelected(item.id);
+
+        // Auto-deselect out-of-stock items
+        if (isOutOfStock) {
+            state.cartSelections[item.id] = false;
+            hasOutOfStock = true;
+            outOfStockNames.push(item.name);
+        }
+
+        if (isSelected) {
+            totalAmount += item.currentPrice * item.qty;
+        }
 
         const cartItemEl = document.createElement('div');
         cartItemEl.className = 'cart-item';
+        cartItemEl.style.cssText = 'position: relative;' + (isOutOfStock ? ' opacity: 0.5;' : '');
+
         cartItemEl.innerHTML = `
+            <div style="display: flex; align-items: center; margin-right: 8px;">
+                <input type="checkbox" class="cart-select-cb"
+                    data-id="${item.id}"
+                    ${isSelected ? 'checked' : ''}
+                    ${isOutOfStock ? 'disabled' : ''}
+                    style="width: 18px; height: 18px; cursor: ${isOutOfStock ? 'not-allowed' : 'pointer'}; accent-color: var(--primary);">
+            </div>
             <img src="${getAbsoluteImageUrl(item.image)}" alt="${item.name}" class="cart-item-img" loading="lazy">
             <div class="cart-item-details">
-                <div class="cart-item-title">${item.name}</div>
+                <div class="cart-item-title">${item.name}${isOutOfStock ? ' <span style="color: #ff4444; font-size: 0.75rem; font-weight: bold; background: rgba(255,50,50,0.15); padding: 2px 6px; border-radius: 4px; margin-left: 6px;">OUT OF STOCK</span>' : ''}</div>
                 <div class="cart-item-price">৳${item.currentPrice.toFixed(2)}</div>
                 <div class="cart-item-actions">
                     <div class="qty-control">
                         <button class="qty-btn dec-btn" onclick="window.updateQty('${item.id}', -1)">-</button>
                         <span>${item.qty}</span>
-                        <button class="qty-btn inc-btn" onclick="window.updateQty('${item.id}', 1)">+</button>
+                        <button class="qty-btn inc-btn" onclick="window.updateQty('${item.id}', 1)" ${isOutOfStock ? 'disabled' : ''}>+</button>
                     </div>
                     <button class="remove-btn" onclick="window.removeFromCart('${item.id}')">Remove</button>
                 </div>
@@ -168,7 +232,32 @@ export function updateCartUI() {
         cartItemsContainer.appendChild(cartItemEl);
     });
 
+    // Wire up checkbox change handlers
+    cartItemsContainer.querySelectorAll('.cart-select-cb').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const itemId = e.target.dataset.id;
+            setItemSelected(itemId, e.target.checked);
+            updateCartUI(); // Re-render to update totals
+        });
+    });
+
     if (cartTotalPrice) cartTotalPrice.textContent = `৳${totalAmount.toFixed(2)}`;
+
+    // Show/hide out-of-stock warning
+    const stockWarning = document.getElementById('cart-stock-warning');
+    const stockWarningText = document.getElementById('cart-stock-warning-text');
+    if (stockWarning) {
+        if (hasOutOfStock) {
+            stockWarning.style.display = 'block';
+            if (stockWarningText) {
+                stockWarningText.textContent = outOfStockNames.length === 1
+                    ? `"${outOfStockNames[0]}" is out of stock and won't be included in checkout.`
+                    : `${outOfStockNames.length} items are out of stock and won't be included in checkout.`;
+            }
+        } else {
+            stockWarning.style.display = 'none';
+        }
+    }
 }
 
 export function openCart() {
@@ -217,7 +306,6 @@ const DEFAULT_DELIVERY_RULES = {
 function calculateDeliveryCharge(district, totalItems) {
     if (totalItems <= 0) return 0;
 
-    // Use Firebase rules if available, otherwise use hardcoded defaults
     const rules = (state.deliveryRules && Object.keys(state.deliveryRules).length > 0)
         ? state.deliveryRules
         : DEFAULT_DELIVERY_RULES;
@@ -339,46 +427,75 @@ export function openGuestModal() {
 }
 window.openGuestModal = openGuestModal;
 
+// --- Get selected items for checkout ---
+function getSelectedCartItems() {
+    return state.cart.filter(item => {
+        const invProduct = state.inventory.find(p => p.id === item.id);
+        const isOutOfStock = invProduct && invProduct.stock === 0;
+        return !isOutOfStock && isItemSelected(item.id);
+    });
+}
+
+// --- Editable Shipping Details Helper ---
+function buildDistrictDropdown(selectedValue) {
+    const districts = Object.keys(state.steadfastLocations).filter(d => d !== "Dhaka City" && d !== "Dhaka Sub-Urban");
+    districts.push("Dhaka");
+    districts.sort();
+    let html = '<option value="" disabled>Select District</option>';
+    districts.forEach(d => {
+        html += `<option value="${d}" ${d === selectedValue ? 'selected' : ''}>${d}</option>`;
+    });
+    return html;
+}
+
+function buildThanaDropdown(district, selectedThana) {
+    let thanas = [];
+    if (district === "Dhaka") {
+        thanas = [...(state.steadfastLocations["Dhaka City"] || []), ...(state.steadfastLocations["Dhaka Sub-Urban"] || [])];
+    } else if (state.steadfastLocations[district]) {
+        thanas = state.steadfastLocations[district];
+    }
+    thanas.sort();
+    let html = '<option value="" disabled>Select Thana</option>';
+    thanas.forEach(t => {
+        html += `<option value="${t}" ${t === selectedThana ? 'selected' : ''}>${t}</option>`;
+    });
+    return html;
+}
+
+// Store temporary shipping edit data
+let checkoutShippingEdit = null;
+
 export function openCheckoutView() {
     closeCart();
     if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
     if (checkoutView) checkoutView.style.display = 'block';
 
-    if (window.updateUrlState) window.updateUrlState('Checkout...');
-
-    let currentUserId = state.currentUser ? state.currentUser.id : "guest";
-    getDoc(doc(db, 'Counters', 'InvoiceCounter')).then(docSnap => {
-        let proposed = 2637;
-        if (docSnap.exists()) {
-            proposed = docSnap.data().lastInvoice + 1;
-        }
+    // Set checkout URL
+    const activeTarget = state.currentUser || state.currentGuest;
+    if (activeTarget) {
+        const userId = state.currentUser ? state.currentUser.id : (activeTarget.name || 'guest');
+        const checkoutPath = `/${userId}/checkout`;
+        let baseUri = '/';
+        if (window.location.pathname.startsWith('/toy_and_craft')) baseUri = '/toy_and_craft/';
         try {
-            const draftPath = `/${currentUserId}/${proposed}`;
-            let baseUri = '/';
-            if (window.location.pathname.startsWith('/toy_and_craft')) {
-                baseUri = '/toy_and_craft/';
-            }
-            window.history.pushState({ path: baseUri + draftPath.replace(/^\//, '') }, '', baseUri + draftPath.replace(/^\//, ''));
-        } catch (e) { }
-    }).catch(err => console.log("Silent error reading counter predict", err));
-
-    if (checkoutUserDetails) {
-        const activeTarget = state.currentUser || state.currentGuest;
-        if (activeTarget) {
-            checkoutUserDetails.innerHTML = `
-                <p><strong>Name:</strong> ${activeTarget.name}</p>
-                <p><strong>Mobile:</strong> ${activeTarget.mobile || 'Not provided'}</p>
-                <p><strong>District:</strong> ${activeTarget.district || 'Not provided'}</p>
-                <p><strong>Thana:</strong> ${activeTarget.thana || 'Not provided'}</p>
-                <p><strong>Delivery Address:</strong><br>${activeTarget.address || 'Not provided'}</p>
-            `;
-        }
+            window.history.pushState({ path: baseUri + checkoutPath.replace(/^\//, '') }, '', baseUri + checkoutPath.replace(/^\//, ''));
+        } catch (e) {}
     }
+
+    // Reset shipping edit state
+    checkoutShippingEdit = null;
+
+    // Render shipping details
+    renderShippingDetails();
+
+    // Get only selected items
+    const selectedItems = getSelectedCartItems();
 
     if (checkoutItemsList) {
         checkoutItemsList.innerHTML = '';
         let total = 0;
-        state.cart.forEach(item => {
+        selectedItems.forEach(item => {
             total += item.currentPrice * item.qty;
             const el = document.createElement('div');
             el.style.cssText = "display: flex; gap: 1rem; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;";
@@ -395,16 +512,17 @@ export function openCheckoutView() {
 
         const recalcCheckoutTotals = () => {
             let currentDistrict = "";
-            const activeTarget = state.currentUser || state.currentGuest;
-            if (activeTarget && activeTarget.district) {
-                if (activeTarget.district === "Dhaka") {
-                    currentDistrict = getTrueDistrict(activeTarget.district, activeTarget.thana);
+            // Use edited shipping if available, otherwise active target
+            const shippingSource = checkoutShippingEdit || state.currentUser || state.currentGuest;
+            if (shippingSource && shippingSource.district) {
+                if (shippingSource.district === "Dhaka") {
+                    currentDistrict = getTrueDistrict(shippingSource.district, shippingSource.thana);
                 } else {
-                    currentDistrict = activeTarget.district;
+                    currentDistrict = shippingSource.district;
                 }
             }
 
-            const totalItems = state.cart.reduce((sum, item) => sum + item.qty, 0);
+            const totalItems = selectedItems.reduce((sum, item) => sum + item.qty, 0);
             const deliveryCharge = calculateDeliveryCharge(currentDistrict, totalItems);
             const grandTotal = total + deliveryCharge;
 
@@ -423,6 +541,200 @@ export function openCheckoutView() {
 }
 window.openCheckoutView = openCheckoutView;
 
+// --- Shipping Details Rendering ---
+function renderShippingDetails() {
+    if (!checkoutUserDetails) return;
+    const activeTarget = state.currentUser || state.currentGuest;
+    if (!activeTarget) return;
+
+    checkoutUserDetails.innerHTML = `
+        <p><strong>Name:</strong> ${activeTarget.name}</p>
+        <p><strong>Mobile:</strong> ${activeTarget.mobile || 'Not provided'}</p>
+        <p><strong>District:</strong> ${activeTarget.district || 'Not provided'}</p>
+        <p><strong>Thana:</strong> ${activeTarget.thana || 'Not provided'}</p>
+        <p><strong>Delivery Address:</strong><br>${activeTarget.address || 'Not provided'}</p>
+        <div style="margin-top: 1rem;">
+            <button class="btn btn-secondary btn-sm" id="checkout-edit-shipping-btn" style="display: flex; align-items: center; gap: 4px;">
+                <span class="material-icons-round" style="font-size: 16px;">edit</span> Edit
+            </button>
+        </div>
+    `;
+
+    document.getElementById('checkout-edit-shipping-btn')?.addEventListener('click', () => {
+        enterShippingEditMode(activeTarget);
+    });
+}
+
+function enterShippingEditMode(activeTarget) {
+    if (!checkoutUserDetails) return;
+
+    const inputStyle = 'width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.6rem; background: var(--bg-card); color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem;';
+    const selectStyle = inputStyle + ' cursor: pointer;';
+
+    checkoutUserDetails.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+            <div>
+                <label style="font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 4px;">Name</label>
+                <input type="text" id="ship-edit-name" value="${activeTarget.name || ''}" style="${inputStyle}">
+            </div>
+            <div>
+                <label style="font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 4px;">Mobile</label>
+                <input type="tel" id="ship-edit-mobile" value="${activeTarget.mobile || ''}" style="${inputStyle}">
+            </div>
+            <div style="display: flex; gap: 0.8rem;">
+                <div style="flex: 1;">
+                    <label style="font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 4px;">District</label>
+                    <select id="ship-edit-district" style="${selectStyle}">
+                        ${buildDistrictDropdown(activeTarget.district || '')}
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 4px;">Thana</label>
+                    <select id="ship-edit-thana" style="${selectStyle}">
+                        ${buildThanaDropdown(activeTarget.district || '', activeTarget.thana || '')}
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label style="font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 4px;">Delivery Address</label>
+                <textarea id="ship-edit-address" rows="2" style="${inputStyle} resize: vertical;">${activeTarget.address || ''}</textarea>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                <button class="btn btn-primary btn-sm" id="ship-save-temp" style="flex: 1;">Save for this order</button>
+                ${state.currentUser ? '<button class="btn btn-primary btn-sm" id="ship-save-perm" style="flex: 1; background: #22c55e; border: none;">Save permanently</button>' : ''}
+                <button class="btn btn-secondary btn-sm" id="ship-cancel-edit">Cancel</button>
+            </div>
+        </div>
+    `;
+
+    // Wire district → thana cascade
+    const districtSelect = document.getElementById('ship-edit-district');
+    const thanaSelect = document.getElementById('ship-edit-thana');
+    if (districtSelect) {
+        districtSelect.addEventListener('change', () => {
+            if (thanaSelect) {
+                thanaSelect.innerHTML = buildThanaDropdown(districtSelect.value, '');
+            }
+        });
+    }
+
+    // Cancel
+    document.getElementById('ship-cancel-edit')?.addEventListener('click', () => {
+        checkoutShippingEdit = null;
+        renderShippingDetails();
+    });
+
+    // Save for this order (temporary)
+    document.getElementById('ship-save-temp')?.addEventListener('click', () => {
+        const editData = getShippingEditData();
+        checkoutShippingEdit = editData;
+
+        // Update guest state if guest
+        if (!state.currentUser && state.currentGuest) {
+            Object.assign(state.currentGuest, editData);
+        }
+
+        renderShippingDetails();
+        // Recalc delivery with new district
+        if (window.recalcCheckoutTotals) window.recalcCheckoutTotals();
+    });
+
+    // Save permanently (logged-in users only)
+    document.getElementById('ship-save-perm')?.addEventListener('click', async () => {
+        const editData = getShippingEditData();
+        checkoutShippingEdit = editData;
+
+        if (state.currentUser) {
+            // Update local state
+            state.currentUser.name = editData.name;
+            state.currentUser.mobile = editData.mobile;
+            state.currentUser.district = editData.district;
+            state.currentUser.thana = editData.thana;
+            state.currentUser.address = editData.address;
+
+            // Save to Firebase
+            try {
+                await updateDoc(doc(db, 'Users', state.currentUser.id), {
+                    name: editData.name,
+                    mobile: editData.mobile,
+                    district: editData.district,
+                    thana: editData.thana,
+                    address: editData.address
+                });
+
+                // Update local storage
+                const storageKey = localStorage.getItem('tc_user') ? 'tc_user' : null;
+                const sessionKey = sessionStorage.getItem('tc_user') ? 'tc_user' : null;
+                const updatedUser = JSON.stringify(state.currentUser);
+                if (storageKey) localStorage.setItem(storageKey, updatedUser);
+                if (sessionKey) sessionStorage.setItem(sessionKey, updatedUser);
+
+            } catch (e) {
+                console.error("Failed to save shipping permanently", e);
+                alert("Failed to save changes. Please try again.");
+                return;
+            }
+        }
+
+        renderShippingDetails();
+        if (window.recalcCheckoutTotals) window.recalcCheckoutTotals();
+    });
+}
+
+function getShippingEditData() {
+    return {
+        name: document.getElementById('ship-edit-name')?.value.trim() || '',
+        mobile: document.getElementById('ship-edit-mobile')?.value.trim() || '',
+        district: document.getElementById('ship-edit-district')?.value || '',
+        thana: document.getElementById('ship-edit-thana')?.value || '',
+        address: document.getElementById('ship-edit-address')?.value.trim() || ''
+    };
+}
+
+// --- Order Success Modal ---
+function showOrderSuccessModal(invoiceId, items, grandTotal) {
+    const modal = document.getElementById('order-success-modal');
+    const invoiceEl = document.getElementById('order-success-invoice');
+    const detailsEl = document.getElementById('order-success-details');
+    const continueBtn = document.getElementById('order-success-continue-btn');
+
+    if (!modal) return;
+
+    if (invoiceEl) invoiceEl.textContent = invoiceId;
+    if (detailsEl) {
+        let html = '';
+        items.forEach(item => {
+            html += `<div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dotted var(--border-color);">
+                <span>${item.name} × ${item.qty}</span>
+                <span style="font-weight: 500;">৳${(item.price * item.qty).toFixed(2)}</span>
+            </div>`;
+        });
+        html += `<div style="display: flex; justify-content: space-between; padding: 8px 0 0; font-weight: bold; font-size: 1rem;">
+            <span>Grand Total</span>
+            <span>৳${grandTotal.toFixed(2)}</span>
+        </div>`;
+        detailsEl.innerHTML = html;
+    }
+
+    modal.style.display = 'flex';
+
+    if (continueBtn) {
+        continueBtn.onclick = () => {
+            modal.style.display = 'none';
+            if (checkoutView) checkoutView.style.display = 'none';
+            if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
+
+            // Navigate to home
+            if (state.categories && state.categories.length > 0) {
+                state.currentCategorySlug = state.categories[0].slug;
+            }
+            if (window.updateUrlState) window.updateUrlState(state.currentCategorySlug, 1);
+            if (window.renderProducts) window.renderProducts(state.currentCategorySlug, 1);
+        };
+    }
+}
+
+// --- Cart Listeners Setup ---
 export function setupCartListeners() {
     if (cartToggleBtn) cartToggleBtn.addEventListener('click', openCart);
     if (closeCartBtn) closeCartBtn.addEventListener('click', closeCart);
@@ -434,6 +746,13 @@ export function setupCartListeners() {
                 alert("Your cart is empty.");
                 return;
             }
+
+            const selectedItems = getSelectedCartItems();
+            if (selectedItems.length === 0) {
+                alert("Please select at least one item to checkout.");
+                return;
+            }
+
             if (!state.currentUser) {
                 openGuestModal();
             } else {
@@ -446,12 +765,37 @@ export function setupCartListeners() {
         checkoutCancelBtn.addEventListener('click', () => {
             if (checkoutView) checkoutView.style.display = 'none';
             if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
+
+            // Navigate back to shop
+            if (state.categories && state.categories.length > 0) {
+                state.currentCategorySlug = state.categories[0].slug;
+            }
+            if (window.updateUrlState) window.updateUrlState(state.currentCategorySlug, 1);
         });
     }
 
     if (checkoutConfirmBtn) {
         checkoutConfirmBtn.addEventListener('click', async () => {
-            if (state.cart.length === 0) return;
+            const selectedItems = getSelectedCartItems();
+            if (selectedItems.length === 0) return;
+
+            // --- Stock validation ---
+            const stockIssues = [];
+            for (const item of selectedItems) {
+                const invProduct = state.inventory.find(p => p.id === item.id);
+                if (!invProduct || invProduct.stock === 0) {
+                    stockIssues.push(`"${item.name}" is out of stock.`);
+                } else if (item.qty > invProduct.stock) {
+                    stockIssues.push(`"${item.name}" only has ${invProduct.stock} in stock (you have ${item.qty}).`);
+                }
+            }
+            if (stockIssues.length > 0) {
+                alert("Stock issues:\n" + stockIssues.join("\n") + "\n\nPlease update your cart.");
+                return;
+            }
+
+            // Get shipping data (edited or original)
+            const shippingSource = checkoutShippingEdit || state.currentUser || state.currentGuest;
 
             let orderUserId = "guest";
             let orderUsername = "";
@@ -462,11 +806,11 @@ export function setupCartListeners() {
 
             if (state.currentUser) {
                 orderUserId = state.currentUser.id;
-                orderUsername = state.currentUser.name || "Unknown User";
-                orderMobile = state.currentUser.mobile || "";
-                orderAddress = state.currentUser.address || "";
-                orderDistrict = state.currentUser.district || "Default";
-                orderThana = state.currentUser.thana || "Default";
+                orderUsername = shippingSource.name || state.currentUser.name || "Unknown User";
+                orderMobile = shippingSource.mobile || state.currentUser.mobile || "";
+                orderAddress = shippingSource.address || state.currentUser.address || "";
+                orderDistrict = shippingSource.district || state.currentUser.district || "Default";
+                orderThana = shippingSource.thana || state.currentUser.thana || "Default";
             } else if (state.currentGuest) {
                 if (!state.currentGuest.name || !state.currentGuest.mobile ||
                     !state.currentGuest.address || !state.currentGuest.district || !state.currentGuest.thana) {
@@ -487,14 +831,13 @@ export function setupCartListeners() {
             checkoutConfirmBtn.textContent = "Processing...";
 
             try {
-                const payloadItemsQty = state.cart.reduce((sum, item) => sum + item.qty, 0);
-                const activeTarget = state.currentUser || state.currentGuest || {};
-                let currentDistrictCalc = activeTarget.district || "";
+                const payloadItemsQty = selectedItems.reduce((sum, item) => sum + item.qty, 0);
+                let currentDistrictCalc = shippingSource?.district || "";
                 if (currentDistrictCalc === "Dhaka") {
-                    currentDistrictCalc = getTrueDistrict(activeTarget.district, activeTarget.thana);
+                    currentDistrictCalc = getTrueDistrict(shippingSource.district, shippingSource.thana);
                 }
                 const secureDeliveryCharge = calculateDeliveryCharge(currentDistrictCalc, payloadItemsQty);
-                const rawSubtotal = state.cart.reduce((sum, item) => sum + (item.currentPrice * item.qty), 0);
+                const rawSubtotal = selectedItems.reduce((sum, item) => sum + (item.currentPrice * item.qty), 0);
                 const secureGrandTotal = rawSubtotal + secureDeliveryCharge;
 
                 const orderPayload = {
@@ -504,7 +847,7 @@ export function setupCartListeners() {
                     address: orderAddress,
                     district: orderDistrict,
                     thana: orderThana,
-                    items: state.cart.map(i => ({ id: i.id, name: i.name, price: i.currentPrice, qty: i.qty })),
+                    items: selectedItems.map(i => ({ id: i.id, name: i.name, price: i.currentPrice, qty: i.qty })),
                     subtotal: rawSubtotal,
                     deliveryCharge: secureDeliveryCharge,
                     totalPrice: secureGrandTotal,
@@ -536,9 +879,8 @@ export function setupCartListeners() {
                 }
 
                 // Update product stock counts
-                state.cart.forEach(item => {
+                selectedItems.forEach(item => {
                     const newStock = Math.max(0, (item.stock || 1) - item.qty);
-                    // Use categoryId from the item if it exists 
                     if (item.categoryId) {
                         const prodRef = doc(db, 'Products', item.categoryId, 'Items', item.id);
                         batch.update(prodRef, { stock: newStock });
@@ -548,28 +890,34 @@ export function setupCartListeners() {
                 await batch.commit();
 
                 // Update local memory inventory array
-                state.cart.forEach(item => {
+                selectedItems.forEach(item => {
                     const invProd = state.inventory.find(p => p.id === item.id);
                     if (invProd) {
                         invProd.stock = Math.max(0, (invProd.stock || 1) - item.qty);
                     }
                 });
 
-                alert("Order Confirmed! Your Invoice Number is: " + secureInvoiceId);
+                // Show success modal
+                showOrderSuccessModal(secureInvoiceId, orderPayload.items, secureGrandTotal);
 
+                // Clear checked-out items from cart
                 if (state.currentUser) {
                     const wipeBatch = writeBatch(db);
-                    state.cart.forEach(item => {
+                    selectedItems.forEach(item => {
                         wipeBatch.delete(doc(db, 'Users', state.currentUser.id, 'Cart', item.id));
                     });
                     await wipeBatch.commit().catch(e => console.error("Silent Cart Wipe Failure", e));
                 }
 
-                state.cart = [];
+                // Remove only the selected items from cart (keep unselected ones)
+                const selectedIds = new Set(selectedItems.map(i => i.id));
+                state.cart = state.cart.filter(item => !selectedIds.has(item.id));
+                // Clean up selections for removed items
+                selectedIds.forEach(id => delete state.cartSelections[id]);
                 saveCart();
 
-                if (checkoutView) checkoutView.style.display = 'none';
-                if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
+                // Reset shipping edit
+                checkoutShippingEdit = null;
 
             } catch (err) {
                 console.error("Order Failed:", err);

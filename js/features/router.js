@@ -5,26 +5,50 @@ import { toggleAdminMode, promptPassword } from './admin.js';
 
 // --- URL Routing Utility ---
 
+function getBaseUri() {
+    if (window.location.pathname.startsWith('/toy_and_craft')) {
+        return '/toy_and_craft/';
+    }
+    return '/';
+}
+
 export function updateUrlState(categorySlug, pageNum = 1, productSlug = null) {
     if (!categorySlug) return;
 
     // Ignore updates for base auth actions where categorySlug is abused
-    if (['login', 'register', 'admin', 'authenticate-admin', 'Details', 'Orders', 'Checkout...'].includes(categorySlug)) {
+    if (['login', 'register', 'authenticate-admin', 'Details', 'Orders', 'Checkout...'].includes(categorySlug)) {
         let newPath = `/${categorySlug}`;
         if (state.currentUser && (categorySlug === 'Details' || categorySlug === 'Orders')) {
             newPath = `/${state.currentUser.id}/${categorySlug}`;
         }
         try {
-            window.history.pushState({ path: newPath }, '', newPath);
+            window.history.pushState({ path: newPath }, '', getBaseUri() + newPath.replace(/^\//, ''));
         } catch (e) {
             console.warn("pushState failed", e);
         }
         return;
     }
 
-    let newPath = `/${categorySlug}`;
-    if (state.currentUser) {
-        newPath = `/${state.currentUser.id}/${categorySlug}`;
+    // Admin-specific pages (all-orders, sold-products)
+    if (['all-orders', 'sold-products'].includes(categorySlug)) {
+        const newPath = `/admin/${categorySlug}`;
+        try {
+            window.history.pushState({ path: newPath }, '', getBaseUri() + newPath.replace(/^\//, ''));
+        } catch (e) {
+            console.warn("pushState failed", e);
+        }
+        return;
+    }
+
+    let newPath;
+    if (state.isAdmin) {
+        // Admin mode: /admin/categorySlug/page-N
+        newPath = `/admin/${categorySlug}`;
+    } else {
+        newPath = `/${categorySlug}`;
+        if (state.currentUser) {
+            newPath = `/${state.currentUser.id}/${categorySlug}`;
+        }
     }
 
     if (pageNum >= 1) {
@@ -35,14 +59,8 @@ export function updateUrlState(categorySlug, pageNum = 1, productSlug = null) {
         newPath += `/${productSlug}`;
     }
 
-    // Get the base segment dynamically, so deployment on GitHub Pages still functions properly
-    let baseUri = '/';
-    if (window.location.pathname.startsWith('/toy_and_craft')) {
-        baseUri = '/toy_and_craft/';
-    }
-
     try {
-        window.history.pushState({ path: baseUri + newPath.replace(/^\//, '') }, '', baseUri + newPath.replace(/^\//, ''));
+        window.history.pushState({ path: getBaseUri() + newPath.replace(/^\//, '') }, '', getBaseUri() + newPath.replace(/^\//, ''));
     } catch (e) {
         console.warn("pushState failed, likely not running on a server.", e);
     }
@@ -52,6 +70,14 @@ window.updateUrlState = updateUrlState;
 export function processRoute() {
 
     const bounceToRoot = () => {
+        if (state.categories.length > 0) {
+            state.currentCategorySlug = state.categories[0].slug;
+            state.currentPage = 1;
+            updateUrlState(state.currentCategorySlug, state.currentPage);
+        }
+    };
+
+    const bounceToAdminRoot = () => {
         if (state.categories.length > 0) {
             state.currentCategorySlug = state.categories[0].slug;
             state.currentPage = 1;
@@ -70,6 +96,10 @@ export function processRoute() {
     if (parts.length === 0) {
         // Base URL loaded
         bounceToRoot();
+    } else if (parts[0] === 'admin') {
+        // === ADMIN URL ROUTING ===
+        handleAdminRoute(parts, bounceToAdminRoot);
+        return; // admin route handler takes care of rendering
     } else {
         // Deep link detection
         let maybeUser = parts[0];
@@ -86,10 +116,10 @@ export function processRoute() {
                 updateUrlState(maybeAction);
                 if (window.openAuthModal) window.openAuthModal(maybeAction);
             }
-        } else if (maybeAction === 'admin' || maybeAction === 'authenticate-admin') {
+        } else if (maybeAction === 'authenticate-admin') {
             if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
             if (state.isAdmin) {
-                updateUrlState('admin');
+                bounceToAdminRoot();
             } else {
                 updateUrlState('authenticate-admin');
                 if (window.promptPassword) {
@@ -102,6 +132,11 @@ export function processRoute() {
                     });
                 }
             }
+        } else if (maybeAction === 'checkout' || rawAction === 'checkout') {
+            // Checkout URL: /userid/checkout or /guestname/checkout
+            if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
+            // Mark as pending checkout — will be opened after products load
+            window.pendingCheckout = true;
         } else if (maybeAction === 'search' || (parts.length === 2 && parts[0] === 'search')) {
             // --- Search URL routing ---
             let searchKeyword = null;
@@ -111,11 +146,9 @@ export function processRoute() {
                 searchKeyword = decodeURIComponent(parts.slice(1).join('/'));
                 if (state.currentUser) {
                     // Logged-in user accessing guest search URL — redirect to /userid/search/keyword
-                    let baseUri = '/';
-                    if (window.location.pathname.startsWith('/toy_and_craft')) baseUri = '/toy_and_craft/';
                     const newPath = `${state.currentUser.id}/search/${encodeURIComponent(searchKeyword)}`;
                     try {
-                        window.history.replaceState({ path: baseUri + newPath }, '', baseUri + newPath);
+                        window.history.replaceState({ path: getBaseUri() + newPath }, '', getBaseUri() + newPath);
                     } catch (e) { }
                 }
             } else if (maybeAction === 'search' && parts.length >= 3) {
@@ -123,11 +156,9 @@ export function processRoute() {
                 searchKeyword = decodeURIComponent(parts.slice(2).join('/'));
                 if (!state.currentUser) {
                     // Non-logged-in user accessing user search URL — redirect to /search/keyword
-                    let baseUri = '/';
-                    if (window.location.pathname.startsWith('/toy_and_craft')) baseUri = '/toy_and_craft/';
                     const newPath = `search/${encodeURIComponent(searchKeyword)}`;
                     try {
-                        window.history.replaceState({ path: baseUri + newPath }, '', baseUri + newPath);
+                        window.history.replaceState({ path: getBaseUri() + newPath }, '', getBaseUri() + newPath);
                     } catch (e) { }
                 }
             }
@@ -195,13 +226,8 @@ export function processRoute() {
                 if (targetPage >= 1) newPath += `/page-${targetPage}`;
                 if (targetProduct) newPath += `/${targetProduct}`;
 
-                let baseUri = '/';
-                if (window.location.pathname.startsWith('/toy_and_craft')) {
-                    baseUri = '/toy_and_craft/';
-                }
-
                 try {
-                    window.history.replaceState({ path: baseUri + newPath.replace(/^\//, '') }, '', baseUri + newPath.replace(/^\//, ''));
+                    window.history.replaceState({ path: getBaseUri() + newPath.replace(/^\//, '') }, '', getBaseUri() + newPath.replace(/^\//, ''));
                 } catch (e) { }
             }
 
@@ -254,6 +280,20 @@ export function processRoute() {
         setTimeout(() => {
             if (window.triggerSearchFromUrl) window.triggerSearchFromUrl(keyword);
         }, 100);
+    } else if (window.pendingCheckout) {
+        window.pendingCheckout = null;
+        // Render products in background, then open checkout
+        if (productViewSection) productViewSection.style.display = 'none';
+        if (shopSection) shopSection.style.display = 'block';
+        if (window.renderProducts && state.currentCategorySlug) {
+            window.renderProducts(state.currentCategorySlug, 1);
+        }
+        // Open checkout after a short delay to let everything load
+        setTimeout(() => {
+            if (state.cart.length > 0 && window.openCheckoutView) {
+                window.openCheckoutView();
+            }
+        }, 300);
     } else if (state.currentCategorySlug) {
 
         if (!window.location.pathname.includes('/Details') && !window.location.pathname.includes('/Orders')) {
@@ -265,6 +305,125 @@ export function processRoute() {
     }
 }
 window.processRoute = processRoute;
+
+// --- Admin Route Handler ---
+function handleAdminRoute(parts, bounceToAdminRoot) {
+    // parts[0] === 'admin'
+    const adminSubParts = parts.slice(1); // everything after 'admin'
+
+    if (!state.isAdmin) {
+        // Not logged in as admin — store intended URL and redirect to auth
+        const intendedPath = '/' + parts.join('/');
+        sessionStorage.setItem('tc_admin_redirect', intendedPath);
+        state.adminIntendedUrl = intendedPath;
+
+        if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
+        updateUrlState('authenticate-admin');
+        if (window.promptPassword) {
+            window.promptPassword("Enter Admin Password", (pass) => {
+                if (pass === atob("MDEyNw==")) {
+                    if (window.toggleAdminMode) window.toggleAdminMode(true);
+                } else {
+                    alert("Incorrect password.");
+                }
+            });
+        }
+        if (window.renderCategoryTabs) window.renderCategoryTabs();
+        return;
+    }
+
+    // Admin is logged in — parse the sub-route
+    const productViewSection = document.getElementById('product-view');
+    const shopSection = document.getElementById('shop');
+    const checkoutView = document.getElementById('checkout-view');
+    const adminOrdersView = document.getElementById('admin-orders-view');
+    const mainLayoutContainer = document.getElementById('main-content');
+
+    // Hide chat widget on admin pages
+    const chatWidget = document.getElementById('floating-chat-widget');
+    if (chatWidget) chatWidget.style.display = 'none';
+
+    if (adminSubParts.length === 0) {
+        // /admin — go to first category
+        bounceToAdminRoot();
+        if (window.renderCategoryTabs) window.renderCategoryTabs();
+        if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
+        if (checkoutView) checkoutView.style.display = 'none';
+        if (adminOrdersView) adminOrdersView.style.display = 'none';
+        if (productViewSection) productViewSection.style.display = 'none';
+        if (shopSection) shopSection.style.display = 'block';
+        if (window.renderProducts) window.renderProducts(state.currentCategorySlug, state.currentPage || 1);
+        return;
+    }
+
+    const subPage = adminSubParts[0];
+
+    if (subPage === 'all-orders') {
+        // /admin/all-orders
+        if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
+        if (window.renderCategoryTabs) window.renderCategoryTabs();
+        if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
+        if (checkoutView) checkoutView.style.display = 'none';
+        if (adminOrdersView) adminOrdersView.style.display = 'block';
+        if (productViewSection) productViewSection.style.display = 'none';
+        if (shopSection) shopSection.style.display = 'none';
+
+        // Highlight correct button
+        const adminOrdersBtn = document.getElementById('admin-orders-btn');
+        const adminSoldProductsBtn = document.getElementById('admin-sold-products-btn');
+        if (adminOrdersBtn) adminOrdersBtn.style.opacity = '1';
+        if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '0.6';
+
+        if (window.loadAdminOrders) window.loadAdminOrders();
+        return;
+    }
+
+    if (subPage === 'sold-products') {
+        // /admin/sold-products
+        if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
+        if (window.renderCategoryTabs) window.renderCategoryTabs();
+        if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
+        if (checkoutView) checkoutView.style.display = 'none';
+        if (adminOrdersView) adminOrdersView.style.display = 'block';
+        if (productViewSection) productViewSection.style.display = 'none';
+        if (shopSection) shopSection.style.display = 'none';
+
+        // Highlight correct button
+        const adminOrdersBtn = document.getElementById('admin-orders-btn');
+        const adminSoldProductsBtn = document.getElementById('admin-sold-products-btn');
+        if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '1';
+        if (adminOrdersBtn) adminOrdersBtn.style.opacity = '0.6';
+
+        if (window.renderAdminSoldProducts) window.renderAdminSoldProducts();
+        return;
+    }
+
+    // /admin/categorySlug/page-N — category browsing in admin mode
+    let targetCategory = subPage;
+    let targetPage = 1;
+
+    if (adminSubParts.length > 1 && adminSubParts[1].startsWith('page-')) {
+        targetPage = parseInt(adminSubParts[1].split('-')[1]) || 1;
+    }
+
+    const catExists = state.categories.find(c => c.slug === targetCategory);
+    if (!catExists) {
+        showErrorPage(`Category "${targetCategory}" does not exist.`);
+        return;
+    }
+
+    state.currentCategorySlug = targetCategory;
+    state.currentPage = targetPage;
+
+    if (window.renderCategoryTabs) window.renderCategoryTabs();
+    if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
+    if (checkoutView) checkoutView.style.display = 'none';
+    if (adminOrdersView) adminOrdersView.style.display = 'none';
+    if (productViewSection) productViewSection.style.display = 'none';
+    if (shopSection) shopSection.style.display = 'block';
+
+    if (window.renderProducts) window.renderProducts(state.currentCategorySlug, state.currentPage);
+}
 
 export function initRouting() {
     if (state.routingInitialized) return;
@@ -288,7 +447,9 @@ window.addEventListener('popstate', (e) => {
 
     // Ensure shop layout is visible if we aren't rendering a product
     if (!window.pendingProductSlug && !window.location.pathname.includes('/Details') && !window.location.pathname.includes('/Orders')) {
-        if (productViewSection) productViewSection.style.display = 'none';
-        if (shopSection) shopSection.style.display = 'block';
+        if (!window.location.pathname.includes('/admin/all-orders') && !window.location.pathname.includes('/admin/sold-products')) {
+            if (productViewSection) productViewSection.style.display = 'none';
+            if (shopSection) shopSection.style.display = 'block';
+        }
     }
 });
