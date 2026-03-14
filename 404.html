@@ -30,7 +30,7 @@
     <!-- Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <!-- Styles -->
-    <link rel="stylesheet" href="css/style.css?v=skeletonfinal">
+    <link rel="stylesheet" href="css/style.css?v=carousel_v1">
 </head>
 
 <body>
@@ -347,20 +347,11 @@
                 <form id="admin-product-form">
                     <input type="hidden" id="admin-product-id">
 
-                    <!-- Product Image Cover (shows when editing) -->
-                    <div id="admin-cover-image-section"
-                        style="position:relative; width:100%; height:200px; border-radius:8px; overflow:hidden; display:none; margin-bottom:1rem; background:var(--bg-hover);">
-                        <img id="admin-cover-image" src="" style="width:100%; height:100%; object-fit:contain;"
-                            alt="Cover">
-                        <button type="button" class="btn btn-primary"
-                            onclick="document.getElementById('admin-product-file-input').click()"
-                            style="position:absolute; bottom:12px; right:12px; display:flex; align-items:center; gap:0.4rem; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-                            <span class="material-icons-round" style="font-size:18px;">edit</span> Edit Photos
-                        </button>
-                    </div>
-
-                    <div class="form-group" id="admin-image-group">
-                        <label>Product Images</label>
+                    <div class="form-group" id="admin-image-group" style="margin-bottom: 1.5rem;">
+                        <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            Product Images
+                            <small style="font-weight: normal; color: var(--text-muted);">(Drag to reorder, first is main)</small>
+                        </label>
 
                         <!-- Drive auth notice (shown when not yet connected) -->
                         <div id="drive-auth-notice"
@@ -373,25 +364,25 @@
                                 Drive</button>
                         </div>
 
-                        <!-- File picker -->
-                        <label for="admin-product-file-input" class="drive-upload-label" id="drive-upload-area">
-                            <span class="material-icons-round">cloud_upload</span>
-                            <span>Click to select images (JPG, PNG, WEBP)</span>
-                            <input type="file" id="admin-product-file-input" multiple accept="image/*"
-                                style="display:none;">
-                        </label>
+                        <!-- Image Carousel Area -->
+                        <div id="admin-image-carousel" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem; min-height: 160px; outline: none;" tabindex="0">
+                            <!-- Existing images injected here by JS -->
+                            
+                            <!-- Add Photo Card (Upload trigger & Paste Area) -->
+                            <label for="admin-product-file-input" id="admin-add-photo-card" style="flex: 0 0 160px; height: 160px; border: 2px dashed var(--border-color); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; background: var(--bg-hover); transition: all 0.2s;">
+                                <span class="material-icons-round" style="font-size: 32px; color: var(--text-muted); margin-bottom: 0.5rem;">add_photo_alternate</span>
+                                <span style="font-size: 0.9rem; font-weight: 500; color: var(--text-main);">Add Photo</span>
+                                <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">(or paste here)</span>
+                                <input type="file" id="admin-product-file-input" multiple accept="image/*" style="display:none;">
+                            </label>
+                        </div>
 
                         <!-- Per-image upload status list -->
-                        <div id="drive-upload-status"></div>
-
-                        <!-- Image preview strip -->
-                        <div id="admin-image-previews"
-                            style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.5rem;"></div>
+                        <div id="drive-upload-status" style="margin-top: 0.5rem;"></div>
 
                         <!-- Hidden textarea holds the final comma-separated URLs -->
                         <textarea id="admin-product-image" rows="2" style="display:none;"
                             placeholder="https://drive.google.com/thumbnail?id=..."></textarea>
-                        <small>Images upload to Google Drive automatically. First image = main thumbnail.</small>
                     </div>
 
                     <div class="form-group">
@@ -841,7 +832,7 @@
     </div>
 
     <!-- Config & Main Application Logic -->
-    <script type="module" src="js/app.js?v=skeletonui"></script>
+    <script type="module" src="js/app.js?v=carousel_v1"></script>
 </body>
 
 </html>
