@@ -11,7 +11,7 @@ import {
 } from '../core/dom.js';
 
 import { updateAuthUI } from './auth.js';
-import { uploadImageToDrive, isDriveAuthorized, getDriveAccessToken, handleDriveAuthRedirect, renameDriveFile } from './drive.js';
+import { uploadImageToDrive, isDriveAuthorized, getDriveAccessToken, handleDriveAuthRedirect, renameDriveFile, deleteDriveFile } from './drive.js';
 
 // Handle Drive OAuth redirect (runs on page load)
 handleDriveAuthRedirect();
@@ -273,49 +273,114 @@ export function setupAdminListeners() {
         let pendingUploadPromise = null;
 
         if (fileInput) {
-            fileInput.addEventListener('change', async () => {
+            fileInput.addEventListener('change', () => {
                 const files = Array.from(fileInput.files);
                 if (!files.length) return;
 
                 const catSlug = adminProductCategory.value || 'products';
+                const carousel = document.getElementById('admin-image-carousel');
+                const addCard = document.getElementById('admin-add-photo-card');
+                const imageTextarea = document.getElementById('admin-product-image');
+                
                 if (statusDiv) statusDiv.innerHTML = '';
-
-                // Get current URLs from textarea
+                
                 const existingUrls = imageTextarea ? imageTextarea.value.split(',').map(s => s.trim()).filter(Boolean) : [];
                 const allUrls = [...existingUrls];
 
-                const uploadItems = files.map(file => {
-                    const row = document.createElement('div');
-                    row.style.cssText = 'display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;margin:0.2rem 0;';
-                    row.innerHTML = `<span class="material-icons-round" style="font-size:16px;animation:spin 1s linear infinite;">sync</span> <span>${file.name}</span>`;
-                    if (statusDiv) statusDiv.appendChild(row);
-                    return { file, row };
+                const baseName = adminProductName.value.trim() || 'product';
+                const safeBaseName = baseName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+                const uploadPromises = files.map((file, i) => {
+                    const ext = file.name.split('.').pop();
+                    const index = allUrls.length + i + 1;
+                    const customFileName = `${safeBaseName}-${index}.${ext}`;
+
+                    // 1. Create Placeholder Card DOM
+                    const card = document.createElement('div');
+                    card.className = 'admin-upload-placeholder';
+                    card.style.cssText = `
+                        flex: 0 0 160px; height: 160px; border-radius: 8px; overflow: hidden; position: relative;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1); background: #eee; scroll-snap-align: start;
+                        display: flex; align-items: center; justify-content: center;
+                    `;
+                    
+                    const imgPreview = document.createElement('img');
+                    imgPreview.style.cssText = 'width: 100%; height: 100%; object-fit: contain; pointer-events: none; opacity: 0.5;';
+                    card.appendChild(imgPreview);
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => { imgPreview.src = e.target.result; };
+                    reader.readAsDataURL(file);
+
+                    const overlay = document.createElement('div');
+                    overlay.style.cssText = 'position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; font-weight: bold; font-size: 1.2rem;';
+                    
+                    const percentText = document.createElement('span');
+                    percentText.innerText = '0%';
+                    overlay.appendChild(percentText);
+                    card.appendChild(overlay);
+
+                    let abortUpload = null;
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.innerHTML = '<span class="material-icons-round" style="font-size:16px;">close</span>';
+                    cancelBtn.style.cssText = 'position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;';
+                    cancelBtn.onmouseover = () => cancelBtn.style.background = 'rgba(255,50,50,0.8)';
+                    cancelBtn.onmouseout = () => cancelBtn.style.background = 'rgba(0,0,0,0.6)';
+                    cancelBtn.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (abortUpload) abortUpload();
+                        card.remove(); 
+                    };
+                    card.appendChild(cancelBtn);
+
+                    if (carousel && addCard) {
+                        carousel.insertBefore(card, addCard);
+                    }
+
+                    return new Promise((resolve, reject) => {
+                        try {
+                            const { promise, abort } = uploadImageToDrive(file, catSlug, customFileName, (pct) => {
+                                percentText.innerText = `${Math.round(pct)}%`;
+                            });
+                            abortUpload = abort;
+                            promise.then(url => {
+                                resolve({ url, file, card });
+                            }).catch(err => {
+                                card.remove();
+                                reject({ err, file });
+                            });
+                        } catch (err) {
+                            card.remove();
+                            reject({ err, file });
+                        }
+                    });
                 });
 
-                pendingUploadPromise = (async () => {
-                    const baseName = adminProductName.value.trim() || 'product';
-                    const safeBaseName = baseName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                // Clear input early so user can select same files again if needed
+                fileInput.value = '';
 
-                    for (let i = 0; i < uploadItems.length; i++) {
-                        const { file, row } = uploadItems[i];
-                        try {
-                            const ext = file.name.split('.').pop();
-                            const index = allUrls.length + 1;
-                            const customFileName = `${safeBaseName}-${index}.${ext}`;
+                let uploadsInProgress = true;
+                const submitBtn = adminProductForm.querySelector('[type="submit"]');
+                if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Uploading...'; }
 
-                            const url = await uploadImageToDrive(file, catSlug, customFileName);
-                            allUrls.push(url);
-                            if (imageTextarea) imageTextarea.value = allUrls.join(', ');
-                            if (window.renderAdminImageCarousel) window.renderAdminImageCarousel();
-                            row.innerHTML = `<span class="material-icons-round" style="font-size:16px;color:#22c55e;">check_circle</span> <span>${file.name}</span>`;
-
-                        } catch (err) {
-                            row.innerHTML = `<span class="material-icons-round" style="font-size:16px;color:#ef4444;">error</span> <span>${file.name}: ${err.message}</span>`;
+                pendingUploadPromise = Promise.allSettled(uploadPromises).then(results => {
+                    results.forEach(res => {
+                        if (res.status === 'fulfilled' && res.value && res.value.url) {
+                            allUrls.push(res.value.url);
+                            res.value.card.remove(); // Remove placeholder now that it's finished
+                        } else if (res.status === 'rejected' && res.reason && res.reason.err) {
+                            console.error('Upload Error for', res.reason.file.name, ':', res.reason.err);
+                            // Show error toast or indicator
                         }
-                    }
-                    // Final sync 
+                    });
+                    
                     if (imageTextarea) imageTextarea.value = allUrls.join(', ');
-                })();
+                    if (window.renderAdminImageCarousel) window.renderAdminImageCarousel();
+
+                    uploadsInProgress = false;
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Save Product'; }
+                });
             });
         }
 
@@ -485,6 +550,7 @@ export function setupAdminListeners() {
 
         const existingCards = carousel.querySelectorAll('.admin-image-card');
         existingCards.forEach(c => c.remove());
+        // Preserves placeholders since they have '.admin-upload-placeholder' class instead
 
         const urls = imageTextarea.value.split(',').map(s => s.trim()).filter(Boolean);
         
@@ -516,13 +582,27 @@ export function setupAdminListeners() {
             deleteBtn.style.cssText = 'position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;';
             deleteBtn.onmouseover = () => deleteBtn.style.background = 'rgba(255,50,50,0.8)';
             deleteBtn.onmouseout = () => deleteBtn.style.background = 'rgba(0,0,0,0.6)';
-            deleteBtn.onclick = (e) => {
+            deleteBtn.onclick = async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (confirm('Remove this image?')) {
-                    urls.splice(index, 1);
-                    imageTextarea.value = urls.join(', ');
-                    window.renderAdminImageCarousel();
+                if (confirm('Remove this image? It will be deleted from your Google Drive instantly.')) {
+                    const targetUrl = urls[index];
+                    
+                    // Show a tiny spinner locally on the button
+                    deleteBtn.innerHTML = '<span class="material-icons-round" style="font-size:16px;animation:spin 1s linear infinite;">sync</span>';
+                    
+                    const deleted = await deleteDriveFile(targetUrl);
+                    
+                    if (deleted) {
+                        urls.splice(index, 1);
+                        imageTextarea.value = urls.join(', ');
+                        window.renderAdminImageCarousel();
+                    } else {
+                        alert("Warning: Could not immediately remove from Drive (it might be locked or missing data), but it has been removed from this product visually.");
+                        urls.splice(index, 1);
+                        imageTextarea.value = urls.join(', ');
+                        window.renderAdminImageCarousel();
+                    }
                 }
             };
             card.appendChild(deleteBtn);

@@ -235,50 +235,108 @@ async function ensureCategoryFolder(categorySlug, accessToken) {
 
 /**
  * Upload an image file to Google Drive under Toy&Craft/Products/<categorySlug>/
- * Returns a public thumbnail URL.
+ * Returns { promise: Promise<String>, abort: Function }
+ * Accepts an optional onProgress(percent) callback.
  */
-export async function uploadImageToDrive(file, categorySlug, customFileName = null) {
-    const accessToken = await getDriveAccessToken();
-    const folderId = await ensureCategoryFolder(categorySlug, accessToken);
+export function uploadImageToDrive(file, categorySlug, customFileName = null, onProgress = null) {
+    let xhr;
+    
+    const promise = new Promise(async (resolve, reject) => {
+        try {
+            const accessToken = await getDriveAccessToken();
+            const folderId = await ensureCategoryFolder(categorySlug, accessToken);
 
-    // Use custom name or generate a unique filename with timestamp
-    const ext = file.name.split('.').pop();
-    const safeName = customFileName ? customFileName : `${categorySlug}_${Date.now()}.${ext}`;
+            // Use custom name or generate a unique filename with timestamp
+            const ext = file.name.split('.').pop();
+            const safeName = customFileName ? customFileName : `${categorySlug}_${Date.now()}.${ext}`;
 
-    // Multipart upload: metadata + file body
-    const metadata = {
-        name: safeName,
-        parents: [folderId],
-    };
+            // Multipart upload: metadata + file body
+            const metadata = {
+                name: safeName,
+                parents: [folderId],
+            };
 
-    const form = new FormData();
-    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-    form.append('file', file);
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            form.append('file', file);
 
-    const uploadRes = await fetch(
-        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name',
-        {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${accessToken}` },
-            body: form,
+            xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name');
+            xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+
+            if (onProgress) {
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const percent = (e.loaded / e.total) * 100;
+                        onProgress(percent);
+                    }
+                };
+            }
+
+            xhr.onload = async () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    const fileData = JSON.parse(xhr.responseText);
+                    if (!fileData.id) {
+                        reject(new Error('Drive upload failed: ' + xhr.responseText));
+                        return;
+                    }
+
+                    // Make file public (anyone with link can view)
+                    await fetch(`https://www.googleapis.com/drive/v3/files/${fileData.id}/permissions`, {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ role: 'reader', type: 'anyone' }),
+                    });
+
+                    // Return a fast-loading thumbnail URL (600px wide)
+                    resolve(`https://drive.google.com/thumbnail?id=${fileData.id}&sz=w800`);
+                } else {
+                    reject(new Error('Drive upload failed with status ' + xhr.status + ': ' + xhr.responseText));
+                }
+            };
+
+            xhr.onerror = () => reject(new Error('Network error during upload'));
+            xhr.onabort = () => reject(new Error('Upload aborted'));
+            
+            xhr.send(form);
+        } catch (err) {
+            reject(err);
         }
-    );
-
-    const fileData = await uploadRes.json();
-    if (!fileData.id) throw new Error('Drive upload failed: ' + JSON.stringify(fileData));
-
-    // Make file public (anyone with link can view)
-    await fetch(`https://www.googleapis.com/drive/v3/files/${fileData.id}/permissions`, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ role: 'reader', type: 'anyone' }),
     });
 
-    // Return a fast-loading thumbnail URL (600px wide)
-    return `https://drive.google.com/thumbnail?id=${fileData.id}&sz=w800`;
+    return {
+        promise,
+        abort: () => {
+            if (xhr) xhr.abort();
+        }
+    };
+}
+
+/** Immediate deletion of a file from Google Drive via its thumbnail URL. */
+export async function deleteDriveFile(driveUrl) {
+    const match = driveUrl.match(/[?&]id=([^&]+)/);
+    if (!match || !match[1]) return false; // Not a valid drive thumbnail URL
+
+    const fileId = match[1];
+    const accessToken = await getDriveAccessToken();
+
+    try {
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+
+        if (!res.ok && res.status !== 404) throw new Error('Drive delete failed');
+        return true;
+    } catch (e) {
+        console.error("Error deleting drive file:", e);
+        return false;
+    }
 }
 
 /** Rename an existing file in Drive. Extracts ID from thumbnail URL. */
