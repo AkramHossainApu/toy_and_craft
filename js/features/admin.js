@@ -301,29 +301,33 @@ export function setupAdminListeners() {
                     card.style.cssText = `
                         flex: 0 0 160px; height: 160px; border-radius: 8px; overflow: hidden; position: relative;
                         box-shadow: 0 2px 8px rgba(0,0,0,0.1); background: #eee; scroll-snap-align: start;
-                        display: flex; align-items: center; justify-content: center;
                     `;
                     
                     const imgPreview = document.createElement('img');
-                    imgPreview.style.cssText = 'width: 100%; height: 100%; object-fit: contain; pointer-events: none; opacity: 0.5;';
+                    imgPreview.style.cssText = 'width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: grayscale(100%) brightness(0.5); transition: filter 0.3s;';
                     card.appendChild(imgPreview);
                     
                     const reader = new FileReader();
                     reader.onload = (e) => { imgPreview.src = e.target.result; };
                     reader.readAsDataURL(file);
 
-                    const overlay = document.createElement('div');
-                    overlay.style.cssText = 'position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; font-weight: bold; font-size: 1.2rem;';
+                    // A fill overlay that visually drops down as progress increases
+                    const fillOverlay = document.createElement('div');
+                    fillOverlay.style.cssText = 'position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); transition: bottom 0.1s linear;';
+                    card.appendChild(fillOverlay);
+
+                    const textOverlay = document.createElement('div');
+                    textOverlay.style.cssText = 'position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; font-weight: bold; font-size: 1.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);';
                     
                     const percentText = document.createElement('span');
                     percentText.innerText = '0%';
-                    overlay.appendChild(percentText);
-                    card.appendChild(overlay);
+                    textOverlay.appendChild(percentText);
+                    card.appendChild(textOverlay);
 
                     let abortUpload = null;
                     const cancelBtn = document.createElement('button');
                     cancelBtn.innerHTML = '<span class="material-icons-round" style="font-size:16px;">close</span>';
-                    cancelBtn.style.cssText = 'position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;';
+                    cancelBtn.style.cssText = 'position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; z-index: 10;';
                     cancelBtn.onmouseover = () => cancelBtn.style.background = 'rgba(255,50,50,0.8)';
                     cancelBtn.onmouseout = () => cancelBtn.style.background = 'rgba(0,0,0,0.6)';
                     cancelBtn.onclick = (e) => {
@@ -341,7 +345,12 @@ export function setupAdminListeners() {
                     return new Promise((resolve, reject) => {
                         try {
                             const { promise, abort } = uploadImageToDrive(file, catSlug, customFileName, (pct) => {
-                                percentText.innerText = `${Math.round(pct)}%`;
+                                const rounded = Math.round(pct);
+                                percentText.innerText = `${rounded}%`;
+                                // The background overlay recedes downwards to "reveal" the image
+                                fillOverlay.style.bottom = `${rounded}%`;
+                                // Image regains color as it uploads
+                                imgPreview.style.filter = `grayscale(${100 - rounded}%) brightness(${0.5 + (rounded / 200)})`;
                             });
                             abortUpload = abort;
                             promise.then(url => {
