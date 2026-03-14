@@ -242,7 +242,6 @@ export function setupAdminListeners() {
         // ── Drive file picker: upload images on selection ──
         const fileInput = document.getElementById('admin-product-file-input');
         const statusDiv = document.getElementById('drive-upload-status');
-        const previewDiv = document.getElementById('admin-image-previews');
         const imageTextarea = document.getElementById('admin-product-image');
         const driveAuthNotice = document.getElementById('drive-auth-notice');
         const driveConnectBtn = document.getElementById('drive-connect-btn');
@@ -280,7 +279,6 @@ export function setupAdminListeners() {
 
                 const catSlug = adminProductCategory.value || 'products';
                 if (statusDiv) statusDiv.innerHTML = '';
-                if (previewDiv) previewDiv.innerHTML = '';
 
                 // Get current URLs from textarea
                 const existingUrls = imageTextarea ? imageTextarea.value.split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -307,20 +305,15 @@ export function setupAdminListeners() {
 
                             const url = await uploadImageToDrive(file, catSlug, customFileName);
                             allUrls.push(url);
+                            if (imageTextarea) imageTextarea.value = allUrls.join(', ');
+                            if (window.renderAdminImageCarousel) window.renderAdminImageCarousel();
                             row.innerHTML = `<span class="material-icons-round" style="font-size:16px;color:#22c55e;">check_circle</span> <span>${file.name}</span>`;
 
-                            // Show preview
-                            if (previewDiv) {
-                                const img = document.createElement('img');
-                                img.src = url;
-                                img.style.cssText = 'width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border-color);';
-                                previewDiv.appendChild(img);
-                            }
                         } catch (err) {
                             row.innerHTML = `<span class="material-icons-round" style="font-size:16px;color:#ef4444;">error</span> <span>${file.name}: ${err.message}</span>`;
                         }
                     }
-                    // Sync to hidden textarea
+                    // Final sync 
                     if (imageTextarea) imageTextarea.value = allUrls.join(', ');
                 })();
             });
@@ -453,7 +446,118 @@ export function setupAdminListeners() {
                 alert("Database Error! Message: " + (err.message || JSON.stringify(err)));
             }
         });
+
+        // Add paste-to-upload support
+        const carousel = document.getElementById('admin-image-carousel');
+        if (carousel && fileInput) {
+            carousel.addEventListener('paste', async (e) => {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                const files = [];
+                for (let index in items) {
+                    const item = items[index];
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        const blob = item.getAsFile();
+                        files.push(new File([blob], `pasted-image-${Date.now()}.${blob.type.split('/')[1]}`, { type: blob.type }));
+                    }
+                }
+                
+                if (files.length > 0) {
+                    e.preventDefault();
+                    const dataTransfer = new DataTransfer();
+                    files.forEach(f => dataTransfer.items.add(f));
+                    fileInput.files = dataTransfer.files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            });
+            // Allow clicking carousel void space to focus for paste
+            carousel.addEventListener('click', (e) => {
+                if (e.target === carousel) carousel.focus();
+            });
+        }
     }
+
+    // Carousel Renderer Helper
+    window.renderAdminImageCarousel = function() {
+        const carousel = document.getElementById('admin-image-carousel');
+        const addCard = document.getElementById('admin-add-photo-card');
+        const imageTextarea = document.getElementById('admin-product-image');
+        if (!carousel || !addCard || !imageTextarea) return;
+
+        const existingCards = carousel.querySelectorAll('.admin-image-card');
+        existingCards.forEach(c => c.remove());
+
+        const urls = imageTextarea.value.split(',').map(s => s.trim()).filter(Boolean);
+        
+        urls.forEach((url, index) => {
+            const card = document.createElement('div');
+            card.className = 'admin-image-card';
+            card.draggable = true;
+            card.dataset.index = index;
+            card.style.cssText = `
+                flex: 0 0 160px; height: 160px; border-radius: 8px; overflow: hidden; position: relative;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: grab; background: #fff; scroll-snap-align: start;
+                border: 2px solid transparent; transition: border 0.2s;
+            `;
+            
+            const img = document.createElement('img');
+            img.src = getAbsoluteImageUrl(url);
+            img.style.cssText = 'width: 100%; height: 100%; object-fit: contain; pointer-events: none;';
+            card.appendChild(img);
+
+            if (index === 0) {
+                const mainBadge = document.createElement('div');
+                mainBadge.textContent = 'Main';
+                mainBadge.style.cssText = 'position: absolute; top: 8px; left: 8px; background: var(--primary); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; pointer-events: none;box-shadow: 0 2px 4px rgba(0,0,0,0.2)';
+                card.appendChild(mainBadge);
+            }
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '<span class="material-icons-round" style="font-size:16px;">close</span>';
+            deleteBtn.style.cssText = 'position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;';
+            deleteBtn.onmouseover = () => deleteBtn.style.background = 'rgba(255,50,50,0.8)';
+            deleteBtn.onmouseout = () => deleteBtn.style.background = 'rgba(0,0,0,0.6)';
+            deleteBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (confirm('Remove this image?')) {
+                    urls.splice(index, 1);
+                    imageTextarea.value = urls.join(', ');
+                    window.renderAdminImageCarousel();
+                }
+            };
+            card.appendChild(deleteBtn);
+
+            card.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', index.toString());
+                card.style.opacity = '0.5';
+            });
+            card.addEventListener('dragend', (e) => {
+                card.style.opacity = '1';
+                carousel.querySelectorAll('.admin-image-card').forEach(c => c.style.borderColor = 'transparent');
+            });
+            card.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                card.style.borderColor = 'var(--primary)';
+            });
+            card.addEventListener('dragleave', (e) => {
+                card.style.borderColor = 'transparent';
+            });
+            card.addEventListener('drop', (e) => {
+                e.preventDefault();
+                card.style.borderColor = 'transparent';
+                const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                const toIndex = index;
+                if (!isNaN(fromIndex) && fromIndex !== toIndex) {
+                    const item = urls.splice(fromIndex, 1)[0];
+                    urls.splice(toIndex, 0, item);
+                    imageTextarea.value = urls.join(', ');
+                    window.renderAdminImageCarousel();
+                }
+            });
+
+            carousel.insertBefore(card, addCard);
+        });
+    };
 
     // Attach to Window since these are invoked from HTML directly
     window.openEditModal = function (productId = null) {
@@ -479,34 +583,10 @@ export function setupAdminListeners() {
             const adminProductDesc = document.getElementById('admin-product-description');
             if (adminProductImageEl) adminProductImageEl.value = (product.images && product.images.length > 0) ? product.images.join(', ') : (product.image || '');
 
-            // Handle image cover UI and previews
-            const editPreviewDiv = document.getElementById('admin-image-previews');
+            // Handle image UI
             const editStatusDiv = document.getElementById('drive-upload-status');
-            const coverSection = document.getElementById('admin-cover-image-section');
-            const coverImage = document.getElementById('admin-cover-image');
-            const uploadArea = document.getElementById('drive-upload-area');
-            const existingUrls = adminProductImageEl ? adminProductImageEl.value.split(',').map(s => s.trim()).filter(Boolean) : [];
-
-            if (editPreviewDiv) {
-                editPreviewDiv.innerHTML = '';
-                existingUrls.forEach(url => {
-                    const img = document.createElement('img');
-                    img.src = getAbsoluteImageUrl(url);
-                    img.style.cssText = 'width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border-color);';
-                    editPreviewDiv.appendChild(img);
-                });
-            }
             if (editStatusDiv) editStatusDiv.innerHTML = '';
-
-            // Toggle cover image layout
-            if (existingUrls.length > 0) {
-                if (coverSection) coverSection.style.display = 'block';
-                if (coverImage) coverImage.src = getAbsoluteImageUrl(existingUrls[0]);
-                if (uploadArea) uploadArea.style.display = 'none';
-            } else {
-                if (coverSection) coverSection.style.display = 'none';
-                if (uploadArea) uploadArea.style.display = 'flex';
-            }
+            if (window.renderAdminImageCarousel) window.renderAdminImageCarousel();
 
             if (adminProductDesc) adminProductDesc.value = product.description || '';
             const adminProductStock = document.getElementById('admin-product-stock');
@@ -522,17 +602,12 @@ export function setupAdminListeners() {
             if (adminProductId) adminProductId.removeAttribute('data-original-cat');
 
             // Reset image layout for new product
-            const coverSection = document.getElementById('admin-cover-image-section');
-            const uploadArea = document.getElementById('drive-upload-area');
-            const editPreviewDiv = document.getElementById('admin-image-previews');
             const editStatusDiv = document.getElementById('drive-upload-status');
             const adminProductImageEl = document.getElementById('admin-product-image');
 
-            if (coverSection) coverSection.style.display = 'none';
-            if (uploadArea) uploadArea.style.display = 'flex';
-            if (editPreviewDiv) editPreviewDiv.innerHTML = '';
             if (editStatusDiv) editStatusDiv.innerHTML = '';
             if (adminProductImageEl) adminProductImageEl.value = '';
+            if (window.renderAdminImageCarousel) window.renderAdminImageCarousel();
 
             let catName = "";
             let catCheck = state.categories.find(c => c.slug === state.currentCategorySlug);
