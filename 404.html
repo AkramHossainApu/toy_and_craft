@@ -67,9 +67,9 @@
         <div class="nav-container">
             <div class="logo">
                 <img src="assets/tc_logo.png" alt="Logo" class="site-logo-img">
-                <h1 class="logo-text" id="site-title"
-                    style="cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; margin-left: 10px; font-size: 1.5rem; display: inline-block;">Toy
-                    & Craft</h1>
+                <span class="logo-text" id="site-title"
+                    style="cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; margin-left: 10px;">Toy
+                    & Craft</span>
             </div>
             <div class="nav-actions">
                 <button class="icon-btn cart-toggle" id="cart-toggle" aria-label="Open Cart"
@@ -111,6 +111,7 @@
 
     <!-- Removed Hero and Features Sections -->
     <main id="main-content" style="display: none;">
+        <h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Toy & Craft</h1>
         <!-- Shop Section -->
         <section id="shop" class="shop-section">
             <div class="section-header" style="position: relative;">
@@ -274,38 +275,21 @@
                 </div>
             </div>
         </section>
-    </main>
 
-    <!-- About Section -->
-    <section id="about" class="about-section" style="padding: 4rem 1.5rem; background: var(--card-bg); border-top: 1px solid var(--border-color);">
-        <div class="container" style="max-width: 800px; margin: 0 auto; text-align: center;">
-            <h2 style="font-family: var(--font-heading); color: var(--primary); margin-bottom: 1.5rem;">About Toy & Craft</h2>
-            <p style="line-height: 1.8; color: var(--text-muted); font-size: 1.1rem;">
-                Toy & Craft is an e-commerce platform dedicated to bringing joy through our premium collection of Mini Bricks and handcrafted Key Rings. 
-            </p>
-            <div style="margin-top: 2rem; padding: 1.5rem; background: var(--bg-main); border-radius: 12px; border: 1px dashed var(--primary);">
-                <h3 style="font-family: var(--font-heading); color: var(--secondary); margin-bottom: 1rem; font-size: 1.2rem;">Google API Transparency & Data Usage</h3>
-                <p style="line-height: 1.6; color: var(--text-muted); font-size: 1rem;">
-                    To efficiently manage our product catalog, our administrative dashboard utilizes the <strong>Google Drive API</strong>. 
-                    This integration is strictly used for hosting and managing product images. We do not access, store, or share any personal user data from your Google account.
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-bottom" style="text-align: center; padding: 2rem; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                <p style="font-size: 0.8rem; color: var(--text-muted); max-width: 600px; margin: 0 0 0.5rem 0; line-height: 1.4;">
+                    Toy & Craft is an e-commerce platform for premium mini bricks and handcrafted key rings. Our administrative interface utilizes Google Drive API integrations to securely store and manage product catalog imagery.
                 </p>
+                <p>&copy; 2026 Toy & Craft. All rights reserved.</p>
+                <div style="display: flex; gap: 1.5rem; font-size: 0.9rem;">
+                    <a href="privacy-policy" style="color: var(--primary); text-decoration: none;">Privacy Policy</a>
+                    <a href="terms-of-services" style="color: var(--primary); text-decoration: none;">Terms of Service</a>
+                </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-bottom" style="text-align: center; padding: 2rem; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-            <p style="font-size: 0.8rem; color: var(--text-muted); max-width: 600px; margin: 0 0 0.5rem 0; line-height: 1.4;">
-                Toy & Craft is an e-commerce platform for premium mini bricks and handcrafted key rings. Our administrative interface utilizes Google Drive API integrations to securely store and manage product catalog imagery.
-            </p>
-            <p>&copy; 2026 Toy & Craft. All rights reserved.</p>
-            <div style="display: flex; gap: 1.5rem; font-size: 0.9rem;">
-                <a href="privacy-policy" style="color: var(--primary); text-decoration: none; font-weight: 600;">Privacy Policy</a>
-                <a href="terms-of-services" style="color: var(--primary); text-decoration: none; font-weight: 600;">Terms of Service</a>
-            </div>
-        </div>
-    </footer>
+        </footer>
+    </main>
 
     <!-- Cart Overlay & Sidebar -->
     <div class="cart-overlay" id="cart-overlay"></div>
