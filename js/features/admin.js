@@ -374,10 +374,22 @@ export function setupAdminListeners() {
                     results.forEach(res => {
                         if (res.status === 'fulfilled' && res.value && res.value.url) {
                             allUrls.push(res.value.url);
-                            res.value.card.remove(); // Remove placeholder now that it's finished
+                            
+                            // Visual indication of success before vanishing
+                            const finalCardText = res.value.card.querySelector('span');
+                            if (finalCardText) {
+                                finalCardText.innerText = '100%';
+                                finalCardText.style.color = '#4ade80';
+                            }
+                            
+                            // Delay removal so user sees 100% for an instant on ultra-fast network connections
+                            setTimeout(() => {
+                                res.value.card.remove(); 
+                            }, 800);
+                            
                         } else if (res.status === 'rejected' && res.reason && res.reason.err) {
                             console.error('Upload Error for', res.reason.file.name, ':', res.reason.err);
-                            // Show error toast or indicator
+                            alert(`Upload Error for ${res.reason.file.name}:\n${res.reason.err.message || res.reason.err}`);
                         }
                     });
                     
