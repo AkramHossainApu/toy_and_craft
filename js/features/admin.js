@@ -366,9 +366,6 @@ export function setupAdminListeners() {
                     });
                 });
 
-                // Clear input early so user can select same files again if needed
-                fileInput.value = '';
-
                 let uploadsInProgress = true;
                 const submitBtn = adminProductForm.querySelector('[type="submit"]');
                 if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Uploading...'; }
@@ -389,6 +386,9 @@ export function setupAdminListeners() {
 
                     uploadsInProgress = false;
                     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Save Product'; }
+
+                    // Clear input after all uploads complete to avoid Blob invalidation race conditions on PC browsers
+                    fileInput.value = '';
                 });
             });
         }
