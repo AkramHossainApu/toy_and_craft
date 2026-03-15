@@ -64,7 +64,12 @@ async function refreshAccessToken(refreshToken) {
     });
 
     const data = await res.json();
-    if (data.error) throw new Error('Drive token refresh failed: ' + data.error_description);
+    if (data.error) {
+        localStorage.removeItem(LS_ACCESS_TOKEN);
+        localStorage.removeItem(LS_REFRESH_TOKEN);
+        localStorage.removeItem(LS_ACCESS_EXPIRY);
+        throw new Error('Drive token refresh failed: ' + data.error_description + ' - Please reload page and click Connect Drive again.');
+    }
 
     const expiresAt = Date.now() + (data.expires_in * 1000);
     localStorage.setItem(LS_ACCESS_TOKEN, data.access_token);
