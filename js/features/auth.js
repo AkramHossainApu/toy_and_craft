@@ -628,10 +628,12 @@ export function setupAuthListeners() {
                         registerEmailHint.textContent = '✓ Email is available.';
                         registerEmailHint.style.color = '#28a745';
                         registerGetOtpWrapper.style.display = 'block';
+                        registerGetOtpBtn.disabled = false;
                     } else {
                         registerEmailHint.textContent = '✗ Account already exists with this email. Please login instead.';
                         registerEmailHint.style.color = '#ff4444';
                         registerGetOtpWrapper.style.display = 'none';
+                        registerGetOtpBtn.disabled = true;
                     }
                 } catch (err) {
                     console.error('Email check error:', err);
@@ -706,10 +708,12 @@ export function setupAuthListeners() {
                         forgotEmailHint.textContent = '✓ Account found. You can request an OTP.';
                         forgotEmailHint.style.color = '#28a745';
                         forgotGetOtpWrapper.style.display = 'block';
+                        forgotGetOtpBtn.disabled = false;
                     } else {
                         forgotEmailHint.textContent = '✗ No account found with this email address.';
                         forgotEmailHint.style.color = '#ff4444';
                         forgotGetOtpWrapper.style.display = 'none';
+                        forgotGetOtpBtn.disabled = true;
                     }
                 } catch (err) {
                     console.error('Account check error:', err);
