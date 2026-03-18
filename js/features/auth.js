@@ -6,9 +6,249 @@ import {
     profileUsernameInput, profileUseridInput, profileMobileInput, profileAddressInput, profileDistrictInput, profileThanaInput,
     authModal, showRegisterBtn, showLoginBtn, authLogoutBtn, loginIdentifierInput, loginPasswordInput, loginRememberInput, loginSubmitBtn,
     registerUsernameInput, registerUseridInput, registerMobileInput, registerPasswordInput, registerAddressInput, registerDistrictInput, registerThanaInput, registerRememberInput, registerSubmitBtn,
-    profileUpdateBtn, closeAuthModalBtn, profileOrdersList
+    profileUpdateBtn, closeAuthModalBtn, profileOrdersList,
+    // Email & OTP Elements
+    registerEmailInput, registerEmailHint, registerGetOtpBtn, registerOtpSection, registerOtpInput,
+    registerOtpHint, registerResendOtpBtn, registerOtpTimer, registerHiddenFields, registerGetOtpWrapper, registerEmailGroup,
+    // Forgot Password Elements
+    forgotPasswordView, forgotEmailInput, forgotEmailHint, forgotGetOtpBtn, forgotOtpSection,
+    forgotOtpInput, forgotOtpHint, forgotResendOtpBtn, forgotOtpTimer, forgotNewPasswordSection,
+    forgotNewPasswordInput, forgotConfirmPasswordInput, forgotSubmitBtn, forgotGetOtpWrapper, forgotEmailGroup,
+    showForgotPasswordBtn, showLoginFromForgotBtn,
+    // Profile Email & OTP Elements
+    profileEmailInput, profileChangeEmailBtn, profileEmailHint, profileGetOtpBtn, profileOtpSection,
+    profileOtpInput, profileOtpHint, profileResendOtpBtn, profileOtpTimer, profileGetOtpWrapper, profileEmailGroup
 } from '../core/dom.js';
 import { generateSlug } from '../core/utils.js';
+
+// =============================================
+// EmailJS Configuration — UPDATE THESE VALUES
+// =============================================
+const EMAILJS_PUBLIC_KEY = 'OjiCre7MrMd4cQykO';    // Updated with user's key
+const EMAILJS_SERVICE_ID = 'service_ae64ka8';    // Updated with user's service ID
+const EMAILJS_TEMPLATE_ID = 'template_cgls9sh';  // Updated with user's template ID
+
+// OTP State (in-memory, per session)
+const otpState = {
+    register: { code: null, expiry: null, timer: null, email: null },
+    forgot: { code: null, expiry: null, timer: null, email: null },
+    profile: { code: null, expiry: null, timer: null, email: null }
+};
+
+// =============================================
+// Email Validation Helper
+// =============================================
+function validateEmail(email, hintEl) {
+    email = email.trim().toLowerCase();
+    if (!email) {
+        hintEl.textContent = 'Email is required.';
+        hintEl.style.color = 'var(--text-muted)';
+        return false;
+    }
+    if (email.endsWith('.edu')) {
+        hintEl.textContent = '⚠ Please don\'t use a student email. Use a normal email (e.g. @gmail.com).';
+        hintEl.style.color = '#f59e0b';
+        return false;
+    }
+    if (email.endsWith('@gmail.com')) {
+        hintEl.textContent = '✓ Valid Gmail address.';
+        hintEl.style.color = '#28a745';
+        return true;
+    }
+    // Anything else
+    hintEl.textContent = '✗ Invalid email. Please use a valid Gmail address (@gmail.com).';
+    hintEl.style.color = '#ff4444';
+    return false;
+}
+
+// =============================================
+// OTP Generation, Sending & Verification
+// =============================================
+function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function startOtpTimer(context, timerEl, resendBtn) {
+    let remaining = 5 * 60; // 5 minutes in seconds
+    resendBtn.disabled = true;
+
+    // Clear any existing timer
+    if (otpState[context].timer) clearInterval(otpState[context].timer);
+
+    const updateDisplay = () => {
+        const min = Math.floor(remaining / 60);
+        const sec = remaining % 60;
+        timerEl.textContent = `⏱ ${min}:${sec.toString().padStart(2, '0')}`;
+        timerEl.style.color = remaining <= 60 ? '#ff4444' : 'var(--primary)';
+    };
+    updateDisplay();
+
+    otpState[context].timer = setInterval(() => {
+        remaining--;
+        updateDisplay();
+        if (remaining <= 0) {
+            clearInterval(otpState[context].timer);
+            otpState[context].code = null;
+            timerEl.textContent = '⏱ Expired';
+            timerEl.style.color = '#ff4444';
+            resendBtn.disabled = false;
+        }
+        // Enable resend after 30 seconds
+        if (remaining <= (5 * 60 - 30)) {
+            resendBtn.disabled = false;
+        }
+    }, 1000);
+}
+
+async function sendOtpEmail(toEmail, otpCode) {
+    try {
+        // Initialize EmailJS if not already done
+        if (window.emailjs) {
+            window.emailjs.init(EMAILJS_PUBLIC_KEY);
+        }
+
+        await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+            to_email: toEmail,
+            otp_code: otpCode,
+            expiry_minutes: '5'
+        });
+        return true;
+    } catch (err) {
+        console.error('EmailJS Error:', err);
+        return false;
+    }
+}
+
+function setupOtpFlow(context, {
+    emailInput, emailHint, getOtpBtn, getOtpWrapper, emailGroup,
+    otpSection, otpInput, otpHint, resendBtn, timerEl,
+    onVerified
+}) {
+    // Email real-time validation
+    emailInput.addEventListener('input', () => {
+        const isValid = validateEmail(emailInput.value, emailHint);
+        getOtpBtn.disabled = !isValid;
+    });
+
+    // Get OTP button
+    getOtpBtn.addEventListener('click', async () => {
+        const email = emailInput.value.trim().toLowerCase();
+        if (!validateEmail(email, emailHint)) return;
+
+        getOtpBtn.disabled = true;
+        getOtpBtn.textContent = 'Sending OTP...';
+
+        const otp = generateOTP();
+        otpState[context].code = otp;
+        otpState[context].expiry = Date.now() + 5 * 60 * 1000;
+        otpState[context].email = email;
+
+        const sent = await sendOtpEmail(email, otp);
+
+        if (sent) {
+            // Hide email input, show OTP section
+            emailGroup.style.display = 'none';
+            getOtpWrapper.style.display = 'none';
+            otpSection.style.display = 'block';
+            otpInput.value = '';
+            otpInput.focus();
+            otpHint.textContent = 'Check your Gmail inbox for the verification code.';
+            otpHint.style.color = 'var(--text-muted)';
+            startOtpTimer(context, timerEl, resendBtn);
+        } else {
+            emailHint.textContent = '✗ Failed to send OTP. Please try again.';
+            emailHint.style.color = '#ff4444';
+            getOtpBtn.disabled = false;
+            getOtpBtn.textContent = 'Get OTP';
+        }
+    });
+
+    // Resend OTP
+    resendBtn.addEventListener('click', async () => {
+        const email = otpState[context].email;
+        if (!email) return;
+
+        resendBtn.disabled = true;
+        resendBtn.textContent = 'Sending...';
+
+        const otp = generateOTP();
+        otpState[context].code = otp;
+        otpState[context].expiry = Date.now() + 5 * 60 * 1000;
+
+        const sent = await sendOtpEmail(email, otp);
+
+        if (sent) {
+            otpHint.textContent = '✓ New OTP sent! Check your inbox.';
+            otpHint.style.color = '#28a745';
+            otpInput.value = '';
+            otpInput.focus();
+            startOtpTimer(context, timerEl, resendBtn);
+        } else {
+            otpHint.textContent = '✗ Failed to resend. Try again shortly.';
+            otpHint.style.color = '#ff4444';
+        }
+        resendBtn.textContent = 'Resend OTP';
+    });
+
+    // Real-time OTP verification (auto-verify when 6 digits entered)
+    otpInput.addEventListener('input', () => {
+        // Only allow digits
+        otpInput.value = otpInput.value.replace(/[^0-9]/g, '');
+
+        if (otpInput.value.length === 6) {
+            if (!otpState[context].code || Date.now() > otpState[context].expiry) {
+                otpHint.textContent = '✗ OTP has expired. Please request a new one.';
+                otpHint.style.color = '#ff4444';
+                return;
+            }
+            if (otpInput.value === otpState[context].code) {
+                // SUCCESS
+                otpHint.textContent = '✓ Email verified successfully!';
+                otpHint.style.color = '#28a745';
+                otpInput.disabled = true;
+                otpInput.style.borderColor = '#28a745';
+                resendBtn.disabled = true;
+                if (otpState[context].timer) clearInterval(otpState[context].timer);
+                timerEl.textContent = '✓ Verified';
+                timerEl.style.color = '#28a745';
+
+                // Trigger callback
+                setTimeout(() => onVerified(otpState[context].email), 400);
+            } else {
+                otpHint.textContent = '✗ Incorrect OTP. Please try again.';
+                otpHint.style.color = '#ff4444';
+            }
+        }
+    });
+}
+
+// Reset OTP form state
+function resetOtpUI(context, {
+    emailGroup, emailInput, emailHint, getOtpBtn, getOtpWrapper,
+    otpSection, otpInput, otpHint, resendBtn, timerEl
+}) {
+    if (otpState[context].timer) clearInterval(otpState[context].timer);
+    otpState[context] = { code: null, expiry: null, timer: null, email: null };
+
+    emailGroup.style.display = 'block';
+    getOtpWrapper.style.display = 'block';
+    emailInput.value = '';
+    emailHint.textContent = context === 'register' ? 'Only Gmail addresses are accepted.' : 'Enter your registered Gmail address.';
+    emailHint.style.color = 'var(--text-muted)';
+    getOtpBtn.disabled = true;
+    getOtpBtn.textContent = 'Get OTP';
+
+    otpSection.style.display = 'none';
+    otpInput.value = '';
+    otpInput.disabled = false;
+    otpInput.style.borderColor = '';
+    otpHint.textContent = 'Check your Gmail inbox for the verification code.';
+    otpHint.style.color = 'var(--text-muted)';
+    timerEl.textContent = '⏱ 5:00';
+    timerEl.style.color = 'var(--primary)';
+    resendBtn.disabled = true;
+    resendBtn.textContent = 'Resend OTP';
+}
 
 // --- User Authentication & Profile Logic ---
 
@@ -109,10 +349,43 @@ export function openAuthModal(view = 'login') {
     if (registerForm) registerForm.reset();
     if (profileForm) profileForm.reset();
 
+    // Reset OTP states when modal opens
+    if (registerHiddenFields) registerHiddenFields.style.display = 'none';
+    resetOtpUI('register', {
+        emailGroup: registerEmailGroup, emailInput: registerEmailInput, emailHint: registerEmailHint,
+        getOtpBtn: registerGetOtpBtn, getOtpWrapper: registerGetOtpWrapper,
+        otpSection: registerOtpSection, otpInput: registerOtpInput, otpHint: registerOtpHint,
+        resendBtn: registerResendOtpBtn, timerEl: registerOtpTimer
+    });
+    resetOtpUI('forgot', {
+        emailGroup: forgotEmailGroup, emailInput: forgotEmailInput, emailHint: forgotEmailHint,
+        getOtpBtn: forgotGetOtpBtn, getOtpWrapper: forgotGetOtpWrapper,
+        otpSection: forgotOtpSection, otpInput: forgotOtpInput, otpHint: forgotOtpHint,
+        resendBtn: forgotResendOtpBtn, timerEl: forgotOtpTimer
+    });
+    resetOtpUI('profile', {
+        emailGroup: profileEmailGroup, emailInput: profileEmailInput, emailHint: profileEmailHint,
+        getOtpBtn: profileGetOtpBtn, getOtpWrapper: profileGetOtpWrapper,
+        otpSection: profileOtpSection, otpInput: profileOtpInput, otpHint: profileOtpHint,
+        resendBtn: profileResendOtpBtn, timerEl: profileOtpTimer
+    });
+    if (profileEmailInput) {
+        profileEmailInput.readOnly = true;
+        profileEmailInput.style.background = 'var(--bg-subtle)';
+        profileEmailInput.style.color = 'var(--text-muted)';
+        profileEmailInput.style.borderStyle = 'dashed';
+    }
+    if (profileChangeEmailBtn) {
+        profileChangeEmailBtn.textContent = 'Change';
+        profileChangeEmailBtn.style.display = 'block';
+    }
+    if (forgotNewPasswordSection) forgotNewPasswordSection.style.display = 'none';
+
     if (state.currentUser) {
         if (authModalTitle) authModalTitle.textContent = "Your Profile";
         if (loginView) loginView.style.display = 'none';
         if (registerView) registerView.style.display = 'none';
+        if (forgotPasswordView) forgotPasswordView.style.display = 'none';
         if (profileView) profileView.style.display = 'block';
 
         // Profile Tabs Engine
@@ -129,7 +402,7 @@ export function openAuthModal(view = 'login') {
                 tabOrders.style.color = 'var(--text-muted)';
                 contentDetails.style.display = 'block';
                 contentOrders.style.display = 'none';
-                if (window.updateUrlState) window.updateUrlState('Details'); // Optional pathing
+                if (window.updateUrlState) window.updateUrlState('Details');
             };
 
             tabOrders.onclick = () => {
@@ -140,15 +413,15 @@ export function openAuthModal(view = 'login') {
                 contentDetails.style.display = 'none';
                 contentOrders.style.display = 'block';
                 if (window.loadProfileOrders) window.loadProfileOrders();
-                if (window.updateUrlState) window.updateUrlState('Orders'); // Required pathing -> /{UserID}/Orders
+                if (window.updateUrlState) window.updateUrlState('Orders');
             };
 
-            // Force Details visible by default
             tabDetails.click();
         }
 
         if (profileUsernameInput) profileUsernameInput.value = state.currentUser.name || '';
         if (profileUseridInput) profileUseridInput.value = state.currentUser.id;
+        if (profileEmailInput) profileEmailInput.value = state.currentUser.email || '';
         if (profileMobileInput) profileMobileInput.value = state.currentUser.mobile || '';
         if (profileAddressInput) profileAddressInput.value = state.currentUser.address || '';
 
@@ -158,9 +431,7 @@ export function openAuthModal(view = 'login') {
                 mappedDistrict = "Dhaka";
             }
             profileDistrictInput.value = mappedDistrict;
-
             profileDistrictInput.dispatchEvent(new Event('change'));
-
             if (profileThanaInput && state.currentUser.thana) {
                 profileThanaInput.value = state.currentUser.thana;
             }
@@ -168,18 +439,27 @@ export function openAuthModal(view = 'login') {
 
         if (window.loadProfileOrders) window.loadProfileOrders();
     } else {
+        const hideAll = () => {
+            if (loginView) loginView.style.display = 'none';
+            if (registerView) registerView.style.display = 'none';
+            if (forgotPasswordView) forgotPasswordView.style.display = 'none';
+            if (profileView) profileView.style.display = 'none';
+        };
+
         if (view === 'login') {
+            hideAll();
             if (authModalTitle) authModalTitle.textContent = "Login";
             if (loginView) loginView.style.display = 'block';
-            if (registerView) registerView.style.display = 'none';
-            if (profileView) profileView.style.display = 'none';
+        } else if (view === 'forgot') {
+            hideAll();
+            if (authModalTitle) authModalTitle.textContent = "Reset Password";
+            if (forgotPasswordView) forgotPasswordView.style.display = 'block';
         } else {
+            hideAll();
             if (authModalTitle) authModalTitle.textContent = "Register";
-            if (loginView) loginView.style.display = 'none';
             if (registerView) registerView.style.display = 'block';
-            if (profileView) profileView.style.display = 'none';
         }
-        if (window.updateUrlState) window.updateUrlState(view); // Instantly update URL to /login or /register
+        if (window.updateUrlState) window.updateUrlState(view);
     }
 
     if (authModal) authModal.style.display = 'flex';
@@ -198,6 +478,268 @@ export function setupAuthListeners() {
 
     if (showRegisterBtn) showRegisterBtn.addEventListener('click', (e) => { e.preventDefault(); openAuthModal('register'); });
     if (showLoginBtn) showLoginBtn.addEventListener('click', (e) => { e.preventDefault(); openAuthModal('login'); });
+
+    // Forgot Password navigation
+    if (showForgotPasswordBtn) showForgotPasswordBtn.addEventListener('click', (e) => { e.preventDefault(); openAuthModal('forgot'); });
+    if (showLoginFromForgotBtn) showLoginFromForgotBtn.addEventListener('click', (e) => { e.preventDefault(); openAuthModal('login'); });
+
+    // === Password Visibility Toggle Handler ===
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = btn.previousElementSibling;
+            if (input && (input.type === 'password' || input.type === 'text')) {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    btn.textContent = 'visibility_off';
+                } else {
+                    input.type = 'password';
+                    btn.textContent = 'visibility';
+                }
+            }
+        });
+    });
+
+    // === Setup Register Email + OTP Flow ===
+    if (registerEmailInput && registerGetOtpBtn) {
+        setupOtpFlow('register', {
+            emailInput: registerEmailInput,
+            emailHint: registerEmailHint,
+            getOtpBtn: registerGetOtpBtn,
+            getOtpWrapper: registerGetOtpWrapper,
+            emailGroup: registerEmailGroup,
+            otpSection: registerOtpSection,
+            otpInput: registerOtpInput,
+            otpHint: registerOtpHint,
+            resendBtn: registerResendOtpBtn,
+            timerEl: registerOtpTimer,
+            onVerified: (email) => {
+                // Reveal hidden fields with animation
+                if (registerHiddenFields) {
+                    registerHiddenFields.style.display = 'block';
+                    registerHiddenFields.style.animation = 'otpReveal 0.4s ease-out';
+                    // Trigger username-based ID generation if username already filled
+                    if (registerUsernameInput && registerUsernameInput.value.trim()) {
+                        registerUsernameInput.dispatchEvent(new Event('input'));
+                    }
+                }
+            }
+        });
+    }
+
+    // === Setup Forgot Password Email + OTP Flow ===
+    if (forgotEmailInput && forgotGetOtpBtn) {
+        // Override Get OTP to first check if email exists in Firestore
+        forgotEmailInput.addEventListener('input', () => {
+            const isValid = validateEmail(forgotEmailInput.value, forgotEmailHint);
+            forgotGetOtpBtn.disabled = !isValid;
+        });
+
+        forgotGetOtpBtn.addEventListener('click', async () => {
+            const email = forgotEmailInput.value.trim().toLowerCase();
+            if (!validateEmail(email, forgotEmailHint)) return;
+
+            forgotGetOtpBtn.disabled = true;
+            forgotGetOtpBtn.textContent = 'Checking email...';
+
+            // Check if email exists in Users collection
+            try {
+                const q = query(collection(db, 'Users'), where('email', '==', email));
+                const snap = await getDocs(q);
+                if (snap.empty) {
+                    forgotEmailHint.textContent = '✗ No account found with this email address.';
+                    forgotEmailHint.style.color = '#ff4444';
+                    forgotGetOtpBtn.disabled = false;
+                    forgotGetOtpBtn.textContent = 'Get OTP';
+                    return;
+                }
+            } catch (err) {
+                console.error('Firestore query error:', err);
+                forgotEmailHint.textContent = '✗ Error checking email. Try again.';
+                forgotEmailHint.style.color = '#ff4444';
+                forgotGetOtpBtn.disabled = false;
+                forgotGetOtpBtn.textContent = 'Get OTP';
+                return;
+            }
+
+            // Email exists — send OTP
+            forgotGetOtpBtn.textContent = 'Sending OTP...';
+            const otp = generateOTP();
+            otpState.forgot.code = otp;
+            otpState.forgot.expiry = Date.now() + 5 * 60 * 1000;
+            otpState.forgot.email = email;
+
+            const sent = await sendOtpEmail(email, otp);
+            if (sent) {
+                forgotEmailGroup.style.display = 'none';
+                forgotGetOtpWrapper.style.display = 'none';
+                forgotOtpSection.style.display = 'block';
+                forgotOtpInput.value = '';
+                forgotOtpInput.focus();
+                forgotOtpHint.textContent = 'Check your Gmail inbox for the verification code.';
+                forgotOtpHint.style.color = 'var(--text-muted)';
+                startOtpTimer('forgot', forgotOtpTimer, forgotResendOtpBtn);
+            } else {
+                forgotEmailHint.textContent = '✗ Failed to send OTP. Please try again.';
+                forgotEmailHint.style.color = '#ff4444';
+                forgotGetOtpBtn.disabled = false;
+                forgotGetOtpBtn.textContent = 'Get OTP';
+            }
+        });
+
+        // Resend OTP for forgot
+        forgotResendOtpBtn.addEventListener('click', async () => {
+            const email = otpState.forgot.email;
+            if (!email) return;
+            forgotResendOtpBtn.disabled = true;
+            forgotResendOtpBtn.textContent = 'Sending...';
+
+            const otp = generateOTP();
+            otpState.forgot.code = otp;
+            otpState.forgot.expiry = Date.now() + 5 * 60 * 1000;
+
+            const sent = await sendOtpEmail(email, otp);
+            if (sent) {
+                forgotOtpHint.textContent = '✓ New OTP sent! Check your inbox.';
+                forgotOtpHint.style.color = '#28a745';
+                forgotOtpInput.value = '';
+                forgotOtpInput.focus();
+                startOtpTimer('forgot', forgotOtpTimer, forgotResendOtpBtn);
+            } else {
+                forgotOtpHint.textContent = '✗ Failed to resend. Try again shortly.';
+                forgotOtpHint.style.color = '#ff4444';
+            }
+            forgotResendOtpBtn.textContent = 'Resend OTP';
+        });
+
+        // Real-time OTP verification for forgot
+        forgotOtpInput.addEventListener('input', () => {
+            forgotOtpInput.value = forgotOtpInput.value.replace(/[^0-9]/g, '');
+            if (forgotOtpInput.value.length === 6) {
+                if (!otpState.forgot.code || Date.now() > otpState.forgot.expiry) {
+                    forgotOtpHint.textContent = '✗ OTP has expired. Please request a new one.';
+                    forgotOtpHint.style.color = '#ff4444';
+                    return;
+                }
+                if (forgotOtpInput.value === otpState.forgot.code) {
+                    forgotOtpHint.textContent = '✓ Email verified successfully!';
+                    forgotOtpHint.style.color = '#28a745';
+                    forgotOtpInput.disabled = true;
+                    forgotOtpInput.style.borderColor = '#28a745';
+                    forgotResendOtpBtn.disabled = true;
+                    if (otpState.forgot.timer) clearInterval(otpState.forgot.timer);
+                    forgotOtpTimer.textContent = '✓ Verified';
+                    forgotOtpTimer.style.color = '#28a745';
+
+                    // Show new password fields
+                    setTimeout(() => {
+                        forgotOtpSection.style.display = 'none';
+                        forgotNewPasswordSection.style.display = 'block';
+                        forgotNewPasswordSection.style.animation = 'otpReveal 0.4s ease-out';
+                        if (forgotNewPasswordInput) forgotNewPasswordInput.focus();
+                    }, 400);
+                } else {
+                    forgotOtpHint.textContent = '✗ Incorrect OTP. Please try again.';
+                    forgotOtpHint.style.color = '#ff4444';
+                }
+            }
+        });
+    }
+
+    // === Setup Profile Email + OTP Flow ===
+    if (profileEmailInput && profileGetOtpBtn) {
+        setupOtpFlow('profile', {
+            emailInput: profileEmailInput,
+            emailHint: profileEmailHint,
+            getOtpBtn: profileGetOtpBtn,
+            getOtpWrapper: profileGetOtpWrapper,
+            emailGroup: profileEmailGroup,
+            otpSection: profileOtpSection,
+            otpInput: profileOtpInput,
+            otpHint: profileOtpHint,
+            resendBtn: profileResendOtpBtn,
+            timerEl: profileOtpTimer,
+            onVerified: (email) => {
+                profileEmailInput.readOnly = true;
+                profileEmailInput.style.background = 'var(--bg-subtle)';
+                profileEmailInput.style.color = '#28a745'; // Green for verified
+                profileEmailInput.style.borderStyle = 'dashed';
+                profileEmailInput.style.borderColor = '#28a745';
+
+                profileOtpSection.style.display = 'none';
+                profileEmailHint.textContent = '✓ Email verified! Click Update Profile to save.';
+                profileEmailHint.style.color = '#28a745';
+            }
+        });
+    }
+
+    if (profileChangeEmailBtn) {
+        profileChangeEmailBtn.addEventListener('click', () => {
+            profileEmailInput.readOnly = false;
+            profileEmailInput.style.background = 'var(--bg-card)';
+            profileEmailInput.style.color = 'var(--text-main)';
+            profileEmailInput.style.borderStyle = 'solid';
+            profileEmailInput.style.borderColor = 'var(--primary)';
+            profileEmailInput.focus();
+
+            profileChangeEmailBtn.style.display = 'none';
+            profileGetOtpWrapper.style.display = 'block';
+            profileEmailHint.textContent = 'Enter your new Gmail address and verify.';
+            profileEmailHint.style.color = 'var(--text-muted)';
+        });
+    }
+
+    // === Forgot Password Submit (Reset Password) ===
+    if (forgotSubmitBtn) {
+        forgotSubmitBtn.addEventListener('click', async () => {
+            const newPass = forgotNewPasswordInput?.value;
+            const confirmPass = forgotConfirmPasswordInput?.value;
+
+            if (!newPass || !confirmPass) {
+                alert('Please fill in both password fields.');
+                return;
+            }
+            if (newPass !== confirmPass) {
+                alert('Passwords do not match.');
+                return;
+            }
+            if (newPass.length < 4) {
+                alert('Password must be at least 4 characters long.');
+                return;
+            }
+
+            const email = otpState.forgot.email;
+            if (!email) {
+                alert('Session expired. Please start over.');
+                openAuthModal('forgot');
+                return;
+            }
+
+            forgotSubmitBtn.disabled = true;
+            forgotSubmitBtn.textContent = 'Resetting...';
+
+            try {
+                const q = query(collection(db, 'Users'), where('email', '==', email));
+                const snap = await getDocs(q);
+                if (snap.empty) {
+                    alert('No account found. Please register instead.');
+                    openAuthModal('register');
+                    return;
+                }
+
+                const userDoc = snap.docs[0];
+                await updateDoc(doc(db, 'Users', userDoc.id), { password: newPass });
+
+                alert('Password reset successfully! Please log in with your new password.');
+                openAuthModal('login');
+            } catch (err) {
+                console.error('Password Reset Error:', err);
+                alert('Failed to reset password. Please try again.');
+            }
+
+            forgotSubmitBtn.disabled = false;
+            forgotSubmitBtn.textContent = 'Reset Password';
+        });
+    }
 
     if (authLogoutBtn) {
         authLogoutBtn.addEventListener('click', () => {
@@ -437,6 +979,7 @@ export function setupAuthListeners() {
             e.preventDefault();
             const username = registerUsernameInput.value.trim();
             const userid = registerUseridInput.value.trim();
+            const email = registerEmailInput?.value.trim().toLowerCase() || '';
             const mobile = registerMobileInput.value.trim();
             const password = registerPasswordInput.value;
             const address = registerAddressInput.value.trim();
@@ -477,6 +1020,7 @@ export function setupAuthListeners() {
 
                     await setDoc(userRef, {
                         username: username,
+                        email: email,
                         mobile: mobile,
                         password: password,
                         address: address,
@@ -485,7 +1029,7 @@ export function setupAuthListeners() {
                         createdAt: Date.now()
                     });
 
-                    state.currentUser = { id: userid, name: username, mobile: mobile, address: address, district: finalDistrict, thana: rawThana };
+                    state.currentUser = { id: userid, name: username, email: email, mobile: mobile, address: address, district: finalDistrict, thana: rawThana };
                     if (remember) {
                         localStorage.setItem('tc_user', JSON.stringify(state.currentUser));
                     } else {
@@ -521,6 +1065,15 @@ export function setupAuthListeners() {
             const newMobile = profileMobileInput.value.trim();
             const rawDistrict = profileDistrictInput.value;
             const rawThana = profileThanaInput.value;
+            const newEmail = profileEmailInput.value.trim().toLowerCase();
+
+            // Email Change Verification Check
+            if (newEmail !== (state.currentUser.email || '').toLowerCase()) {
+                if (otpState.profile.email !== newEmail) {
+                    alert("Please verify your new email address via OTP before saving.");
+                    return;
+                }
+            }
 
             if (!state.currentUser) return;
             if (!newUsername) {
@@ -577,7 +1130,8 @@ export function setupAuthListeners() {
                         address: newAddress,
                         mobile: newMobile,
                         district: finalDistrict,
-                        thana: rawThana
+                        thana: rawThana,
+                        email: profileEmailInput.value.trim()
                     };
 
                     // Create new doc
@@ -607,9 +1161,12 @@ export function setupAuthListeners() {
                         address: newAddress,
                         mobile: newMobile,
                         district: finalDistrict,
-                        thana: rawThana
+                        thana: rawThana,
+                        email: profileEmailInput.value.trim()
                     });
                 }
+
+                state.currentUser.email = profileEmailInput.value.trim();
 
                 state.currentUser.name = newUsername;
                 state.currentUser.address = newAddress;

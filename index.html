@@ -32,6 +32,8 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <!-- Styles -->
     <link rel="stylesheet" href="css/style.css?v=carousel_v2">
+    <!-- EmailJS SDK for OTP emails -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 
 <body>
@@ -506,13 +508,15 @@
                                     style="position: absolute; right: 10px; cursor: pointer; color: var(--text-muted); font-size: 1.2rem;">visibility</span>
                             </div>
                         </div>
-                        <div class="form-group checkbox-group"
-                            style="display: flex; align-items: center; justify-content: flex-start;">
+                        <div class="form-group"
+                            style="display: flex; align-items: center; justify-content: space-between;">
                             <label
                                 style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 0.9rem; cursor: pointer; flex-direction: row-reverse;">
                                 Keep me logged in
                                 <input type="checkbox" id="login-remember" checked>
                             </label>
+                            <a href="#" id="show-forgot-password-btn"
+                                style="font-size: 0.85rem; color: var(--primary); font-weight: 600; text-decoration: none;">Forgot Password?</a>
                         </div>
                         <div class="modal-actions" style="margin-top: 1rem; flex-direction: column; gap: 1rem;">
                             <button type="submit" class="btn btn-primary" id="login-submit-btn"
@@ -532,65 +536,170 @@
                             <label for="register-username">Username</label>
                             <input type="text" id="register-username" required placeholder="Choose a username">
                         </div>
-                        <div class="form-group">
-                            <label for="register-userid">Unique User ID (Editable)</label>
-                            <input type="text" id="register-userid" required style="color: var(--text-main);"
-                                placeholder="Auto-generated, modify carefully">
-                            <small id="register-userid-hint"
-                                style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Leave
-                                matching your username for best results.</small>
+
+                        <!-- Email Field + OTP Section -->
+                        <div class="form-group" id="register-email-group">
+                            <label for="register-email">Email Address <span style="color: #ff4444;">*</span></label>
+                            <input type="email" id="register-email" required placeholder="yourname@gmail.com"
+                                autocomplete="email">
+                            <small id="register-email-hint"
+                                style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Only
+                                Gmail addresses are accepted.</small>
                         </div>
-                        <div class="form-group">
-                            <label for="register-mobile">Mobile Number</label>
-                            <input type="tel" id="register-mobile" required placeholder="e.g. +1 234 567 8900">
+                        <div id="register-get-otp-wrapper" style="margin-bottom: 1rem;">
+                            <button type="button" class="btn btn-primary btn-sm" id="register-get-otp-btn"
+                                style="width: 100%; padding: 0.6rem;" disabled>Get OTP</button>
                         </div>
+
+                        <!-- OTP Verification Section (hidden until Get OTP clicked) -->
+                        <div id="register-otp-section" style="display: none; margin-bottom: 1rem;">
+                            <div class="form-group">
+                                <label for="register-otp">Enter 6-Digit OTP</label>
+                                <input type="text" id="register-otp" maxlength="6" placeholder="● ● ● ● ● ●"
+                                    autocomplete="one-time-code"
+                                    style="text-align: center; font-size: 1.4rem; letter-spacing: 8px; font-family: 'Courier New', monospace; font-weight: bold;">
+                                <small id="register-otp-hint"
+                                    style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Check
+                                    your Gmail inbox for the verification code.</small>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                <span id="register-otp-timer"
+                                    style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">⏱ 5:00</span>
+                                <button type="button" class="btn btn-secondary btn-sm" id="register-resend-otp-btn"
+                                    style="font-size: 0.8rem; padding: 0.3rem 0.8rem;" disabled>Resend OTP</button>
+                            </div>
+                        </div>
+
+                        <!-- Hidden fields: revealed only after OTP verification -->
+                        <div id="register-hidden-fields" style="display: none;">
+                            <div class="form-group">
+                                <label for="register-userid">Unique User ID (Editable)</label>
+                                <input type="text" id="register-userid" style="color: var(--text-main);"
+                                    placeholder="Auto-generated, modify carefully">
+                                <small id="register-userid-hint"
+                                    style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Leave
+                                    matching your username for best results.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="register-mobile">Mobile Number</label>
+                                <input type="tel" id="register-mobile" required placeholder="e.g. +1 234 567 8900">
+                            </div>
+                            <div class="form-group">
+                                <label for="register-password">Password</label>
+                                <div class="input-wrapper" style="position: relative; display: flex; align-items: center;">
+                                    <input type="password" id="register-password" required
+                                        style="width: 100%; padding-right: 40px;">
+                                    <span class="material-icons-round toggle-password"
+                                        style="position: absolute; right: 10px; cursor: pointer; color: var(--text-muted); font-size: 1.2rem;">visibility</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="register-address">Detailed Address</label>
+                                <textarea id="register-address" required rows="2"
+                                    style="width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: var(--bg-card); color: var(--text-main); font-family: var(--font-body); resize: vertical;"></textarea>
+                            </div>
+                            <div class="form-row" style="display: flex; gap: 1rem;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="register-district">District</label>
+                                    <select id="register-district" required
+                                        style="width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: var(--bg-card); color: var(--text-main);">
+                                        <option value="" disabled selected>Select District</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="register-thana">Thana / Area</label>
+                                    <select id="register-thana" required disabled
+                                        style="width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: var(--bg-hover); color: var(--text-main); cursor: not-allowed;">
+                                        <option value="" disabled selected>Select Thana</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group checkbox-group"
+                                style="display: flex; align-items: center; justify-content: flex-start;">
+                                <label
+                                    style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 0.9rem; cursor: pointer; flex-direction: row-reverse;">
+                                    Keep me logged in
+                                    <input type="checkbox" id="register-remember" checked>
+                                </label>
+                            </div>
+                            <div class="modal-actions" style="margin-top: 1rem; flex-direction: column; gap: 1rem;">
+                                <button type="submit" class="btn btn-primary" id="register-submit-btn"
+                                    style="width: 100%;">Register</button>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; font-size: 0.9rem; color: var(--text-muted); margin-top: 1rem;">
+                            Already have an account? <a href="#" id="show-login-btn"
+                                style="color: var(--primary); font-weight: 600;">Login Here</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Forgot Password View -->
+                <div id="forgot-password-view" style="display: none;">
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Enter the Gmail address associated with your account. We'll send you an OTP to verify your identity.</p>
+
+                    <!-- Email Input -->
+                    <div class="form-group" id="forgot-email-group">
+                        <label for="forgot-email">Email Address</label>
+                        <input type="email" id="forgot-email" required placeholder="yourname@gmail.com"
+                            autocomplete="email">
+                        <small id="forgot-email-hint"
+                            style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Enter your registered Gmail address.</small>
+                    </div>
+                    <div id="forgot-get-otp-wrapper" style="margin-bottom: 1rem;">
+                        <button type="button" class="btn btn-primary btn-sm" id="forgot-get-otp-btn"
+                            style="width: 100%; padding: 0.6rem;" disabled>Get OTP</button>
+                    </div>
+
+                    <!-- OTP Section -->
+                    <div id="forgot-otp-section" style="display: none; margin-bottom: 1rem;">
                         <div class="form-group">
-                            <label for="register-password">Password</label>
+                            <label for="forgot-otp">Enter 6-Digit OTP</label>
+                            <input type="text" id="forgot-otp" maxlength="6" placeholder="● ● ● ● ● ●"
+                                autocomplete="one-time-code"
+                                style="text-align: center; font-size: 1.4rem; letter-spacing: 8px; font-family: 'Courier New', monospace; font-weight: bold;">
+                            <small id="forgot-otp-hint"
+                                style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Check your Gmail inbox for the verification code.</small>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                            <span id="forgot-otp-timer"
+                                style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">⏱ 5:00</span>
+                            <button type="button" class="btn btn-secondary btn-sm" id="forgot-resend-otp-btn"
+                                style="font-size: 0.8rem; padding: 0.3rem 0.8rem;" disabled>Resend OTP</button>
+                        </div>
+                    </div>
+
+                    <!-- New Password Section (shown after OTP verified) -->
+                    <div id="forgot-new-password-section" style="display: none;">
+                        <div class="form-group">
+                            <label for="forgot-new-password">New Password</label>
                             <div class="input-wrapper" style="position: relative; display: flex; align-items: center;">
-                                <input type="password" id="register-password" required
+                                <input type="password" id="forgot-new-password" required
                                     style="width: 100%; padding-right: 40px;">
                                 <span class="material-icons-round toggle-password"
                                     style="position: absolute; right: 10px; cursor: pointer; color: var(--text-muted); font-size: 1.2rem;">visibility</span>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="register-address">Detailed Address</label>
-                            <textarea id="register-address" required rows="2"
-                                style="width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: var(--bg-card); color: var(--text-main); font-family: var(--font-body); resize: vertical;"></textarea>
-                        </div>
-                        <div class="form-row" style="display: flex; gap: 1rem;">
-                            <div class="form-group" style="flex: 1;">
-                                <label for="register-district">District</label>
-                                <select id="register-district" required
-                                    style="width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: var(--bg-card); color: var(--text-main);">
-                                    <option value="" disabled selected>Select District</option>
-                                </select>
+                            <label for="forgot-confirm-password">Confirm Password</label>
+                            <div class="input-wrapper" style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="forgot-confirm-password" required
+                                    style="width: 100%; padding-right: 40px;">
+                                <span class="material-icons-round toggle-password"
+                                    style="position: absolute; right: 10px; cursor: pointer; color: var(--text-muted); font-size: 1.2rem;">visibility</span>
                             </div>
-                            <div class="form-group" style="flex: 1;">
-                                <label for="register-thana">Thana / Area</label>
-                                <select id="register-thana" required disabled
-                                    style="width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: var(--bg-hover); color: var(--text-main); cursor: not-allowed;">
-                                    <option value="" disabled selected>Select Thana</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group checkbox-group"
-                            style="display: flex; align-items: center; justify-content: flex-start;">
-                            <label
-                                style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 0.9rem; cursor: pointer; flex-direction: row-reverse;">
-                                Keep me logged in
-                                <input type="checkbox" id="register-remember" checked>
-                            </label>
                         </div>
                         <div class="modal-actions" style="margin-top: 1rem; flex-direction: column; gap: 1rem;">
-                            <button type="submit" class="btn btn-primary" id="register-submit-btn"
-                                style="width: 100%;">Register</button>
-                            <div style="text-align: center; font-size: 0.9rem; color: var(--text-muted);">
-                                Already have an account? <a href="#" id="show-login-btn"
-                                    style="color: var(--primary); font-weight: 600;">Login Here</a>
-                            </div>
+                            <button type="button" class="btn btn-primary" id="forgot-submit-btn"
+                                style="width: 100%;">Reset Password</button>
                         </div>
-                    </form>
+                    </div>
+
+                    <div style="text-align: center; font-size: 0.9rem; color: var(--text-muted); margin-top: 1rem;">
+                        <a href="#" id="show-login-from-forgot-btn"
+                            style="color: var(--primary); font-weight: 600;">← Back to Login</a>
+                    </div>
                 </div>
 
                 <!-- Profile View (For logged in users) -->
@@ -617,6 +726,43 @@
                                 <small id="profile-userid-hint"
                                     style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Editing
                                     will migrate your account to the new ID.</small>
+                            </div>
+
+                            <!-- Profile Email & OTP Flow -->
+                            <div class="form-group" id="profile-email-group" style="margin-bottom: 0.5rem;">
+                                <label for="profile-email">Email Address</label>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="email" id="profile-email" readonly
+                                        style="flex: 1; background: var(--bg-subtle); color: var(--text-muted); border-style: dashed;"
+                                        placeholder="yourname@gmail.com">
+                                    <button type="button" class="btn btn-secondary btn-sm" id="profile-change-email-btn"
+                                        style="padding: 0.5rem 0.8rem; font-size: 0.85rem; height: 100%;">Change</button>
+                                </div>
+                                <small id="profile-email-hint"
+                                    style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Verified Gmail address.</small>
+                            </div>
+
+                            <div id="profile-get-otp-wrapper" style="display: none; margin-bottom: 1rem;">
+                                <button type="button" class="btn btn-primary btn-sm" id="profile-get-otp-btn"
+                                    style="width: 100%; padding: 0.6rem;" disabled>Get OTP for New Email</button>
+                            </div>
+
+                            <!-- Profile OTP Section -->
+                            <div id="profile-otp-section" style="display: none; margin-bottom: 1rem;">
+                                <div class="form-group">
+                                    <label for="profile-otp">Enter 6-Digit OTP</label>
+                                    <input type="text" id="profile-otp" maxlength="6" placeholder="● ● ● ● ● ●"
+                                        autocomplete="one-time-code"
+                                        style="text-align: center; font-size: 1.4rem; letter-spacing: 8px; font-family: 'Courier New', monospace; font-weight: bold;">
+                                    <small id="profile-otp-hint"
+                                        style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Verification code sent to your new Gmail.</small>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                    <span id="profile-otp-timer"
+                                        style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">⏱ 5:00</span>
+                                    <button type="button" class="btn btn-secondary btn-sm" id="profile-resend-otp-btn"
+                                        style="font-size: 0.8rem; padding: 0.3rem 0.8rem;" disabled>Resend OTP</button>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="profile-mobile">Mobile Number</label>

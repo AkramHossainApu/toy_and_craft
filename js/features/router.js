@@ -16,7 +16,7 @@ export function updateUrlState(categorySlug, pageNum = 1, productSlug = null) {
     if (!categorySlug) return;
 
     // Ignore updates for base auth actions where categorySlug is abused
-    if (['login', 'register', 'authenticate-admin', 'Details', 'Orders', 'Checkout...'].includes(categorySlug)) {
+    if (['login', 'register', 'forgot', 'authenticate-admin', 'Details', 'Orders', 'Checkout...'].includes(categorySlug)) {
         let newPath = `/${categorySlug}`;
         if (state.currentUser && (categorySlug === 'Details' || categorySlug === 'Orders')) {
             newPath = `/${state.currentUser.id}/${categorySlug}`;
@@ -106,7 +106,7 @@ export function processRoute() {
         let rawAction = parts.length > 1 ? parts[1] : parts[0];
         let maybeAction = rawAction.toLowerCase();
 
-        if (maybeAction === 'login' || maybeAction === 'register') {
+        if (maybeAction === 'login' || maybeAction === 'register' || maybeAction === 'forgot') {
             if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
             if (state.currentUser) {
                 // Already authenticated, reject Auth prompt

@@ -2071,3 +2071,32 @@ a {
     height: 20px;
   }
 }
+
+/* --- OTP Reveal Animation --- */
+@keyframes otpReveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* OTP Input Styling */
+#register-otp,
+#forgot-otp {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#register-otp:focus,
+#forgot-otp:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+/* Forgot Password Link Hover */
+#show-forgot-password-btn:hover {
+  text-decoration: underline;
+}

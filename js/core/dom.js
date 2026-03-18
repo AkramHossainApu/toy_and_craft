@@ -61,6 +61,51 @@ export const profileOrdersList = document.getElementById('profile-orders-list');
 export const profileUpdateBtn = document.getElementById('profile-update-btn');
 export const authLogoutBtn = document.getElementById('auth-logout-btn');
 
+// Register Email & OTP Elements
+export const registerEmailInput = document.getElementById('register-email');
+export const registerEmailHint = document.getElementById('register-email-hint');
+export const registerGetOtpBtn = document.getElementById('register-get-otp-btn');
+export const registerOtpSection = document.getElementById('register-otp-section');
+export const registerOtpInput = document.getElementById('register-otp');
+export const registerOtpHint = document.getElementById('register-otp-hint');
+export const registerResendOtpBtn = document.getElementById('register-resend-otp-btn');
+export const registerOtpTimer = document.getElementById('register-otp-timer');
+export const registerHiddenFields = document.getElementById('register-hidden-fields');
+export const registerGetOtpWrapper = document.getElementById('register-get-otp-wrapper');
+export const registerEmailGroup = document.getElementById('register-email-group');
+
+// Forgot Password Elements
+export const forgotPasswordView = document.getElementById('forgot-password-view');
+export const forgotEmailInput = document.getElementById('forgot-email');
+export const forgotEmailHint = document.getElementById('forgot-email-hint');
+export const forgotGetOtpBtn = document.getElementById('forgot-get-otp-btn');
+export const forgotOtpSection = document.getElementById('forgot-otp-section');
+export const forgotOtpInput = document.getElementById('forgot-otp');
+export const forgotOtpHint = document.getElementById('forgot-otp-hint');
+export const forgotResendOtpBtn = document.getElementById('forgot-resend-otp-btn');
+export const forgotOtpTimer = document.getElementById('forgot-otp-timer');
+export const forgotNewPasswordSection = document.getElementById('forgot-new-password-section');
+export const forgotNewPasswordInput = document.getElementById('forgot-new-password');
+export const forgotConfirmPasswordInput = document.getElementById('forgot-confirm-password');
+export const forgotSubmitBtn = document.getElementById('forgot-submit-btn');
+export const forgotGetOtpWrapper = document.getElementById('forgot-get-otp-wrapper');
+export const forgotEmailGroup = document.getElementById('forgot-email-group');
+export const showForgotPasswordBtn = document.getElementById('show-forgot-password-btn');
+export const showLoginFromForgotBtn = document.getElementById('show-login-from-forgot-btn');
+
+// Profile Email & OTP Elements
+export const profileEmailInput = document.getElementById('profile-email');
+export const profileChangeEmailBtn = document.getElementById('profile-change-email-btn');
+export const profileEmailHint = document.getElementById('profile-email-hint');
+export const profileGetOtpBtn = document.getElementById('profile-get-otp-btn');
+export const profileOtpSection = document.getElementById('profile-otp-section');
+export const profileOtpInput = document.getElementById('profile-otp');
+export const profileOtpHint = document.getElementById('profile-otp-hint');
+export const profileResendOtpBtn = document.getElementById('profile-resend-otp-btn');
+export const profileOtpTimer = document.getElementById('profile-otp-timer');
+export const profileGetOtpWrapper = document.getElementById('profile-get-otp-wrapper');
+export const profileEmailGroup = document.getElementById('profile-email-group');
+
 // Admin Elements
 export const siteTitle = document.getElementById('site-title');
 export const adminToolsBanner = document.getElementById('admin-tools-banner');
