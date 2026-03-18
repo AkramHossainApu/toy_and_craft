@@ -508,12 +508,12 @@
                                     style="position: absolute; right: 10px; cursor: pointer; color: var(--text-muted); font-size: 1.2rem;">visibility</span>
                             </div>
                         </div>
-                        <div class="form-group"
-                            style="display: flex; align-items: center; justify-content: space-between;">
+                        <div class="form-row"
+                            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
                             <label
-                                style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 0.9rem; cursor: pointer; flex-direction: row-reverse;">
-                                Keep me logged in
+                                style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 0.9rem; cursor: pointer; color: var(--text-muted);">
                                 <input type="checkbox" id="login-remember" checked>
+                                Keep me logged in
                             </label>
                             <a href="#" id="show-forgot-password-btn"
                                 style="font-size: 0.85rem; color: var(--primary); font-weight: 600; text-decoration: none;">Forgot Password?</a>
@@ -533,12 +533,20 @@
                 <div id="register-view" style="display: none;">
                     <form id="register-form">
                         <div class="form-group">
-                            <label for="register-username">Username</label>
+                            <label for="register-username">Username <span style="color: #ff4444;">*</span></label>
                             <input type="text" id="register-username" required placeholder="Choose a username">
+                        </div>
+                        <div class="form-group">
+                            <label for="register-userid">Unique User ID (Editable)</label>
+                            <input type="text" id="register-userid" style="color: var(--text-main);"
+                                placeholder="Auto-generated, modify carefully">
+                            <small id="register-userid-hint"
+                                style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Leave
+                                matching your username for best results.</small>
                         </div>
 
                         <!-- Email Field + OTP Section -->
-                        <div class="form-group" id="register-email-group">
+                        <div class="form-group" id="register-email-group" style="margin-bottom: 0.5rem;">
                             <label for="register-email">Email Address <span style="color: #ff4444;">*</span></label>
                             <input type="email" id="register-email" required placeholder="yourname@gmail.com"
                                 autocomplete="email">
@@ -573,16 +581,8 @@
                         <!-- Hidden fields: revealed only after OTP verification -->
                         <div id="register-hidden-fields" style="display: none;">
                             <div class="form-group">
-                                <label for="register-userid">Unique User ID (Editable)</label>
-                                <input type="text" id="register-userid" style="color: var(--text-main);"
-                                    placeholder="Auto-generated, modify carefully">
-                                <small id="register-userid-hint"
-                                    style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Leave
-                                    matching your username for best results.</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="register-mobile">Mobile Number</label>
-                                <input type="tel" id="register-mobile" required placeholder="e.g. +1 234 567 8900">
+                                <label for="register-mobile">Mobile Number <span style="color: #ff4444;">*</span></label>
+                                <input type="tel" id="register-mobile" required placeholder="e.g. 01712345678">
                             </div>
                             <div class="form-group">
                                 <label for="register-password">Password</label>
@@ -640,7 +640,7 @@
                     <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Enter the Gmail address associated with your account. We'll send you an OTP to verify your identity.</p>
 
                     <!-- Email Input -->
-                    <div class="form-group" id="forgot-email-group">
+                    <div class="form-group" id="forgot-email-group" style="margin-bottom: 0.5rem;">
                         <label for="forgot-email">Email Address</label>
                         <input type="email" id="forgot-email" required placeholder="yourname@gmail.com"
                             autocomplete="email">

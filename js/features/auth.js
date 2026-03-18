@@ -152,10 +152,7 @@ function setupOtpFlow(context, {
 
         if (sent) {
             // Hide Get OTP button, show OTP section
-            // In profile context, we keep the email input visible
-            if (context !== 'profile') {
-                emailGroup.style.display = 'none';
-            }
+            // We now keep emailGroup visible across all contexts for better UX
             getOtpWrapper.style.display = 'none';
             otpSection.style.display = 'block';
             otpInput.value = '';
@@ -410,6 +407,11 @@ export function openAuthModal(view = 'login') {
         otpSection: profileOtpSection, otpInput: profileOtpInput, otpHint: profileOtpHint,
         resendBtn: profileResendOtpBtn, timerEl: profileOtpTimer
     });
+
+    // Reset visibility for Get OTP wrappers (they should be hidden initially)
+    if (registerGetOtpWrapper) registerGetOtpWrapper.style.display = 'none';
+    if (forgotGetOtpWrapper) forgotGetOtpWrapper.style.display = 'none';
+    if (profileGetOtpWrapper) profileGetOtpWrapper.style.display = 'none';
     if (profileEmailInput) {
         profileEmailInput.readOnly = true;
         profileEmailInput.style.background = 'var(--bg-subtle)';
@@ -557,6 +559,15 @@ export function setupAuthListeners() {
             resendBtn: registerResendOtpBtn,
             timerEl: registerOtpTimer,
             onVerified: (email) => {
+                // Style email as verified
+                registerEmailInput.readOnly = true;
+                registerEmailInput.style.background = 'rgba(40, 167, 69, 0.05)';
+                registerEmailInput.style.color = '#28a745';
+                registerEmailInput.style.borderStyle = 'solid';
+                registerEmailInput.style.borderColor = '#28a745';
+                registerEmailHint.textContent = '✓ Email verified! Please complete the rest of the form.';
+                registerEmailHint.style.color = '#28a745';
+
                 // Reveal hidden fields with animation
                 if (registerHiddenFields) {
                     registerHiddenFields.style.display = 'block';
@@ -568,14 +579,20 @@ export function setupAuthListeners() {
                 }
             }
         });
+
+        // Toggle Get OTP button only after valid email is entered
+        registerEmailInput.addEventListener('input', () => {
+            const isValid = validateEmail(registerEmailInput.value, registerEmailHint);
+            registerGetOtpWrapper.style.display = isValid ? 'block' : 'none';
+        });
     }
 
     // === Setup Forgot Password Email + OTP Flow ===
     if (forgotEmailInput && forgotGetOtpBtn) {
-        // Override Get OTP to first check if email exists in Firestore
+        // Toggle Get OTP button only after valid email is entered
         forgotEmailInput.addEventListener('input', () => {
             const isValid = validateEmail(forgotEmailInput.value, forgotEmailHint);
-            forgotGetOtpBtn.disabled = !isValid;
+            forgotGetOtpWrapper.style.display = isValid ? 'block' : 'none';
         });
 
         forgotGetOtpBtn.addEventListener('click', async () => {
@@ -614,7 +631,7 @@ export function setupAuthListeners() {
 
             const sent = await sendOtpEmail(email, otp);
             if (sent) {
-                forgotEmailGroup.style.display = 'none';
+                // Keep emailGroup visible, hide button, show OTP
                 forgotGetOtpWrapper.style.display = 'none';
                 forgotOtpSection.style.display = 'block';
                 forgotOtpInput.value = '';
