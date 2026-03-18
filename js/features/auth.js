@@ -5,8 +5,8 @@ import {
     loginForm, registerForm, profileForm, authModalTitle, loginView, registerView, profileView,
     profileUsernameInput, profileUseridInput, profileMobileInput, profileAddressInput, profileDistrictInput, profileThanaInput,
     authModal, showRegisterBtn, showLoginBtn, authLogoutBtn, loginIdentifierInput, loginPasswordInput, loginRememberInput, loginSubmitBtn,
-    registerUsernameInput, registerUseridInput, registerMobileInput, registerPasswordInput, registerAddressInput, registerDistrictInput, registerThanaInput, registerRememberInput, registerSubmitBtn,
-    profileUpdateBtn, closeAuthModalBtn, profileOrdersList,
+    registerUsernameInput, registerUseridInput, registerMobileInput, registerMobileHint, registerPasswordInput, registerAddressInput, registerDistrictInput, registerThanaInput, registerRememberInput, registerSubmitBtn,
+    profileUpdateBtn, closeAuthModalBtn, profileOrdersList, profileMobileHint,
     // Email & OTP Elements
     registerEmailInput, registerEmailHint, registerGetOtpBtn, registerOtpSection, registerOtpInput,
     registerOtpHint, registerResendOtpBtn, registerOtpTimer, registerHiddenFields, registerGetOtpWrapper, registerEmailGroup,
@@ -368,6 +368,8 @@ export function checkProfileChanges() {
     if (originalDistrict === "Dhaka City" || originalDistrict === "Dhaka Sub-Urban") {
         originalDistrict = "Dhaka";
     }
+    const mobileHint = document.getElementById('profile-mobile-hint');
+    const isMobileTaken = mobileHint && mobileHint.style.color === 'rgb(255, 68, 68)';
 
     const hasChanged = 
         profileUsernameInput.value.trim() !== (state.currentUser.name || '') ||
@@ -378,7 +380,7 @@ export function checkProfileChanges() {
         currentDistrict !== originalDistrict ||
         profileThanaInput.value !== (state.currentUser.thana || '');
 
-    profileUpdateBtn.style.display = hasChanged ? 'block' : 'none';
+    profileUpdateBtn.style.display = (hasChanged && !isMobileTaken) ? 'block' : 'none';
 }
 window.initLocationDropdowns = initLocationDropdowns;
 
@@ -580,50 +582,134 @@ export function setupAuthListeners() {
             }
         });
 
-        // Toggle Get OTP button only after valid email is entered
+        // Real-time unique email check for Register
+        let registerEmailDebounce;
         registerEmailInput.addEventListener('input', () => {
-            const isValid = validateEmail(registerEmailInput.value, registerEmailHint);
-            registerGetOtpWrapper.style.display = isValid ? 'block' : 'none';
+            clearTimeout(registerEmailDebounce);
+            const email = registerEmailInput.value.trim().toLowerCase();
+            const isValidFormat = validateEmail(email, registerEmailHint);
+
+            if (!isValidFormat) {
+                registerGetOtpWrapper.style.display = 'none';
+                return;
+            }
+
+            if (email === '') {
+                registerGetOtpWrapper.style.display = 'none';
+                registerEmailHint.textContent = 'Only Gmail addresses are accepted.';
+                registerEmailHint.style.color = 'var(--text-muted)';
+                return;
+            }
+
+            registerEmailHint.textContent = 'Checking availability...';
+            registerEmailHint.style.color = 'var(--text-muted)';
+            registerGetOtpWrapper.style.display = 'none';
+
+            registerEmailDebounce = setTimeout(async () => {
+                try {
+                    const q = query(collection(db, 'Users'), where('email', '==', email));
+                    const snap = await getDocs(q);
+                    if (snap.empty) {
+                        registerEmailHint.textContent = '✓ Email is available.';
+                        registerEmailHint.style.color = '#28a745';
+                        registerGetOtpWrapper.style.display = 'block';
+                    } else {
+                        registerEmailHint.textContent = '✗ Account already exists with this email. Please login instead.';
+                        registerEmailHint.style.color = '#ff4444';
+                        registerGetOtpWrapper.style.display = 'none';
+                    }
+                } catch (err) {
+                    console.error('Email check error:', err);
+                    registerEmailHint.textContent = '✗ Error checking email. Try again.';
+                    registerEmailHint.style.color = '#ff4444';
+                }
+            }, 600);
+        });
+
+        // Real-time unique mobile check for Register
+        let registerMobileDebounce;
+        registerMobileInput.addEventListener('input', () => {
+            clearTimeout(registerMobileDebounce);
+            const mobile = registerMobileInput.value.trim();
+            if (mobile.length < 10) {
+                registerMobileHint.textContent = 'Enter a valid mobile number.';
+                registerMobileHint.style.color = 'var(--text-muted)';
+                return;
+            }
+            registerMobileHint.textContent = 'Checking availability...';
+            registerMobileHint.style.color = 'var(--text-muted)';
+
+            registerMobileDebounce = setTimeout(async () => {
+                try {
+                    const q = query(collection(db, 'Users'), where('mobile', '==', mobile));
+                    const snap = await getDocs(q);
+                    if (snap.empty) {
+                        registerMobileHint.textContent = '✓ Mobile number is available.';
+                        registerMobileHint.style.color = '#28a745';
+                    } else {
+                        registerMobileHint.textContent = '✗ This number is already registered. Please use another.';
+                        registerMobileHint.style.color = '#ff4444';
+                    }
+                } catch (err) {
+                    registerMobileHint.textContent = '✗ Error checking mobile. Try again.';
+                    registerMobileHint.style.color = '#ff4444';
+                }
+            }, 600);
         });
     }
 
     // === Setup Forgot Password Email + OTP Flow ===
     if (forgotEmailInput && forgotGetOtpBtn) {
-        // Toggle Get OTP button only after valid email is entered
+        // Real-time account check for Forgot Password
+        let forgotEmailDebounce;
         forgotEmailInput.addEventListener('input', () => {
-            const isValid = validateEmail(forgotEmailInput.value, forgotEmailHint);
-            forgotGetOtpWrapper.style.display = isValid ? 'block' : 'none';
+            clearTimeout(forgotEmailDebounce);
+            const email = forgotEmailInput.value.trim().toLowerCase();
+            const isValidFormat = validateEmail(email, forgotEmailHint);
+
+            if (!isValidFormat) {
+                forgotGetOtpWrapper.style.display = 'none';
+                return;
+            }
+
+            if (email === '') {
+                forgotGetOtpWrapper.style.display = 'none';
+                forgotEmailHint.textContent = 'Enter your registered Gmail address.';
+                forgotEmailHint.style.color = 'var(--text-muted)';
+                return;
+            }
+
+            forgotEmailHint.textContent = 'Checking account...';
+            forgotEmailHint.style.color = 'var(--text-muted)';
+            forgotGetOtpWrapper.style.display = 'none';
+
+            forgotEmailDebounce = setTimeout(async () => {
+                try {
+                    const q = query(collection(db, 'Users'), where('email', '==', email));
+                    const snap = await getDocs(q);
+                    if (!snap.empty) {
+                        forgotEmailHint.textContent = '✓ Account found. You can request an OTP.';
+                        forgotEmailHint.style.color = '#28a745';
+                        forgotGetOtpWrapper.style.display = 'block';
+                    } else {
+                        forgotEmailHint.textContent = '✗ No account found with this email address.';
+                        forgotEmailHint.style.color = '#ff4444';
+                        forgotGetOtpWrapper.style.display = 'none';
+                    }
+                } catch (err) {
+                    console.error('Account check error:', err);
+                    forgotEmailHint.textContent = '✗ Error checking account. Try again.';
+                    forgotEmailHint.style.color = '#ff4444';
+                }
+            }, 600);
         });
 
         forgotGetOtpBtn.addEventListener('click', async () => {
             const email = forgotEmailInput.value.trim().toLowerCase();
-            if (!validateEmail(email, forgotEmailHint)) return;
-
+            // Final check — though button is only visible if found
             forgotGetOtpBtn.disabled = true;
-            forgotGetOtpBtn.textContent = 'Checking email...';
-
-            // Check if email exists in Users collection
-            try {
-                const q = query(collection(db, 'Users'), where('email', '==', email));
-                const snap = await getDocs(q);
-                if (snap.empty) {
-                    forgotEmailHint.textContent = '✗ No account found with this email address.';
-                    forgotEmailHint.style.color = '#ff4444';
-                    forgotGetOtpBtn.disabled = false;
-                    forgotGetOtpBtn.textContent = 'Get OTP';
-                    return;
-                }
-            } catch (err) {
-                console.error('Firestore query error:', err);
-                forgotEmailHint.textContent = '✗ Error checking email. Try again.';
-                forgotEmailHint.style.color = '#ff4444';
-                forgotGetOtpBtn.disabled = false;
-                forgotGetOtpBtn.textContent = 'Get OTP';
-                return;
-            }
-
-            // Email exists — send OTP
             forgotGetOtpBtn.textContent = 'Sending OTP...';
+
             const otp = generateOTP();
             otpState.forgot.code = otp;
             otpState.forgot.expiry = Date.now() + 5 * 60 * 1000;
@@ -726,7 +812,7 @@ export function setupAuthListeners() {
                 profileEmailInput.style.color = '#28a745'; 
                 profileEmailInput.style.borderStyle = 'solid';
                 profileEmailInput.style.borderColor = '#28a745';
-
+ 
                 profileOtpSection.style.display = 'none';
                 profileEmailHint.textContent = '✓ Email verified! Click Update Profile to save.';
                 profileEmailHint.style.color = '#28a745';
@@ -737,6 +823,95 @@ export function setupAuthListeners() {
                 // Check and show update button after verification
                 checkProfileChanges();
             }
+        });
+
+        // Real-time unique email check for Profile Change
+        let profileEmailDebounce;
+        profileEmailInput.addEventListener('input', () => {
+            if (profileEmailInput.readOnly) return; 
+            
+            clearTimeout(profileEmailDebounce);
+            const email = profileEmailInput.value.trim().toLowerCase();
+            const isValidFormat = validateEmail(email, profileEmailHint);
+
+            profileGetOtpWrapper.style.display = 'none';
+
+            if (!isValidFormat) {
+                return;
+            }
+
+            if (email === state.currentUser?.email?.toLowerCase()) {
+                profileEmailHint.textContent = 'This is your current email.';
+                profileEmailHint.style.color = 'var(--text-muted)';
+                return;
+            }
+
+            profileEmailHint.textContent = 'Checking availability...';
+            profileEmailHint.style.color = 'var(--text-muted)';
+
+            profileEmailDebounce = setTimeout(async () => {
+                try {
+                    const q = query(collection(db, 'Users'), where('email', '==', email));
+                    const snap = await getDocs(q);
+                    
+                    if (snap.empty) {
+                        profileEmailHint.textContent = '✓ Email is available.';
+                        profileEmailHint.style.color = '#28a745';
+                        profileGetOtpWrapper.style.display = 'block';
+                    } else {
+                        profileEmailHint.textContent = '✗ This email is already taken. Please use a different one.';
+                        profileEmailHint.style.color = '#ff4444';
+                        profileGetOtpWrapper.style.display = 'none';
+                    }
+                } catch (err) {
+                    console.error('Profile email check error:', err);
+                    profileEmailHint.textContent = '✗ Error checking email. Try again.';
+                    profileEmailHint.style.color = '#ff4444';
+                }
+            }, 600);
+        });
+
+        // Real-time unique mobile check for Profile
+        let profileMobileDebounce;
+        profileMobileInput.addEventListener('input', () => {
+            clearTimeout(profileMobileDebounce);
+            const mobile = profileMobileInput.value.trim();
+            const originalMobile = (state.currentUser?.mobile || '');
+
+            if (mobile === originalMobile) {
+                profileMobileHint.textContent = '';
+                checkProfileChanges();
+                return;
+            }
+
+            if (mobile.length < 10) {
+                profileMobileHint.textContent = 'Enter a valid mobile number.';
+                profileMobileHint.style.color = 'var(--text-muted)';
+                checkProfileChanges();
+                return;
+            }
+
+            profileMobileHint.textContent = 'Checking availability...';
+            profileMobileHint.style.color = 'var(--text-muted)';
+
+            profileMobileDebounce = setTimeout(async () => {
+                try {
+                    const q = query(collection(db, 'Users'), where('mobile', '==', mobile));
+                    const snap = await getDocs(q);
+                    if (snap.empty) {
+                        profileMobileHint.textContent = '✓ Mobile number available.';
+                        profileMobileHint.style.color = '#28a745';
+                    } else {
+                        profileMobileHint.textContent = '✗ Already taken by another account.';
+                        profileMobileHint.style.color = '#ff4444';
+                    }
+                    checkProfileChanges(); 
+                } catch (err) {
+                    profileMobileHint.textContent = '✗ Error checking availability.';
+                    profileMobileHint.style.color = '#ff4444';
+                    checkProfileChanges();
+                }
+            }, 600);
         });
     }
 
@@ -753,28 +928,6 @@ export function setupAuthListeners() {
             profileGetOtpWrapper.style.display = 'none'; // Initially hide until valid new email
             profileEmailHint.textContent = 'Enter your new Gmail address.';
             profileEmailHint.style.color = 'var(--text-muted)';
-        });
-
-        profileEmailInput.addEventListener('input', () => {
-            if (profileEmailInput.readOnly) return;
-            const newEmail = profileEmailInput.value.trim().toLowerCase();
-            const currentEmail = (state.currentUser?.email || '').toLowerCase();
-            const isValid = validateEmail(newEmail, profileEmailHint);
-            
-            if (isValid && newEmail !== currentEmail) {
-                profileGetOtpWrapper.style.display = 'block';
-                profileEmailHint.textContent = 'Email is valid. Verify now to change.';
-                profileEmailHint.style.color = 'var(--primary)';
-            } else {
-                profileGetOtpWrapper.style.display = 'none';
-                if (newEmail === currentEmail && newEmail !== '') {
-                    profileEmailHint.textContent = 'This is your current email.';
-                    profileEmailHint.style.color = 'var(--text-muted)';
-                } else if (newEmail === '') {
-                    profileEmailHint.textContent = 'Enter a new Gmail address.';
-                    profileEmailHint.style.color = 'var(--text-muted)';
-                }
-            }
         });
     }
 
@@ -1010,14 +1163,25 @@ export function setupAuthListeners() {
 
             loginSubmitBtn.disabled = true;
             loginSubmitBtn.textContent = "Checking...";
-
             try {
+                // 1. Try Document ID (User ID)
                 let userSnap = await getDoc(doc(db, 'Users', identifier));
+                
+                // 2. Try Mobile Number
                 if (!userSnap.exists()) {
                     const qMobile = query(collection(db, 'Users'), where('mobile', '==', identifier));
                     const qsMobile = await getDocs(qMobile);
                     if (!qsMobile.empty) {
                         userSnap = qsMobile.docs[0];
+                    }
+                }
+
+                // 3. Try Email Address
+                if (!userSnap.exists()) {
+                    const qEmail = query(collection(db, 'Users'), where('email', '==', identifier.toLowerCase()));
+                    const qsEmail = await getDocs(qEmail);
+                    if (!qsEmail.empty) {
+                        userSnap = qsEmail.docs[0];
                     }
                 }
 
@@ -1082,10 +1246,16 @@ export function setupAuthListeners() {
                 return;
             }
 
-            // Check if register button was disabled due to taken ID
+            // Check if register button was disabled due to taken ID or mobile
             const regHint = document.getElementById('register-userid-hint');
             if (regHint && regHint.style.color === 'rgb(255, 68, 68)') {
                 alert("The User ID '" + userid + "' is not available. Please choose a different one.");
+                return;
+            }
+
+            const mobHint = document.getElementById('register-mobile-hint');
+            if (mobHint && mobHint.style.color === 'rgb(255, 68, 68)') {
+                alert("This mobile number is already in use. Please use a different one.");
                 return;
             }
 
