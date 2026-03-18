@@ -120,9 +120,6 @@ async function sendOtpEmail(toEmail, otpCode) {
         return true;
     } catch (err) {
         console.error('EmailJS Error:', err);
-        // If it's a specific EmailJS error, it might have a text field
-        const errorMsg = err?.text || err?.message || 'Unknown error';
-        alert(`EmailJS Error: ${errorMsg}\n\nPlease check your Service ID, Template ID, and Public Key.`);
         return false;
     }
 }
@@ -154,8 +151,11 @@ function setupOtpFlow(context, {
         const sent = await sendOtpEmail(email, otp);
 
         if (sent) {
-            // Hide email input, show OTP section
-            emailGroup.style.display = 'none';
+            // Hide Get OTP button, show OTP section
+            // In profile context, we keep the email input visible
+            if (context !== 'profile') {
+                emailGroup.style.display = 'none';
+            }
             getOtpWrapper.style.display = 'none';
             otpSection.style.display = 'block';
             otpInput.value = '';
@@ -667,15 +667,19 @@ export function setupAuthListeners() {
             resendBtn: profileResendOtpBtn,
             timerEl: profileOtpTimer,
             onVerified: (email) => {
+                profileEmailInput.value = email; // Explicitly set verified email
                 profileEmailInput.readOnly = true;
-                profileEmailInput.style.background = 'var(--bg-subtle)';
-                profileEmailInput.style.color = '#28a745'; // Green for verified
-                profileEmailInput.style.borderStyle = 'dashed';
+                profileEmailInput.style.background = 'rgba(40, 167, 69, 0.05)'; // Subtle green bg
+                profileEmailInput.style.color = '#28a745'; 
+                profileEmailInput.style.borderStyle = 'solid';
                 profileEmailInput.style.borderColor = '#28a745';
 
                 profileOtpSection.style.display = 'none';
                 profileEmailHint.textContent = '✓ Email verified! Click Update Profile to save.';
                 profileEmailHint.style.color = '#28a745';
+                
+                // Keep the change button hidden until next modal open
+                if (profileChangeEmailBtn) profileChangeEmailBtn.style.display = 'none';
             }
         });
     }
@@ -690,9 +694,31 @@ export function setupAuthListeners() {
             profileEmailInput.focus();
 
             profileChangeEmailBtn.style.display = 'none';
-            profileGetOtpWrapper.style.display = 'block';
-            profileEmailHint.textContent = 'Enter your new Gmail address and verify.';
+            profileGetOtpWrapper.style.display = 'none'; // Initially hide until valid new email
+            profileEmailHint.textContent = 'Enter your new Gmail address.';
             profileEmailHint.style.color = 'var(--text-muted)';
+        });
+
+        profileEmailInput.addEventListener('input', () => {
+            if (profileEmailInput.readOnly) return;
+            const newEmail = profileEmailInput.value.trim().toLowerCase();
+            const currentEmail = (state.currentUser?.email || '').toLowerCase();
+            const isValid = validateEmail(newEmail, profileEmailHint);
+            
+            if (isValid && newEmail !== currentEmail) {
+                profileGetOtpWrapper.style.display = 'block';
+                profileEmailHint.textContent = 'Email is valid. Verify now to change.';
+                profileEmailHint.style.color = 'var(--primary)';
+            } else {
+                profileGetOtpWrapper.style.display = 'none';
+                if (newEmail === currentEmail && newEmail !== '') {
+                    profileEmailHint.textContent = 'This is your current email.';
+                    profileEmailHint.style.color = 'var(--text-muted)';
+                } else if (newEmail === '') {
+                    profileEmailHint.textContent = 'Enter a new Gmail address.';
+                    profileEmailHint.style.color = 'var(--text-muted)';
+                }
+            }
         });
     }
 
@@ -1175,7 +1201,6 @@ export function setupAuthListeners() {
                 }
 
                 state.currentUser.email = profileEmailInput.value.trim();
-
                 state.currentUser.name = newUsername;
                 state.currentUser.address = newAddress;
                 state.currentUser.mobile = newMobile;
