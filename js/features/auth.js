@@ -129,6 +129,8 @@ function setupOtpFlow(context, {
     otpSection, otpInput, otpHint, resendBtn, timerEl,
     onVerified
 }) {
+    if (!emailInput || !getOtpBtn || !otpInput) return;
+
     // Email real-time validation
     emailInput.addEventListener('input', () => {
         const isValid = validateEmail(emailInput.value, emailHint);
@@ -151,8 +153,6 @@ function setupOtpFlow(context, {
         const sent = await sendOtpEmail(email, otp);
 
         if (sent) {
-            // Hide Get OTP button, show OTP section
-            // We now keep emailGroup visible across all contexts for better UX
             getOtpWrapper.style.display = 'none';
             otpSection.style.display = 'block';
             otpInput.value = '';
@@ -169,35 +169,36 @@ function setupOtpFlow(context, {
     });
 
     // Resend OTP
-    resendBtn.addEventListener('click', async () => {
-        const email = otpState[context].email;
-        if (!email) return;
+    if (resendBtn) {
+        resendBtn.addEventListener('click', async () => {
+            const email = otpState[context].email;
+            if (!email) return;
 
-        resendBtn.disabled = true;
-        resendBtn.textContent = 'Sending...';
+            resendBtn.disabled = true;
+            resendBtn.textContent = 'Sending...';
 
-        const otp = generateOTP();
-        otpState[context].code = otp;
-        otpState[context].expiry = Date.now() + 5 * 60 * 1000;
+            const otp = generateOTP();
+            otpState[context].code = otp;
+            otpState[context].expiry = Date.now() + 5 * 60 * 1000;
 
-        const sent = await sendOtpEmail(email, otp);
+            const sent = await sendOtpEmail(email, otp);
 
-        if (sent) {
-            otpHint.textContent = '✓ New OTP sent! Check your inbox.';
-            otpHint.style.color = '#28a745';
-            otpInput.value = '';
-            otpInput.focus();
-            startOtpTimer(context, timerEl, resendBtn);
-        } else {
-            otpHint.textContent = '✗ Failed to resend. Try again shortly.';
-            otpHint.style.color = '#ff4444';
-        }
-        resendBtn.textContent = 'Resend OTP';
-    });
+            if (sent) {
+                otpHint.textContent = '✓ New OTP sent! Check your inbox.';
+                otpHint.style.color = '#28a745';
+                otpInput.value = '';
+                otpInput.focus();
+                startOtpTimer(context, timerEl, resendBtn);
+            } else {
+                otpHint.textContent = '✗ Failed to resend. Try again shortly.';
+                otpHint.style.color = '#ff4444';
+            }
+            resendBtn.textContent = 'Resend OTP';
+        });
+    }
 
     // Real-time OTP verification (auto-verify when 6 digits entered)
     otpInput.addEventListener('input', () => {
-        // Only allow digits
         otpInput.value = otpInput.value.replace(/[^0-9]/g, '');
 
         if (otpInput.value.length === 6) {
@@ -207,17 +208,17 @@ function setupOtpFlow(context, {
                 return;
             }
             if (otpInput.value === otpState[context].code) {
-                // SUCCESS
                 otpHint.textContent = '✓ Email verified successfully!';
                 otpHint.style.color = '#28a745';
                 otpInput.disabled = true;
                 otpInput.style.borderColor = '#28a745';
-                resendBtn.disabled = true;
+                if (resendBtn) resendBtn.disabled = true;
                 if (otpState[context].timer) clearInterval(otpState[context].timer);
-                timerEl.textContent = '✓ Verified';
-                timerEl.style.color = '#28a745';
+                if (timerEl) {
+                    timerEl.textContent = '✓ Verified';
+                    timerEl.style.color = '#28a745';
+                }
 
-                // Trigger callback
                 setTimeout(() => onVerified(otpState[context].email), 400);
             } else {
                 otpHint.textContent = '✗ Incorrect OTP. Please try again.';
@@ -232,27 +233,39 @@ function resetOtpUI(context, {
     emailGroup, emailInput, emailHint, getOtpBtn, getOtpWrapper,
     otpSection, otpInput, otpHint, resendBtn, timerEl
 }) {
-    if (otpState[context].timer) clearInterval(otpState[context].timer);
+    if (otpState[context] && otpState[context].timer) clearInterval(otpState[context].timer);
     otpState[context] = { code: null, expiry: null, timer: null, email: null };
 
-    emailGroup.style.display = 'block';
-    getOtpWrapper.style.display = context === 'profile' ? 'none' : 'block';
-    emailInput.value = '';
-    emailHint.textContent = context === 'register' ? 'Only Gmail addresses are accepted.' : 'Enter your registered Gmail address.';
-    emailHint.style.color = 'var(--text-muted)';
-    getOtpBtn.disabled = true;
-    getOtpBtn.textContent = 'Get OTP';
+    if (emailGroup) emailGroup.style.display = 'block';
+    if (getOtpWrapper) getOtpWrapper.style.display = context === 'profile' ? 'none' : 'block';
+    if (emailInput) emailInput.value = '';
+    if (emailHint) {
+        emailHint.textContent = context === 'register' ? 'Only Gmail addresses are accepted.' : 'Enter your registered Gmail address.';
+        emailHint.style.color = 'var(--text-muted)';
+    }
+    if (getOtpBtn) {
+        getOtpBtn.disabled = true;
+        getOtpBtn.textContent = 'Get OTP';
+    }
 
-    otpSection.style.display = 'none';
-    otpInput.value = '';
-    otpInput.disabled = false;
-    otpInput.style.borderColor = '';
-    otpHint.textContent = 'Check your Gmail inbox for the verification code.';
-    otpHint.style.color = 'var(--text-muted)';
-    timerEl.textContent = '⏱ 5:00';
-    timerEl.style.color = 'var(--primary)';
-    resendBtn.disabled = true;
-    resendBtn.textContent = 'Resend OTP';
+    if (otpSection) otpSection.style.display = 'none';
+    if (otpInput) {
+        otpInput.value = '';
+        otpInput.disabled = false;
+        otpInput.style.borderColor = '';
+    }
+    if (otpHint) {
+        otpHint.textContent = 'Check your Gmail inbox for the verification code.';
+        otpHint.style.color = 'var(--text-muted)';
+    }
+    if (timerEl) {
+        timerEl.textContent = '⏱ 5:00';
+        timerEl.style.color = 'var(--primary)';
+    }
+    if (resendBtn) {
+        resendBtn.disabled = true;
+        resendBtn.textContent = 'Resend OTP';
+    }
 }
 
 // --- User Authentication & Profile Logic ---
@@ -510,7 +523,9 @@ export function openAuthModal(view = 'login') {
         if (window.updateUrlState) window.updateUrlState(view);
     }
 
-    if (authModal) authModal.style.display = 'flex';
+    if (authModal) {
+        authModal.style.display = 'flex';
+    }
 }
 window.openAuthModal = openAuthModal;
 
@@ -806,14 +821,15 @@ export function setupAuthListeners() {
             resendBtn: profileResendOtpBtn,
             timerEl: profileOtpTimer,
             onVerified: (email) => {
-                profileEmailInput.value = email; // Explicitly set verified email
+                state.currentUser.email = email;
+                if (localStorage.getItem('tc_user')) localStorage.setItem('tc_user', JSON.stringify(state.currentUser));
+                if (sessionStorage.getItem('tc_user')) sessionStorage.setItem('tc_user', JSON.stringify(state.currentUser));
+                
                 profileEmailInput.readOnly = true;
-                profileEmailInput.style.background = 'rgba(40, 167, 69, 0.05)'; // Subtle green bg
-                profileEmailInput.style.color = '#28a745'; 
-                profileEmailInput.style.borderStyle = 'solid';
-                profileEmailInput.style.borderColor = '#28a745';
- 
-                profileOtpSection.style.display = 'none';
+                profileEmailInput.style.background = 'var(--bg-subtle)';
+                profileEmailInput.style.color = 'var(--text-muted)';
+                profileEmailInput.style.borderStyle = 'dashed';
+                
                 profileEmailHint.textContent = '✓ Email verified! Click Update Profile to save.';
                 profileEmailHint.style.color = '#28a745';
                 
@@ -1191,6 +1207,7 @@ export function setupAuthListeners() {
                         state.currentUser = {
                             id: userSnap.id,
                             name: data.username || '',
+                            email: data.email || '',
                             mobile: data.mobile || '',
                             address: data.address || '',
                             district: data.district || '',

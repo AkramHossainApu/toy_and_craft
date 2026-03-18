@@ -1,4 +1,3 @@
-console.log("APP.JS STARTING: Module evaluation has begun.");
 import { state, setAdmin } from './core/state.js';
 import { db, doc, getDoc, collection, getDocs } from './config/firebase.js';
 import {
@@ -98,12 +97,35 @@ export async function fetchAllProducts() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log("APP.JS DOMContentLoaded: Initializing application...");
-    // 1. Recover User session securely
+    // 0. Session Recovery & Auth Logic
     try {
         const localUser = localStorage.getItem('tc_user') || sessionStorage.getItem('tc_user');
         if (localUser) {
-            state.currentUser = JSON.parse(localUser);
+            const parsed = JSON.parse(localUser);
+            // Refresh user data from Firestore to ensure all fields (like email) are present
+            try {
+                const userSnap = await getDoc(doc(db, 'Users', parsed.id));
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    state.currentUser = {
+                        id: userSnap.id,
+                        name: data.username || '',
+                        email: data.email || '',
+                        mobile: data.mobile || '',
+                        address: data.address || '',
+                        district: data.district || '',
+                        thana: data.thana || ''
+                    };
+                    // Update storage with fresh data
+                    const storage = localStorage.getItem('tc_user') ? localStorage : sessionStorage;
+                    storage.setItem('tc_user', JSON.stringify(state.currentUser));
+                } else {
+                    state.currentUser = parsed;
+                }
+            } catch (err) {
+                console.error("Failed to refresh user data", err);
+                state.currentUser = parsed;
+            }
             await handleFirebaseCartSync(state.currentUser.id);
         } else {
             const localCart = localStorage.getItem('tc_cart');
@@ -114,7 +136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Local session recovery failed", e);
     }
 
-    // 2. Attach specialized listeners
+    // 1. Attach specialized listeners
     setupAuthListeners();
     setupCartListeners();
     setupShopListeners();
@@ -122,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupAdminOrderListeners();
     setupSearchListeners();
 
-    // 2.5 Initialize Visual Toggles & Stored Global States
+    // 2. Initialize Visual Toggles & Stored Global States
     if (themeToggleBtn) {
         if (localStorage.getItem('tc_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
@@ -181,26 +203,43 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     updateAuthUI();
 
-    // 3. Global Error Recovery handler (Removed RetryBtn as it doesn't exist in HTML)
-
-    // 4. Initial Bootstrap Data Fetch
-    fetchSiteMetadata(); // Non blocking metadata fetch
-
+    // 3. Critical Data Fetching (Parallelized)
     try {
-        // Parallelize independent queries. Product fetching MUST wait for Categories to populate first.
+        const fetchMetadata = async () => {
+            const metaSnap = await getDoc(doc(db, 'Settings', 'SiteMetadata'));
+            if (metaSnap.exists()) {
+                const data = metaSnap.data();
+                // Only update navbar title if site_name exists, otherwise keep Toy & Craft
+                if (data.site_name && siteTitle) {
+                    siteTitle.textContent = data.site_name;
+                } else if (siteTitle) {
+                    siteTitle.textContent = "Toy & Craft";
+                }
+
+                if (data.title && homeTitle) homeTitle.textContent = data.title;
+                if (data.subtitle && homeSubtitle) homeSubtitle.textContent = data.subtitle;
+                
+                // Tab title should be the brand name
+                document.title = data.site_name || "Toy & Craft";
+            }
+        };
+
+        // Parallel fetch for critical data
         await Promise.all([
+            fetchMetadata(),
             fetchCategories().then(() => fetchAllProducts()),
             fetchSteadfastLocations().then(() => {
-                console.log("APP.JS: fetchSteadfastLocations completed. Data length:", Object.keys(state.steadfastLocations).length);
                 initLocationDropdowns();
             })
         ]);
+
     } catch (err) {
-        if (window.showErrorPage) window.showErrorPage("Failed to load store data. Please check your connection.");
+        console.error("APP INITIALIZATION ERROR:", err);
+        showErrorPage("Application failed to load critical data. Please check your internet connection.");
         return; // Halt initialization if critical data fails
     }
 
-    // 5. Initialize Routing Engine & Trigger Component Renders
+    // 4. Initialize Routing Engine & Trigger Component Renders
     if (appLoader) appLoader.style.display = 'none';
     if (navbar) navbar.style.display = 'block';
     if (mainContent) mainContent.style.display = 'block';

@@ -15,6 +15,7 @@ export function getAbsoluteImageUrl(img) {
 }
 
 export function showErrorPage(message) {
+    if (appLoader) appLoader.style.display = 'none';
     if (shopSection) shopSection.style.display = 'none';
     if (productViewSection) productViewSection.style.display = 'none';
     if (checkoutView) checkoutView.style.display = 'none';
