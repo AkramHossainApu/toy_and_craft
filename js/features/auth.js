@@ -239,7 +239,7 @@ function resetOtpUI(context, {
     otpState[context] = { code: null, expiry: null, timer: null, email: null };
 
     emailGroup.style.display = 'block';
-    getOtpWrapper.style.display = 'block';
+    getOtpWrapper.style.display = context === 'profile' ? 'none' : 'block';
     emailInput.value = '';
     emailHint.textContent = context === 'register' ? 'Only Gmail addresses are accepted.' : 'Enter your registered Gmail address.';
     emailHint.style.color = 'var(--text-muted)';
@@ -349,6 +349,39 @@ export function initLocationDropdowns() {
     if (profileDistrictInput && profileThanaInput) {
         profileDistrictInput.addEventListener('change', handleDistrictChange(profileThanaInput));
     }
+
+    // Add input listeners for all profile fields to track changes
+    [profileUsernameInput, profileUseridInput, profileEmailInput, profileMobileInput, profileAddressInput].forEach(el => {
+        if (el) el.addEventListener('input', checkProfileChanges);
+    });
+    [profileDistrictInput, profileThanaInput].forEach(el => {
+        if (el) el.addEventListener('change', checkProfileChanges);
+    });
+}
+
+export function checkProfileChanges() {
+    if (!profileUpdateBtn || !state.currentUser) return;
+
+    const currentEmail = profileEmailInput.value.trim().toLowerCase();
+    const originalEmail = (state.currentUser.email || '').toLowerCase();
+    
+    // District mapping check
+    let currentDistrict = profileDistrictInput.value;
+    let originalDistrict = state.currentUser.district || '';
+    if (originalDistrict === "Dhaka City" || originalDistrict === "Dhaka Sub-Urban") {
+        originalDistrict = "Dhaka";
+    }
+
+    const hasChanged = 
+        profileUsernameInput.value.trim() !== (state.currentUser.name || '') ||
+        profileUseridInput.value.trim().toLowerCase() !== (state.currentUser.id || '').toLowerCase() ||
+        currentEmail !== originalEmail ||
+        profileMobileInput.value.trim() !== (state.currentUser.mobile || '') ||
+        profileAddressInput.value.trim() !== (state.currentUser.address || '') ||
+        currentDistrict !== originalDistrict ||
+        profileThanaInput.value !== (state.currentUser.thana || '');
+
+    profileUpdateBtn.style.display = hasChanged ? 'block' : 'none';
 }
 window.initLocationDropdowns = initLocationDropdowns;
 
@@ -446,6 +479,9 @@ export function openAuthModal(view = 'login') {
         }
 
         if (window.loadProfileOrders) window.loadProfileOrders();
+
+        // Initial check to hide Update button
+        if (profileUpdateBtn) profileUpdateBtn.style.display = 'none';
     } else {
         const hideAll = () => {
             if (loginView) loginView.style.display = 'none';
@@ -680,6 +716,9 @@ export function setupAuthListeners() {
                 
                 // Keep the change button hidden until next modal open
                 if (profileChangeEmailBtn) profileChangeEmailBtn.style.display = 'none';
+
+                // Check and show update button after verification
+                checkProfileChanges();
             }
         });
     }
