@@ -105,16 +105,24 @@ async function sendOtpEmail(toEmail, otpCode) {
         // Initialize EmailJS if not already done
         if (window.emailjs) {
             window.emailjs.init(EMAILJS_PUBLIC_KEY);
+        } else {
+            console.error('EmailJS SDK not loaded.');
+            return false;
         }
 
-        await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        const response = await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
             to_email: toEmail,
             otp_code: otpCode,
             expiry_minutes: '5'
         });
+        
+        console.log('EmailJS Success:', response.status, response.text);
         return true;
     } catch (err) {
         console.error('EmailJS Error:', err);
+        // If it's a specific EmailJS error, it might have a text field
+        const errorMsg = err?.text || err?.message || 'Unknown error';
+        alert(`EmailJS Error: ${errorMsg}\n\nPlease check your Service ID, Template ID, and Public Key.`);
         return false;
     }
 }
