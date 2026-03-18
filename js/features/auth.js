@@ -1499,21 +1499,35 @@ export async function loadProfileOrders() {
         orders.forEach(order => {
             const dateStr = new Date(order.createdAt).toLocaleDateString();
             const el = document.createElement('div');
-            el.style.cssText = "background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem;";
+            el.style.cssText = "background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;";
 
-            let itemsHtml = order.items.map(i => `<li>${i.qty}x ${i.name} (৳${i.price})</li>`).join('');
+            let itemsHtml = (order.items || []).map(i => `<li style="margin-bottom: 4px;">${i.qty}x <strong>${i.name}</strong> (৳${(i.price || 0).toFixed(2)})</li>`).join('');
+
+            const statusClass = (order.status || 'Pending').toLowerCase();
+            const badgeClass = order.status === 'Delivered' ? 'status-delivered' : (order.status === 'Sent' ? 'status-sent' : 'status-pending');
 
             el.innerHTML = `
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem; margin-bottom: 0.5rem; font-size: 0.9rem;">
-                    <strong>ID: ${order.id.slice(0, 8)}...</strong>
-                    <span style="color: var(--primary); font-weight: bold;">${order.status}</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.75rem; margin-bottom: 0.25rem;">
+                    <div style="font-weight: 700; color: var(--text-main);">Order #${order.id.slice(0, 8)}</div>
+                    <span class="status-badge ${badgeClass}">${order.status || 'Pending'}</span>
                 </div>
-                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Ordered on ${dateStr}</div>
-                <ul style="margin: 0; padding-left: 1rem; font-size: 0.85rem; color: var(--text-main); margin-bottom: 0.5rem;">
+                
+                <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
+                    <span class="material-icons-round" style="font-size: 16px;">calendar_today</span>
+                    Ordered on ${dateStr}
+                </div>
+
+                <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.9rem; color: var(--text-main); line-height: 1.4;">
                     ${itemsHtml}
                 </ul>
-                <div style="text-align: right; font-weight: bold; font-size: 1rem; color: var(--text-main);">
-                    Total: ৳${order.totalPrice.toFixed(2)}
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+                    <a href="${state.currentUser.id}/Orders/${order.id}" class="btn btn-secondary btn-sm" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 6px;">
+                        <span class="material-icons-round" style="font-size: 18px;">receipt_long</span> View Invoice
+                    </a>
+                    <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">
+                        ৳${(order.totalPrice || 0).toFixed(2)}
+                    </div>
                 </div>
             `;
             profileOrdersList.appendChild(el);

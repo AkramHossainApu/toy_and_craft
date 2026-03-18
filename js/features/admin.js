@@ -791,17 +791,25 @@ function navigateToAdminPage(page) {
     const mainLayoutContainer = document.getElementById('main-content');
     const productViewSection = document.getElementById('product-view');
     const shopSection = document.getElementById('shop');
+    const adminViewTitle = document.getElementById('admin-view-title');
 
     if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
     if (checkoutView) checkoutView.style.display = 'none';
     if (productViewSection) productViewSection.style.display = 'none';
     if (shopSection) shopSection.style.display = 'none';
     if (adminOrdersView) adminOrdersView.style.display = 'block';
+
+    if (adminViewTitle) {
+        if (page === 'all-orders') adminViewTitle.innerText = 'System Orders';
+        else if (page === 'users-list') adminViewTitle.innerText = 'Registered Users';
+        else if (page === 'sold-products') adminViewTitle.innerText = 'Sold Products Performance';
+    }
 }
 window.navigateToAdminPage = navigateToAdminPage;
 
 export function setupAdminOrderListeners() {
     const adminOrdersBtn = document.getElementById('admin-orders-btn');
+    const adminUsersBtn = document.getElementById('admin-users-btn');
     const adminSoldProductsBtn = document.getElementById('admin-sold-products-btn');
     const adminOrdersCloseBtn = document.getElementById('admin-orders-close-btn');
 
@@ -809,8 +817,19 @@ export function setupAdminOrderListeners() {
         adminOrdersBtn.addEventListener('click', () => {
             navigateToAdminPage('all-orders');
             if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '0.6';
+            if (adminUsersBtn) adminUsersBtn.style.opacity = '0.6';
             if (adminOrdersBtn) adminOrdersBtn.style.opacity = '1';
             loadAdminOrders();
+        });
+    }
+
+    if (adminUsersBtn) {
+        adminUsersBtn.addEventListener('click', () => {
+            navigateToAdminPage('users-list');
+            if (adminOrdersBtn) adminOrdersBtn.style.opacity = '0.6';
+            if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '0.6';
+            if (adminUsersBtn) adminUsersBtn.style.opacity = '1';
+            loadAdminUsers();
         });
     }
 
@@ -819,6 +838,7 @@ export function setupAdminOrderListeners() {
             navigateToAdminPage('sold-products');
             if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '1';
             if (adminOrdersBtn) adminOrdersBtn.style.opacity = '0.6';
+            if (adminUsersBtn) adminUsersBtn.style.opacity = '0.6';
             renderAdminSoldProducts();
         });
     }
@@ -868,17 +888,31 @@ export async function loadAdminOrders(filterStatus = null) {
 
         orders.forEach(order => {
             const dateStr = new Date(order.createdAt).toLocaleString();
-            const itemsHTML = order.items.map(i => `• ${i.name} (x${i.qty}) - ৳${i.price.toFixed(2)}`).join('<br>');
+            const itemsHTML = (order.items || []).map(i => `• ${i.name} (x${i.qty}) - ৳${(i.price || 0).toFixed(2)}`).join('<br>');
 
             const li = document.createElement('div');
-            li.style.cssText = `padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); display: flex; flex-direction: column; gap: 0.5rem; background: var(--bg-card); margin-bottom: 1rem;`;
+            const statusClass = (order.status || 'Pending').toLowerCase();
+            li.className = `admin-order-card ${statusClass}`;
+            
+            // Background colors based on status (light versions)
+            let bgColor = 'var(--bg-card)';
+            if (order.status === 'Pending') bgColor = 'rgba(255, 145, 0, 0.08)';
+            else if (order.status === 'Sent') bgColor = 'rgba(0, 123, 255, 0.08)';
+            else if (order.status === 'Delivered') bgColor = 'rgba(34, 197, 94, 0.08)';
 
-            const statusColor = order.status === 'Delivered' ? '#00c853' : (order.status === 'Sent' ? '#2979ff' : '#ff9100');
+            li.style.cssText = `padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); display: flex; flex-direction: column; gap: 0.5rem; background: ${bgColor}; margin-bottom: 1rem; transition: background 0.3s ease;`;
+
+            const statusBadgeClass = order.status === 'Delivered' ? 'status-delivered' : (order.status === 'Sent' ? 'status-sent' : 'status-pending');
 
             li.innerHTML = `
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; flex-wrap: wrap;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; flex-wrap: wrap; gap: 10px;">
                     <div><strong>Order ID:</strong> ${order.id}</div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted);">${dateStr}</div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                         <a href="admin/all-orders/${order.id}" class="btn btn-secondary btn-sm" style="padding: 0.2rem 0.6rem; font-size: 0.75rem; border-radius: 4px;" onclick="event.preventDefault(); updateUrlState('all-orders', 1, '${order.id}'); processRoute();">
+                            <span class="material-icons-round" style="font-size: 14px; margin-right: 4px;">receipt_long</span> Invoice
+                        </a>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">${dateStr}</div>
+                    </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
                     <div>
@@ -895,9 +929,9 @@ export async function loadAdminOrders(filterStatus = null) {
                     </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; border-top: 1px dashed var(--border-color); padding-top: 0.5rem;">
-                    <div style="font-weight: 600;">Total: ৳${order.totalPrice.toFixed(2)}</div>
+                    <div style="font-weight: 600;">Total: ৳${(order.totalPrice || 0).toFixed(2)}</div>
                     <div style="display: flex; gap: 10px; align-items: center;">
-                        <span style="font-size: 0.9rem; font-weight: bold; color: ${statusColor};">Status:</span>
+                        <span class="status-badge ${statusBadgeClass}">${order.status || 'Pending'}</span>
                         <select class="admin-status-dropdown" data-id="${order.id}" data-userid="${order.userId}" style="padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-hover); color: var(--text-main); font-family: inherit;">
                             <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
                             <option value="Sent" ${order.status === 'Sent' ? 'selected' : ''}>Sent</option>
@@ -922,8 +956,16 @@ export async function loadAdminOrders(filterStatus = null) {
                     }
                     await batch.commit();
 
-                    const spanLbl = e.target.previousElementSibling;
-                    spanLbl.style.color = newStatus === 'Delivered' ? '#00c853' : (newStatus === 'Sent' ? '#2979ff' : '#ff9100');
+                    const badge = e.target.previousElementSibling;
+                    const newBadgeClass = newStatus === 'Delivered' ? 'status-delivered' : (newStatus === 'Sent' ? 'status-sent' : 'status-pending');
+                    badge.className = `status-badge ${newBadgeClass}`;
+                    badge.innerText = newStatus;
+
+                    const card = e.target.closest('.admin-order-card');
+                    if (card) {
+                        card.classList.remove('pending', 'sent', 'delivered');
+                        card.classList.add(newStatus.toLowerCase());
+                    }
 
                     // If we are currently filtering by Sold and this is changed, we might want to reload, 
                     // but for now, just let the color change reflect it.
@@ -1010,7 +1052,7 @@ export async function renderAdminSoldProducts() {
                 <div style="font-size: 0.9rem; opacity: 0.9;">Unique Products</div>
             </div>
             <div style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; padding: 1.5rem; border-radius: var(--radius-md); text-align: center;">
-                <div style="font-size: 2rem; font-weight: bold;">৳${grandTotalRevenue.toFixed(2)}</div>
+                <div style="font-size: 2rem; font-weight: bold;">৳${(grandTotalRevenue || 0).toFixed(2)}</div>
                 <div style="font-size: 0.9rem; opacity: 0.9;">Total Revenue</div>
             </div>
         `;
@@ -1040,7 +1082,7 @@ export async function renderAdminSoldProducts() {
             const avgPrice = prod.totalRevenue / prod.totalQty;
             const minPrice = Math.min(...prod.prices);
             const maxPrice = Math.max(...prod.prices);
-            const priceRange = minPrice === maxPrice ? `৳${minPrice.toFixed(2)}` : `৳${minPrice.toFixed(2)} - ৳${maxPrice.toFixed(2)}`;
+            const priceRange = minPrice === maxPrice ? `৳${(minPrice || 0).toFixed(2)}` : `৳${(minPrice || 0).toFixed(2)} - ৳${(maxPrice || 0).toFixed(2)}`;
 
             tableHTML += `
                 <tr style="border-bottom: 1px solid var(--border-color);">
@@ -1049,8 +1091,8 @@ export async function renderAdminSoldProducts() {
                     <td style="padding: 0.85rem 1rem; text-align: center; font-weight: bold; color: var(--primary);">${prod.totalQty}</td>
                     <td style="padding: 0.85rem 1rem; text-align: center; color: var(--text-muted);">${prod.orderCount}</td>
                     <td style="padding: 0.85rem 1rem; text-align: right; color: var(--text-muted);">${priceRange}</td>
-                    <td style="padding: 0.85rem 1rem; text-align: right;">৳${avgPrice.toFixed(2)}</td>
-                    <td style="padding: 0.85rem 1rem; text-align: right; font-weight: bold; color: #22c55e;">৳${prod.totalRevenue.toFixed(2)}</td>
+                    <td style="padding: 0.85rem 1rem; text-align: right;">৳${(avgPrice || 0).toFixed(2)}</td>
+                    <td style="padding: 0.85rem 1rem; text-align: right; font-weight: bold; color: #22c55e;">৳${(prod.totalRevenue || 0).toFixed(2)}</td>
                 </tr>
             `;
         });
@@ -1063,7 +1105,7 @@ export async function renderAdminSoldProducts() {
                         <td style="padding: 1rem; text-align: center; color: var(--primary);">${grandTotalItemsSold}</td>
                         <td style="padding: 1rem; text-align: center;">${deliveredOrders.length}</td>
                         <td colspan="2" style="padding: 1rem;"></td>
-                        <td style="padding: 1rem; text-align: right; color: #22c55e;">৳${grandTotalRevenue.toFixed(2)}</td>
+                        <td style="padding: 1rem; text-align: right; color: #22c55e;">৳${(grandTotalRevenue || 0).toFixed(2)}</td>
                     </tr>
                 </tfoot>
             </table>
@@ -1078,3 +1120,76 @@ export async function renderAdminSoldProducts() {
     }
 }
 window.renderAdminSoldProducts = renderAdminSoldProducts;
+
+// --- Admin Users List ---
+export async function loadAdminUsers() {
+    const adminOrdersList = document.getElementById('admin-orders-list');
+    if (!adminOrdersList) return;
+    adminOrdersList.innerHTML = '<div style="color: var(--text-muted);">Fetching registered users...</div>';
+
+    try {
+        const snapshots = await getDocs(collection(db, 'Users'));
+        adminOrdersList.innerHTML = '';
+
+        if (snapshots.empty) {
+            adminOrdersList.innerHTML = '<div style="color: var(--text-muted);">No users found in the system.</div>';
+            return;
+        }
+
+        const users = snapshots.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        const tableWrap = document.createElement('div');
+        tableWrap.style.cssText = 'overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-card);';
+
+        let tableHTML = `
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="background: var(--bg-hover); text-align: left;">
+                        <th style="padding: 1rem; border-bottom: 2px solid var(--border-color); font-weight: 600;">User Info</th>
+                        <th style="padding: 1rem; border-bottom: 2px solid var(--border-color); font-weight: 600;">Contact</th>
+                        <th style="padding: 1rem; border-bottom: 2px solid var(--border-color); font-weight: 600;">Address</th>
+                        <th style="padding: 1rem; border-bottom: 2px solid var(--border-color); font-weight: 600; text-align: right;">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        users.forEach(user => {
+            const joinedDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A';
+            tableHTML += `
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 0.85rem 1rem;">
+                        <div style="font-weight: 600; color: var(--text-main);">${user.username || 'N/A'}</div>
+                        <div style="font-size: 0.75rem; color: var(--primary); font-family: monospace;">${user.id}</div>
+                    </td>
+                    <td style="padding: 0.85rem 1rem;">
+                        <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 2px;">
+                            <span class="material-icons-round" style="font-size: 14px; color: var(--text-muted);">email</span>
+                            <span>${user.email || 'N/A'}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span class="material-icons-round" style="font-size: 14px; color: var(--text-muted);">phone</span>
+                            <span>${user.mobile || 'N/A'}</span>
+                        </div>
+                    </td>
+                    <td style="padding: 0.85rem 1rem; color: var(--text-muted); font-size: 0.8rem; max-width: 250px;">
+                        ${user.address || 'No address saved.'}<br>
+                        <strong>${user.thana || ''}, ${user.district || ''}</strong>
+                    </td>
+                    <td style="padding: 0.85rem 1rem; text-align: right; color: var(--text-muted); font-size: 0.8rem;">
+                        ${joinedDate}
+                    </td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `</tbody></table>`;
+        tableWrap.innerHTML = tableHTML;
+        adminOrdersList.appendChild(tableWrap);
+
+    } catch (e) {
+        console.error("Admin Load Users Error", e);
+        if (adminOrdersList) adminOrdersList.innerHTML = '<div style="color: #ff4444;">Failed to load users. Check console.</div>';
+    }
+}
+window.loadAdminUsers = loadAdminUsers;

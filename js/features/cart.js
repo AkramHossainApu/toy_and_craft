@@ -847,7 +847,7 @@ export function setupCartListeners() {
                     address: orderAddress,
                     district: orderDistrict,
                     thana: orderThana,
-                    items: selectedItems.map(i => ({ id: i.id, name: i.name, price: i.currentPrice, qty: i.qty })),
+                    items: selectedItems.map(i => ({ id: i.id, name: i.name, price: i.currentPrice, qty: i.qty, image: i.image })),
                     subtotal: rawSubtotal,
                     deliveryCharge: secureDeliveryCharge,
                     totalPrice: secureGrandTotal,

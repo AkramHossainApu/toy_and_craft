@@ -29,9 +29,12 @@ export function updateUrlState(categorySlug, pageNum = 1, productSlug = null) {
         return;
     }
 
-    // Admin-specific pages (all-orders, sold-products)
-    if (['all-orders', 'sold-products'].includes(categorySlug)) {
-        const newPath = `/admin/${categorySlug}`;
+    // Admin-specific pages (all-orders, users-list, sold-products)
+    if (['all-orders', 'users-list', 'sold-products'].includes(categorySlug)) {
+        let newPath = `/admin/${categorySlug}`;
+        if (categorySlug === 'all-orders' && productSlug) { // abusing productSlug for invoiceId here
+            newPath = `/admin/all-orders/${productSlug}`;
+        }
         try {
             window.history.pushState({ path: newPath }, '', getBaseUri() + newPath.replace(/^\//, ''));
         } catch (e) {
@@ -42,21 +45,29 @@ export function updateUrlState(categorySlug, pageNum = 1, productSlug = null) {
 
     let newPath;
     if (state.isAdmin) {
-        // Admin mode: /admin/categorySlug/page-N
-        newPath = `/admin/${categorySlug}`;
+        // Admin mode: /admin/categorySlug/page-N or /admin/search/keyword
+        if (categorySlug === 'search' && productSlug) {
+            newPath = `/admin/search/${encodeURIComponent(productSlug)}`;
+        } else {
+            newPath = `/admin/${categorySlug}`;
+            if (pageNum >= 1) {
+                newPath += `/page-${pageNum}`;
+            }
+            if (productSlug && categorySlug !== 'search') {
+                newPath += `/${productSlug}`;
+            }
+        }
     } else {
         newPath = `/${categorySlug}`;
         if (state.currentUser) {
             newPath = `/${state.currentUser.id}/${categorySlug}`;
         }
-    }
-
-    if (pageNum >= 1) {
-        newPath += `/page-${pageNum}`;
-    }
-
-    if (productSlug) {
-        newPath += `/${productSlug}`;
+        if (pageNum >= 1) {
+            newPath += `/page-${pageNum}`;
+        }
+        if (productSlug) {
+            newPath += `/${productSlug}`;
+        }
     }
 
     try {
@@ -173,6 +184,15 @@ export function processRoute() {
                 bounceToRoot();
             }
         } else if (rawAction === 'Details' || rawAction === 'Orders') {
+            // Check for Invoice URL: /userid/Orders/invoiceNumber
+            if (rawAction === 'Orders' && parts.length === 3) {
+                const orderId = parts[2];
+                if (window.renderInvoicePage) {
+                    window.renderInvoicePage(maybeUser, orderId);
+                    return;
+                }
+            }
+
             // Keep case-sensitive checking for Profile URLs due to IDs potentially passing here
             if (!state.currentUser || state.currentUser.id !== maybeUser) {
                 // Unauthorized or not logged in, boot to base
@@ -358,8 +378,35 @@ function handleAdminRoute(parts, bounceToAdminRoot) {
 
     const subPage = adminSubParts[0];
 
+    if (subPage === 'search' && adminSubParts.length >= 2) {
+        // /admin/search/keyword
+        const searchKeyword = decodeURIComponent(adminSubParts.slice(1).join('/'));
+        if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
+        if (window.renderCategoryTabs) window.renderCategoryTabs();
+        if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
+        if (checkoutView) checkoutView.style.display = 'none';
+        if (adminOrdersView) adminOrdersView.style.display = 'none';
+        if (productViewSection) productViewSection.style.display = 'none';
+        if (shopSection) shopSection.style.display = 'block';
+
+        // Trigger search
+        setTimeout(() => {
+            if (window.triggerSearchFromUrl) window.triggerSearchFromUrl(searchKeyword);
+        }, 100);
+        return;
+    }
+
     if (subPage === 'all-orders') {
-        // /admin/all-orders
+        // /admin/all-orders or /admin/all-orders/invoiceID
+        if (adminSubParts.length >= 2) {
+            const orderId = adminSubParts[1];
+            if (window.renderInvoicePage) {
+                window.renderInvoicePage('admin', orderId);
+                return;
+            }
+        }
+
+        // Default list view
         if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
         if (window.renderCategoryTabs) window.renderCategoryTabs();
         if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
@@ -370,11 +417,35 @@ function handleAdminRoute(parts, bounceToAdminRoot) {
 
         // Highlight correct button
         const adminOrdersBtn = document.getElementById('admin-orders-btn');
+        const adminUsersBtn = document.getElementById('admin-users-btn');
         const adminSoldProductsBtn = document.getElementById('admin-sold-products-btn');
         if (adminOrdersBtn) adminOrdersBtn.style.opacity = '1';
+        if (adminUsersBtn) adminUsersBtn.style.opacity = '0.6';
         if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '0.6';
 
         if (window.loadAdminOrders) window.loadAdminOrders();
+        return;
+    }
+
+    if (subPage === 'users-list') {
+        // /admin/users-list
+        if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
+        if (window.renderCategoryTabs) window.renderCategoryTabs();
+        if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
+        if (checkoutView) checkoutView.style.display = 'none';
+        if (adminOrdersView) adminOrdersView.style.display = 'block';
+        if (productViewSection) productViewSection.style.display = 'none';
+        if (shopSection) shopSection.style.display = 'none';
+
+        // Highlight correct button
+        const adminOrdersBtn = document.getElementById('admin-orders-btn');
+        const adminUsersBtn = document.getElementById('admin-users-btn');
+        const adminSoldProductsBtn = document.getElementById('admin-sold-products-btn');
+        if (adminUsersBtn) adminUsersBtn.style.opacity = '1';
+        if (adminOrdersBtn) adminOrdersBtn.style.opacity = '0.6';
+        if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '0.6';
+
+        if (window.loadAdminUsers) window.loadAdminUsers();
         return;
     }
 
@@ -445,11 +516,13 @@ window.addEventListener('popstate', (e) => {
     // Re-evaluate the current URL and trigger rendering
     processRoute();
 
-    // Ensure shop layout is visible if we aren't rendering a product
+    // Ensure shop layout is visible if we aren't rendering a product or invoice
     if (!window.pendingProductSlug && !window.location.pathname.includes('/Details') && !window.location.pathname.includes('/Orders')) {
-        if (!window.location.pathname.includes('/admin/all-orders') && !window.location.pathname.includes('/admin/sold-products')) {
+        if (!window.location.pathname.includes('/admin/all-orders') && !window.location.pathname.includes('/admin/users-list') && !window.location.pathname.includes('/admin/sold-products')) {
             if (productViewSection) productViewSection.style.display = 'none';
             if (shopSection) shopSection.style.display = 'block';
+            const invoiceView = document.getElementById('invoice-view');
+            if (invoiceView) invoiceView.style.display = 'none';
         }
     }
 });

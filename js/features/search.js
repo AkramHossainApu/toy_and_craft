@@ -184,6 +184,20 @@ function renderSearchResultsInGrid(results) {
             stockBadge = `<div style="position: absolute; bottom: 8px; left: 8px; background: #ff9800; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; z-index: 10;">Low on stock</div>`;
         }
 
+        let adminActions = '';
+        let adminStockView = '';
+        if (state.isAdmin) {
+            adminStockView = `<div style="font-size: 0.8rem; color: var(--primary); font-weight: bold; margin-bottom: 0.25rem;">(Stock: ${product.stock !== undefined ? product.stock : '∞'})</div>`;
+            adminActions = `
+                <button class="edit-product-btn" onclick="window.openEditModal('${product.id}')" title="Edit Product">
+                    <span class="material-icons-round">edit</span>
+                </button>
+                <button class="delete-product-btn" onclick="window.deleteProduct('${product.categoryId}', '${product.id}')" title="Delete Product">
+                    <span class="material-icons-round">delete</span>
+                </button>
+            `;
+        }
+
         const imgSrc = getAbsoluteImageUrl(product.image);
         const imgDisplay = product.image
             ? `<img src="${imgSrc}" alt="${product.name}" class="product-img" loading="lazy">`
@@ -194,13 +208,15 @@ function renderSearchResultsInGrid(results) {
         card.style.animationDelay = `${index * 0.04}s`;
 
         card.innerHTML = `
-            <div onclick="window.renderProductPage('${product.slug}')" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;">
+            ${adminActions}
+            <div onclick="${state.isAdmin ? '' : `window.renderProductPage('${product.slug}')`}" style="cursor: ${state.isAdmin ? 'default' : 'pointer'}; display: flex; flex-direction: column; flex-grow: 1;">
                 <div class="product-img-wrap" style="position: relative;">
                     ${badges}
                     ${stockBadge}
                     ${imgDisplay}
                 </div>
                 <div class="product-info">
+                    ${adminStockView}
                     <div class="product-category">${product.categoryId}</div>
                     <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
                 </div>
@@ -209,9 +225,9 @@ function renderSearchResultsInGrid(results) {
                 <div class="product-price-wrap">
                     ${priceDisplay}
                 </div>
-                <button class="add-to-cart" onclick="window.addCartItem('${product.id}')" aria-label="Add to cart" ${cartButtonDisabled}>
+                ${!state.isAdmin ? `<button class="add-to-cart" onclick="window.addCartItem('${product.id}')" aria-label="Add to cart" ${cartButtonDisabled}>
                     <span class="material-icons-round">add_shopping_cart</span>
-                </button>
+                </button>` : ''}
             </div>
         `;
         productGrid.appendChild(card);
@@ -225,7 +241,9 @@ function updateSearchUrl(keyword) {
     }
 
     let newPath;
-    if (state.currentUser) {
+    if (state.isAdmin) {
+        newPath = `admin/search/${encodeURIComponent(keyword)}`;
+    } else if (state.currentUser) {
         newPath = `${state.currentUser.id}/search/${encodeURIComponent(keyword)}`;
     } else {
         newPath = `search/${encodeURIComponent(keyword)}`;
