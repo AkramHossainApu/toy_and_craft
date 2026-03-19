@@ -36,28 +36,16 @@ const otpState = {
 };
 
 // =============================================
-// Cloudflare Turnstile State & Callbacks
+// Cloudflare Turnstile Reset Function
 // =============================================
-let isLoginTurnstilePassed = false;
-let isRegisterTurnstilePassed = false;
-
-window.onLoginTurnstileSuccess = function(token) {
-    isLoginTurnstilePassed = true;
-    if (loginSubmitBtn) loginSubmitBtn.disabled = false;
-};
-
-window.onRegisterTurnstileSuccess = function(token) {
-    isRegisterTurnstilePassed = true;
-    if (registerEmailHint && registerEmailHint.textContent.includes('Email is available')) {
-        if (registerGetOtpBtn) registerGetOtpBtn.disabled = false;
-    }
-};
-
 function resetTurnstile() {
-    isLoginTurnstilePassed = false;
-    isRegisterTurnstilePassed = false;
+    window.isLoginTurnstilePassed = false;
+    window.isRegisterTurnstilePassed = false;
+    window.isAdminTurnstilePassed = false;
     if (loginSubmitBtn) loginSubmitBtn.disabled = true;
     if (registerGetOtpBtn) registerGetOtpBtn.disabled = true;
+    const adminBtn = document.getElementById('password-submit-btn');
+    if (adminBtn) adminBtn.disabled = true;
     if (typeof turnstile !== 'undefined') {
         try { turnstile.reset(); } catch (e) { console.warn("Turnstile reset error", e); }
     }
@@ -658,7 +646,7 @@ export function setupAuthListeners() {
                         registerEmailHint.textContent = '✓ Email is available.';
                         registerEmailHint.style.color = '#28a745';
                         registerGetOtpWrapper.style.display = 'block';
-                        registerGetOtpBtn.disabled = !isRegisterTurnstilePassed;
+                        registerGetOtpBtn.disabled = !window.isRegisterTurnstilePassed;
                     } else {
                         registerEmailHint.textContent = '✗ Account already exists with this email. Please login instead.';
                         registerEmailHint.style.color = '#ff4444';

@@ -2146,13 +2146,20 @@ a {
 
 /* --- Invoice Printing --- */
 @media print {
+  @page {
+    size: auto;
+    margin: 5mm; 
+  }
+
   .no-print, nav, .footer, .admin-tools-banner, .floating-chat-widget, #cart-sidebar, #cart-overlay, .modal-overlay, #navbar {
     display: none !important;
   }
   
   body {
     background: white !important;
-    padding: 0 !important;
+    padding: 5mm !important;
+    margin: 0 !important;
+    font-size: 11pt !important;
   }
 
   #main-content {
@@ -2164,12 +2171,64 @@ a {
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
+    background: white !important;
   }
 
   .invoice-container {
     box-shadow: none !important;
     border: none !important;
     padding: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* Base Print Layout */
+  .invoice-header { margin-bottom: 2rem !important; }
+  .invoice-brand img { height: 50px !important; }
+  .invoice-brand h1 { font-size: 1.8rem !important; }
+  .invoice-title-block h2 { font-size: 2rem !important; color: #ddd !important; }
+  .invoice-billing-section { margin-bottom: 2rem !important; gap: 3rem !important; display: flex !important; justify-content: space-between !important; }
+  .invoice-table { margin-bottom: 2rem !important; }
+  .invoice-table th, .invoice-table td { padding: 0.6rem 0 !important; font-size: 0.9rem !important; }
+  .invoice-footer { 
+    margin-top: 2rem !important; 
+    padding-top: 1rem !important; 
+    page-break-inside: avoid !important; /* Prevent split */
+  }
+
+  /* Dynamic Compactness Levels */
+  
+  /* Level 1: 7-12 items */
+  .invoice-container.compact-level-1 .invoice-header { margin-bottom: 1.2rem !important; }
+  .invoice-container.compact-level-1 .invoice-brand img { height: 40px !important; }
+  .invoice-container.compact-level-1 .invoice-billing-section { margin-bottom: 1.2rem !important; }
+  .invoice-container.compact-level-1 .invoice-table { margin-bottom: 1.2rem !important; }
+  .invoice-container.compact-level-1 .invoice-footer { margin-top: 1rem !important; page-break-inside: avoid !important; }
+
+  /* Level 2: 13-18 items */
+  .invoice-container.compact-level-2 { font-size: 0.85rem !important; }
+  .invoice-container.compact-level-2 .invoice-header { margin-bottom: 0.8rem !important; }
+  .invoice-container.compact-level-2 .invoice-brand img { height: 35px !important; }
+  .invoice-container.compact-level-2 .invoice-brand h1 { font-size: 1.4rem !important; }
+  .invoice-container.compact-level-2 .invoice-title-block h2 { font-size: 1.6rem !important; }
+  .invoice-container.compact-level-2 .invoice-billing-section { margin-bottom: 0.8rem !important; gap: 1.5rem !important; }
+  .invoice-container.compact-level-2 .invoice-table { margin-bottom: 0.8rem !important; }
+  .invoice-container.compact-level-2 .invoice-table th, .invoice-container.compact-level-2 .invoice-table td { padding: 0.3rem 0 !important; }
+  .invoice-container.compact-level-2 .invoice-footer { margin-top: 0.5rem !important; page-break-inside: avoid !important; }
+
+  /* Level 3: 19+ items */
+  .invoice-container.compact-level-3 { 
+    zoom: 0.85 !important;
+    font-size: 0.8rem !important;
+  }
+  .invoice-container.compact-level-3 .invoice-header { margin-bottom: 0.5rem !important; }
+  .invoice-container.compact-level-3 .invoice-billing-section { margin-bottom: 0.5rem !important; }
+  .invoice-container.compact-level-3 .invoice-table { margin-bottom: 0.5rem !important; }
+  .invoice-container.compact-level-3 .invoice-footer { margin-top: 0.3rem !important; page-break-inside: avoid !important; }
+
+  /* Force single page break prevention */
+  .invoice-item-row {
+    page-break-inside: avoid !important;
   }
 }
 
@@ -2200,68 +2259,87 @@ a {
   }
 
   /* Invoice header: stack logo and invoice title vertically */
-  #invoice-view .invoice-container > div:first-child {
+  .invoice-header {
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 1.5rem !important;
     margin-bottom: 2rem !important;
   }
 
-  #invoice-view .invoice-container > div:first-child > div:last-child {
+  .invoice-title-block {
     text-align: left !important;
   }
 
-  #invoice-view .invoice-container > div:first-child h2 {
+  .invoice-header h2 {
     font-size: 1.8rem !important;
   }
 
-  #invoice-view .invoice-container > div:first-child h1 {
+  .invoice-header h1 {
     font-size: 1.5rem !important;
   }
 
   /* Billing & Order Info: stack into single column */
-  #invoice-view .invoice-container > div:nth-child(2) {
+  .invoice-billing-section {
     grid-template-columns: 1fr !important;
     gap: 1.5rem !important;
     margin-bottom: 2rem !important;
   }
 
-  #invoice-view .invoice-container > div:nth-child(2) > div:last-child {
+  .order-info {
     text-align: left !important;
   }
 
-  #invoice-view .invoice-container > div:nth-child(2) > div:last-child h3 {
+  .order-info h3 {
     margin-left: 0 !important;
   }
 
   /* Items table: make it responsive */
-  #invoice-view table {
-    font-size: 0.85rem;
+  .invoice-table {
+    font-size: 0.85rem !important;
+    table-layout: fixed !important;
   }
 
-  #invoice-view table th,
-  #invoice-view table td {
-    padding: 0.8rem 0.3rem !important;
+  .invoice-table th,
+  .invoice-table td {
+    padding: 0.8rem 4px !important;
+    word-break: break-word !important;
   }
 
-  #invoice-view table td img {
-    width: 36px !important;
-    height: 36px !important;
-  }
+  /* Column widths for mobile */
+  .invoice-table th:nth-child(1), .invoice-table td:nth-child(1) { width: 50% !important; }
+  .invoice-table th:nth-child(2), .invoice-table td:nth-child(2) { width: 10% !important; }
+  .invoice-table th:nth-child(3), .invoice-table td:nth-child(3) { width: 20% !important; }
+  .invoice-table th:nth-child(4), .invoice-table td:nth-child(4) { width: 20% !important; }
 
-  #invoice-view table td:first-child {
+  .invoice-item-desc {
     gap: 0.5rem !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .invoice-item-img {
+    width: 35px !important;
+    height: 35px !important;
+  }
+
+  .invoice-item-name {
+    font-size: 0.8rem !important;
+  }
+
+  .invoice-item-sku {
+    display: none !important; /* Hide SKU on mobile to save space */
   }
 
   /* Totals section */
-  #invoice-view .invoice-container > div:nth-child(4) > div {
+  .invoice-summary > div {
     width: 100% !important;
   }
 
   /* Footer section of invoice */
-  #invoice-view .invoice-container > div:last-child {
+  .invoice-footer {
     flex-direction: column !important;
-    gap: 1rem !important;
+    align-items: flex-start !important;
+    gap: 2rem !important;
     margin-top: 3rem !important;
   }
 
@@ -2269,6 +2347,7 @@ a {
   #invoice-view > div:first-child {
     flex-direction: row !important;
     gap: 0.5rem !important;
+    margin-bottom: 1rem !important;
   }
 
   #invoice-view > div:first-child .btn {
@@ -2278,16 +2357,28 @@ a {
 }
 
 @media (max-width: 480px) {
-  #invoice-view .invoice-container {
-    padding: 1rem 0.75rem !important;
+  .invoice-container {
+    padding: 1rem 0.6rem !important;
   }
 
-  #invoice-view table td img {
-    width: 30px !important;
-    height: 30px !important;
+  .invoice-table {
+    font-size: 0.75rem !important;
   }
 
-  #invoice-view table {
-    font-size: 0.78rem;
+  /* Hide Unit Price column on very small screens to prevent horizontal overflow */
+  .invoice-table th:nth-child(3), .invoice-table td:nth-child(3) {
+    display: none !important;
+  }
+  
+  .invoice-table th:nth-child(1), .invoice-table td:nth-child(1) { width: 65% !important; }
+  .invoice-table th:nth-child(2), .invoice-table td:nth-child(2) { width: 10% !important; }
+  .invoice-table th:nth-child(4), .invoice-table td:nth-child(4) { width: 25% !important; }
+
+  .invoice-header h2 {
+    font-size: 1.5rem !important;
+  }
+
+  .invoice-summary div span:last-child {
+    font-size: 1.2rem !important; /* Scale down total amount */
   }
 }

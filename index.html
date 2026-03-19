@@ -32,10 +32,33 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <!-- Styles -->
     <link rel="stylesheet" href="css/style.css?v=carousel_v2">
-    <!-- EmailJS SDK for OTP emails -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    
-    <!-- Cloudflare Turnstile -->
+    <!-- Cloudflare Turnstile Callbacks -->
+    <script>
+        window.isLoginTurnstilePassed = false;
+        window.isRegisterTurnstilePassed = false;
+        window.isAdminTurnstilePassed = false;
+
+        window.onLoginTurnstileSuccess = function(token) {
+            window.isLoginTurnstilePassed = true;
+            const loginBtn = document.getElementById('login-submit-btn');
+            if (loginBtn) loginBtn.disabled = false;
+        };
+
+        window.onRegisterTurnstileSuccess = function(token) {
+            window.isRegisterTurnstilePassed = true;
+            const regHint = document.getElementById('register-email-hint');
+            const regBtn = document.getElementById('register-get-otp-btn');
+            if (regHint && regHint.textContent.includes('Email is available') && regBtn) {
+                regBtn.disabled = false;
+            }
+        };
+
+        window.onAdminTurnstileSuccess = function(token) {
+            window.isAdminTurnstilePassed = true;
+            const adminBtn = document.getElementById('password-submit-btn');
+            if (adminBtn) adminBtn.disabled = false;
+        };
+    </script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
@@ -331,9 +354,11 @@
                 <input type="password" id="password-input" placeholder="Password"
                     style="text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
             </div>
+            <!-- Cloudflare Turnstile for Admin -->
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAACtXtctvBtKGNWKl" data-callback="onAdminTurnstileSuccess" style="margin-bottom: 1rem; display: flex; justify-content: center;"></div>
             <div class="modal-actions" style="justify-content: center; border: none; padding-top: 0; margin-top: 1rem;">
                 <button type="button" class="btn btn-secondary" id="password-cancel-btn">Cancel</button>
-                <button type="button" class="btn btn-primary" id="password-submit-btn">Submit</button>
+                <button type="button" class="btn btn-primary" id="password-submit-btn" disabled>Submit</button>
             </div>
         </div>
     </div>

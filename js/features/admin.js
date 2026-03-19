@@ -524,7 +524,10 @@ export function setupAdminListeners() {
                     });
                 }
 
-                // Show success feedback on the button, then close modal after delay
+                // Show success feedback on the button, then immediately re-render background
+                state.currentCategorySlug = generateSlug(targetCatId);
+                if (window.renderProducts) window.renderProducts(state.currentCategorySlug);
+
                 const btn = adminProductForm.querySelector('button[type="submit"]');
                 if (btn) {
                     const oldText = btn.textContent;
@@ -535,16 +538,10 @@ export function setupAdminListeners() {
                         btn.textContent = oldText;
                         btn.style.backgroundColor = '';
                         btn.style.color = '';
-                        // Close modal and re-render after feedback is shown
-                        state.currentCategorySlug = generateSlug(targetCatId);
                         closeAdminModalFn();
-                        if (window.renderProducts) window.renderProducts(state.currentCategorySlug);
-                    }, 1500);
+                    }, 800); // reduced delay for better UX
                 } else {
-                    // Fallback if button not found — close immediately
-                    state.currentCategorySlug = generateSlug(targetCatId);
                     closeAdminModalFn();
-                    if (window.renderProducts) window.renderProducts(state.currentCategorySlug);
                 }
 
             } catch (err) {
@@ -746,6 +743,10 @@ export function setupAdminListeners() {
                 // Remove from cart locally
                 state.cart = state.cart.filter(item => item.id !== id);
                 if (window.saveCart) window.saveCart();
+                
+                // Remove from inventory and update UI instantly
+                state.inventory = state.inventory.filter(item => item.id !== id);
+                if (window.renderProducts) window.renderProducts(state.currentCategorySlug);
             } catch (err) {
                 console.error("Error deleting product:", err);
                 alert("Database Error: Could not delete product.");
@@ -761,12 +762,14 @@ export function promptPassword(title, callback) {
     if (passwordInput) passwordInput.value = '';
     currentPasswordCallback = callback;
     if (passwordModal) passwordModal.style.display = 'flex';
+    if (window.resetTurnstile) window.resetTurnstile();
     setTimeout(() => { if (passwordInput) passwordInput.focus(); }, 100);
 }
 
 export function closePasswordModal() {
     if (passwordModal) passwordModal.style.display = 'none';
     currentPasswordCallback = null;
+    if (window.resetTurnstile) window.resetTurnstile();
 
     if (window.location.pathname.includes('authenticate-admin') && !state.isAdmin) {
         if (state.routingInitialized && state.categories && state.categories.length > 0) {
