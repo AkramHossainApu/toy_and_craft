@@ -2187,3 +2187,107 @@ a {
 .admin-order-card.pending { border-left-color: #ff9100; }
 .admin-order-card.sent { border-left-color: #2979ff; }
 .admin-order-card.delivered { border-left-color: #00c853; }
+
+/* --- Invoice Mobile Responsive --- */
+@media (max-width: 768px) {
+  #invoice-view {
+    padding: 1rem 0.5rem !important;
+  }
+
+  #invoice-view .invoice-container {
+    padding: 1.5rem 1rem !important;
+    border-radius: 8px !important;
+  }
+
+  /* Invoice header: stack logo and invoice title vertically */
+  #invoice-view .invoice-container > div:first-child {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1.5rem !important;
+    margin-bottom: 2rem !important;
+  }
+
+  #invoice-view .invoice-container > div:first-child > div:last-child {
+    text-align: left !important;
+  }
+
+  #invoice-view .invoice-container > div:first-child h2 {
+    font-size: 1.8rem !important;
+  }
+
+  #invoice-view .invoice-container > div:first-child h1 {
+    font-size: 1.5rem !important;
+  }
+
+  /* Billing & Order Info: stack into single column */
+  #invoice-view .invoice-container > div:nth-child(2) {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    margin-bottom: 2rem !important;
+  }
+
+  #invoice-view .invoice-container > div:nth-child(2) > div:last-child {
+    text-align: left !important;
+  }
+
+  #invoice-view .invoice-container > div:nth-child(2) > div:last-child h3 {
+    margin-left: 0 !important;
+  }
+
+  /* Items table: make it responsive */
+  #invoice-view table {
+    font-size: 0.85rem;
+  }
+
+  #invoice-view table th,
+  #invoice-view table td {
+    padding: 0.8rem 0.3rem !important;
+  }
+
+  #invoice-view table td img {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  #invoice-view table td:first-child {
+    gap: 0.5rem !important;
+  }
+
+  /* Totals section */
+  #invoice-view .invoice-container > div:nth-child(4) > div {
+    width: 100% !important;
+  }
+
+  /* Footer section of invoice */
+  #invoice-view .invoice-container > div:last-child {
+    flex-direction: column !important;
+    gap: 1rem !important;
+    margin-top: 3rem !important;
+  }
+
+  /* Back / Print buttons */
+  #invoice-view > div:first-child {
+    flex-direction: row !important;
+    gap: 0.5rem !important;
+  }
+
+  #invoice-view > div:first-child .btn {
+    font-size: 0.85rem !important;
+    padding: 0.5rem 0.8rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #invoice-view .invoice-container {
+    padding: 1rem 0.75rem !important;
+  }
+
+  #invoice-view table td img {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  #invoice-view table {
+    font-size: 0.78rem;
+  }
+}

@@ -1184,20 +1184,17 @@ export function setupAuthListeners() {
             loginSubmitBtn.disabled = true;
             loginSubmitBtn.textContent = "Checking...";
             try {
-                // 1. Try Document ID (User ID)
-                let userSnap = await getDoc(doc(db, 'Users', identifier));
+                let userSnap = null;
                 
-                // 2. Try Mobile Number
-                if (!userSnap.exists()) {
-                    const qMobile = query(collection(db, 'Users'), where('mobile', '==', identifier));
-                    const qsMobile = await getDocs(qMobile);
-                    if (!qsMobile.empty) {
-                        userSnap = qsMobile.docs[0];
-                    }
+                // 1. Try Mobile Number
+                const qMobile = query(collection(db, 'Users'), where('mobile', '==', identifier));
+                const qsMobile = await getDocs(qMobile);
+                if (!qsMobile.empty) {
+                    userSnap = qsMobile.docs[0];
                 }
 
-                // 3. Try Email Address
-                if (!userSnap.exists()) {
+                // 2. Try Email Address
+                if (!userSnap) {
                     const qEmail = query(collection(db, 'Users'), where('email', '==', identifier.toLowerCase()));
                     const qsEmail = await getDocs(qEmail);
                     if (!qsEmail.empty) {
@@ -1205,7 +1202,7 @@ export function setupAuthListeners() {
                     }
                 }
 
-                if (userSnap.exists()) {
+                if (userSnap && userSnap.exists()) {
                     const data = userSnap.data();
                     if (data.password === password) {
                         state.currentUser = {

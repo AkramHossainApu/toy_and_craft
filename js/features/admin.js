@@ -79,9 +79,29 @@ export function toggleAdminMode(isAdminState) {
         if (adminToolsBanner) adminToolsBanner.style.display = 'none';
         if (adminHeaderEditContainer) adminHeaderEditContainer.style.display = 'none';
 
+        // Clean up any admin views or invoice that might be open
+        const adminOrdersView = document.getElementById('admin-orders-view');
+        const invoiceView = document.getElementById('invoice-view');
+        const mainLayoutContainer = document.getElementById('main-content');
+        const productViewSection = document.getElementById('product-view');
+        const shopSection = document.getElementById('shop');
+
+        if (adminOrdersView) adminOrdersView.style.display = 'none';
+        if (invoiceView) invoiceView.style.display = 'none';
+        if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
+        if (productViewSection) productViewSection.style.display = 'none';
+        if (shopSection) shopSection.style.display = 'block';
+
         // Show chat widget when leaving admin mode
         const chatWidget = document.getElementById('floating-chat-widget');
         if (chatWidget) chatWidget.style.display = 'block';
+
+        // Restore footer
+        const footer = document.querySelector('.footer');
+        if (footer) footer.style.display = '';
+
+        // Restore page title
+        document.title = 'Toy & Craft';
 
         if (state.categories && state.categories.length > 0) {
             state.currentCategorySlug = state.categories[0].slug;

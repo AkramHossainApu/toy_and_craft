@@ -79,6 +79,8 @@ export function updateUrlState(categorySlug, pageNum = 1, productSlug = null) {
 window.updateUrlState = updateUrlState;
 
 export function processRoute() {
+    // Always clean up invoice view when navigating to a different page
+    if (window.cleanupInvoiceView) window.cleanupInvoiceView();
 
     const bounceToRoot = () => {
         if (state.categories.length > 0) {

@@ -11,18 +11,29 @@ export async function renderInvoicePage(userId, orderId) {
     const categoryTabs = document.querySelector('.category-tabs');
     const categoryTabsClone = document.querySelector('.category-tabs-clone');
     const heroSection = document.querySelector('.hero');
+    const adminOrdersView = document.getElementById('admin-orders-view');
+    const checkoutView = document.getElementById('checkout-view');
+    const productView = document.getElementById('product-view');
+    const shopSection = document.getElementById('shop');
+    const chatWidget = document.getElementById('floating-chat-widget');
 
     if (!invoiceView || !invoiceContainer) return;
 
-    // Show invoice view, hide others
+    // Show invoice view, hide ALL other views
     invoiceView.style.display = 'block';
     if (mainContent) mainContent.style.display = 'none';
-    if (navbar) navbar.style.display = 'block'; // Restore default block display
+    if (adminOrdersView) adminOrdersView.style.display = 'none';
+    if (checkoutView) checkoutView.style.display = 'none';
+    if (productView) productView.style.display = 'none';
+    if (shopSection) shopSection.style.display = 'none';
+    if (navbar) navbar.style.display = 'block';
     if (footer) footer.style.display = 'none';
-    if (adminBanner) adminBanner.style.display = 'none';
+    // Keep admin banner visible if in admin mode
+    if (adminBanner) adminBanner.style.display = state.isAdmin ? 'flex' : 'none';
     if (categoryTabs) categoryTabs.style.display = 'none';
     if (categoryTabsClone) categoryTabsClone.style.display = 'none';
     if (heroSection) heroSection.style.display = 'none';
+    if (chatWidget) chatWidget.style.display = 'none';
 
     invoiceContainer.innerHTML = `
         <div style="text-align: center; padding: 4rem; color: #888;">
@@ -170,3 +181,32 @@ export async function renderInvoicePage(userId, orderId) {
 }
 
 window.renderInvoicePage = renderInvoicePage;
+
+// Cleanup: hide invoice and restore regular UI when navigating away
+export function cleanupInvoiceView() {
+    const invoiceView = document.getElementById('invoice-view');
+    if (!invoiceView || invoiceView.style.display === 'none') return; // nothing to clean
+
+    invoiceView.style.display = 'none';
+
+    // Restore elements that were hidden
+    const navbar = document.getElementById('navbar');
+    const footer = document.querySelector('.footer');
+    const mainContent = document.getElementById('main-content');
+    const categoryTabs = document.querySelector('.category-tabs');
+    const categoryTabsClone = document.querySelector('.category-tabs-clone');
+    const adminBanner = document.getElementById('admin-tools-banner');
+
+    if (navbar) navbar.style.display = '';
+    if (footer) footer.style.display = '';
+    if (mainContent) mainContent.style.display = 'block';
+    if (categoryTabs) categoryTabs.style.display = '';
+    if (categoryTabsClone) categoryTabsClone.style.display = '';
+
+    // Restore admin banner if in admin mode
+    if (adminBanner && state.isAdmin) adminBanner.style.display = 'flex';
+
+    // Restore the page title
+    document.title = 'Toy & Craft';
+}
+window.cleanupInvoiceView = cleanupInvoiceView;

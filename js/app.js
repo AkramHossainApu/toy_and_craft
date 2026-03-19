@@ -11,7 +11,7 @@ import { setupCartListeners, handleFirebaseCartSync } from './features/cart.js';
 import { setupShopListeners, renderCategoryTabs, renderProducts } from './features/shop.js';
 import { setupAdminListeners, setupAdminOrderListeners, toggleAdminMode } from './features/admin.js';
 import { setupSearchListeners } from './features/search.js';
-import { renderInvoicePage } from './features/invoice.js';
+import { renderInvoicePage, cleanupInvoiceView } from './features/invoice.js';
 import { initRouting } from './features/router.js';
 
 import { getTrueDistrict } from './features/cart.js'; // Needed globally locally by forms
