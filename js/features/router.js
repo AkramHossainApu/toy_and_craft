@@ -22,7 +22,7 @@ export function updateUrlState(categorySlug, pageNum = 1, productSlug = null) {
             newPath = `/${state.currentUser.id}/${categorySlug}`;
         }
         try {
-            window.history.pushState({ path: newPath }, '', getBaseUri() + newPath.replace(/^\//, ''));
+            window.history.pushState({ path: newPath }, '', getBaseUri() + '#/' + newPath.replace(/^\//, ''));
         } catch (e) {
             console.warn("pushState failed", e);
         }
@@ -36,7 +36,7 @@ export function updateUrlState(categorySlug, pageNum = 1, productSlug = null) {
             newPath = `/admin/all-orders/${productSlug}`;
         }
         try {
-            window.history.pushState({ path: newPath }, '', getBaseUri() + newPath.replace(/^\//, ''));
+            window.history.pushState({ path: newPath }, '', getBaseUri() + '#/' + newPath.replace(/^\//, ''));
         } catch (e) {
             console.warn("pushState failed", e);
         }
@@ -71,7 +71,7 @@ export function updateUrlState(categorySlug, pageNum = 1, productSlug = null) {
     }
 
     try {
-        window.history.pushState({ path: getBaseUri() + newPath.replace(/^\//, '') }, '', getBaseUri() + newPath.replace(/^\//, ''));
+        window.history.pushState({ path: newPath }, '', getBaseUri() + '#/' + newPath.replace(/^\//, ''));
     } catch (e) {
         console.warn("pushState failed, likely not running on a server.", e);
     }
@@ -98,13 +98,9 @@ export function processRoute() {
         }
     };
 
-    // GitHub pages hosts repository at /toy_and_craft/ instead of literal root
-    const path = window.location.pathname;
-    let safePath = path;
-    if (safePath.startsWith('/toy_and_craft')) {
-        safePath = safePath.replace('/toy_and_craft', '');
-    }
-    const parts = safePath.split('/').filter(p => p.length > 0);
+    // Parse path from Hash fragments instead of Pathname
+    const path = window.location.hash.replace(/^#\/?/, '');
+    const parts = path.split('/').filter(p => p.length > 0);
 
     if (parts.length === 0) {
         // Base URL loaded
@@ -161,7 +157,7 @@ export function processRoute() {
                     // Logged-in user accessing guest search URL — redirect to /userid/search/keyword
                     const newPath = `${state.currentUser.id}/search/${encodeURIComponent(searchKeyword)}`;
                     try {
-                        window.history.replaceState({ path: getBaseUri() + newPath }, '', getBaseUri() + newPath);
+                        window.history.replaceState({ path: newPath }, '', getBaseUri() + '#/' + newPath.replace(/^\//, ''));
                     } catch (e) { }
                 }
             } else if (maybeAction === 'search' && parts.length >= 3) {
@@ -171,7 +167,7 @@ export function processRoute() {
                     // Non-logged-in user accessing user search URL — redirect to /search/keyword
                     const newPath = `search/${encodeURIComponent(searchKeyword)}`;
                     try {
-                        window.history.replaceState({ path: getBaseUri() + newPath }, '', getBaseUri() + newPath);
+                        window.history.replaceState({ path: newPath }, '', getBaseUri() + '#/' + newPath.replace(/^\//, ''));
                     } catch (e) { }
                 }
             }
@@ -249,7 +245,7 @@ export function processRoute() {
                 if (targetProduct) newPath += `/${targetProduct}`;
 
                 try {
-                    window.history.replaceState({ path: getBaseUri() + newPath.replace(/^\//, '') }, '', getBaseUri() + newPath.replace(/^\//, ''));
+                    window.history.replaceState({ path: newPath }, '', getBaseUri() + '#/' + newPath.replace(/^\//, ''));
                 } catch (e) { }
             }
 
@@ -506,7 +502,7 @@ export function initRouting() {
 window.initRouting = initRouting;
 
 window.addEventListener('popstate', (e) => {
-    console.log("Navigated via history", location.pathname);
+    console.log("Navigated via history", location.hash);
 
     // Hide specialized views and error screens when navigating back to base routes
     const productViewSection = document.getElementById('product-view');
@@ -519,8 +515,9 @@ window.addEventListener('popstate', (e) => {
     processRoute();
 
     // Ensure shop layout is visible if we aren't rendering a product or invoice
-    if (!window.pendingProductSlug && !window.location.pathname.includes('/Details') && !window.location.pathname.includes('/Orders')) {
-        if (!window.location.pathname.includes('/admin/all-orders') && !window.location.pathname.includes('/admin/users-list') && !window.location.pathname.includes('/admin/sold-products')) {
+    const currentHash = window.location.hash;
+    if (!window.pendingProductSlug && !currentHash.includes('/Details') && !currentHash.includes('/Orders')) {
+        if (!currentHash.includes('/admin/all-orders') && !currentHash.includes('/admin/users-list') && !currentHash.includes('/admin/sold-products')) {
             if (productViewSection) productViewSection.style.display = 'none';
             if (shopSection) shopSection.style.display = 'block';
             const invoiceView = document.getElementById('invoice-view');
