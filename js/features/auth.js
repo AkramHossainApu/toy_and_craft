@@ -36,6 +36,35 @@ const otpState = {
 };
 
 // =============================================
+// Cloudflare Turnstile State & Callbacks
+// =============================================
+let isLoginTurnstilePassed = false;
+let isRegisterTurnstilePassed = false;
+
+window.onLoginTurnstileSuccess = function(token) {
+    isLoginTurnstilePassed = true;
+    if (loginSubmitBtn) loginSubmitBtn.disabled = false;
+};
+
+window.onRegisterTurnstileSuccess = function(token) {
+    isRegisterTurnstilePassed = true;
+    if (registerEmailHint && registerEmailHint.textContent.includes('Email is available')) {
+        if (registerGetOtpBtn) registerGetOtpBtn.disabled = false;
+    }
+};
+
+function resetTurnstile() {
+    isLoginTurnstilePassed = false;
+    isRegisterTurnstilePassed = false;
+    if (loginSubmitBtn) loginSubmitBtn.disabled = true;
+    if (registerGetOtpBtn) registerGetOtpBtn.disabled = true;
+    if (typeof turnstile !== 'undefined') {
+        try { turnstile.reset(); } catch (e) { console.warn("Turnstile reset error", e); }
+    }
+}
+window.resetTurnstile = resetTurnstile;
+
+// =============================================
 // Email Validation Helper
 // =============================================
 function validateEmail(email, hintEl) {
@@ -532,6 +561,7 @@ window.openAuthModal = openAuthModal;
 export const closeAuthModal = () => {
     if (authModal) authModal.style.display = 'none';
     if (state.currentCategorySlug && window.updateUrlState) window.updateUrlState(state.currentCategorySlug); // Revert to active category
+    if (window.resetTurnstile) window.resetTurnstile();
 };
 
 export function setupAuthListeners() {
@@ -628,7 +658,7 @@ export function setupAuthListeners() {
                         registerEmailHint.textContent = '✓ Email is available.';
                         registerEmailHint.style.color = '#28a745';
                         registerGetOtpWrapper.style.display = 'block';
-                        registerGetOtpBtn.disabled = false;
+                        registerGetOtpBtn.disabled = !isRegisterTurnstilePassed;
                     } else {
                         registerEmailHint.textContent = '✗ Account already exists with this email. Please login instead.';
                         registerEmailHint.style.color = '#ff4444';

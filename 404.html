@@ -34,8 +34,10 @@
     <link rel="stylesheet" href="css/style.css?v=carousel_v2">
     <!-- EmailJS SDK for OTP emails -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <!-- Cloudflare Turnstile -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
-
 <body>
     <!-- App Loading Skeleton -->
     <div id="app-loader">
@@ -520,9 +522,11 @@
                             <a href="#" id="show-forgot-password-btn"
                                 style="font-size: 0.85rem; color: var(--primary); font-weight: 600; text-decoration: none;">Forgot Password?</a>
                         </div>
+                        <!-- Cloudflare Turnstile for Login -->
+                        <div class="cf-turnstile" data-sitekey="0x4AAAAAACtXtctvBtKGNWKl" data-callback="onLoginTurnstileSuccess" style="margin-bottom: 1rem; display: flex; justify-content: center;"></div>
                         <div class="modal-actions" style="margin-top: 1rem; flex-direction: column; gap: 1rem;">
                             <button type="submit" class="btn btn-primary" id="login-submit-btn"
-                                style="width: 100%;">Login</button>
+                                style="width: 100%;" disabled>Login</button>
                             <div style="text-align: center; font-size: 0.9rem; color: var(--text-muted);">
                                 Don't have an account? <a href="#" id="show-register-btn"
                                     style="color: var(--primary); font-weight: 600;">Register Here</a>
@@ -556,6 +560,10 @@
                                 style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">Only
                                 Gmail addresses are accepted.</small>
                         </div>
+                        
+                        <!-- Cloudflare Turnstile for Register -->
+                        <div class="cf-turnstile" data-sitekey="0x4AAAAAACtXtctvBtKGNWKl" data-callback="onRegisterTurnstileSuccess" style="margin-bottom: 1rem; display: flex; justify-content: center;"></div>
+                        
                         <div id="register-get-otp-wrapper" style="margin-bottom: 1rem;">
                             <button type="button" class="btn btn-primary btn-sm" id="register-get-otp-btn"
                                 style="width: 100%; padding: 0.6rem;" disabled>Get OTP</button>
