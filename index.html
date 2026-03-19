@@ -31,7 +31,9 @@
     <!-- Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <!-- Styles -->
-    <link rel="stylesheet" href="css/style.css?v=carousel_v2">
+    <link rel="stylesheet" href="css/style.css?v=premium_ui_v1">
+    <!-- FontAwesome for Social Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Cloudflare Turnstile Callbacks -->
     <script>
         window.isLoginTurnstilePassed = false;
@@ -58,8 +60,33 @@
             const adminBtn = document.getElementById('password-submit-btn');
             if (adminBtn) adminBtn.disabled = false;
         };
+
+        // Live Turnstile Site Key
+        window.SITE_CONFIG = {
+            turnstileKey: '0x4AAAAAACtXtctvBtKGNWKl'
+        };
+
+        // Manual Turnstile Init
+        window.onloadTurnstileCallback = function() {
+            const widgets = [
+                { id: 'admin-turnstile', callback: 'onAdminTurnstileSuccess' },
+                { id: 'login-turnstile', callback: 'onLoginTurnstileSuccess' },
+                { id: 'register-turnstile', callback: 'onRegisterTurnstileSuccess' }
+            ];
+
+            widgets.forEach(w => {
+                const el = document.getElementById(w.id);
+                if (el && typeof turnstile !== 'undefined') {
+                    turnstile.render(`#${w.id}`, {
+                        sitekey: window.SITE_CONFIG.turnstileKey,
+                        callback: window[w.callback]
+                    });
+                }
+            });
+        };
     </script>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <!-- Updated Turnstile Script with explicit callback -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" async defer></script>
 </head>
 <body>
     <!-- App Loading Skeleton -->
@@ -352,10 +379,10 @@
             <h2 id="password-modal-title" style="margin-bottom: 1.5rem; font-size: 1.25rem;">Enter Admin Password</h2>
             <div class="form-group">
                 <input type="password" id="password-input" placeholder="Password"
-                    style="text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
+                    style="text-align: center; font-size: 1.2rem; letter-spacing: 2px; border: 1px solid #ced4da; outline: none; box-shadow: none;">
             </div>
             <!-- Cloudflare Turnstile for Admin -->
-            <div class="cf-turnstile" data-sitekey="0x4AAAAAACtXtctvBtKGNWKl" data-callback="onAdminTurnstileSuccess" style="margin-bottom: 1rem; display: flex; justify-content: center;"></div>
+            <div class="cf-turnstile" id="admin-turnstile" style="margin-bottom: 1rem; display: flex; justify-content: center;"></div>
             <div class="modal-actions" style="justify-content: center; border: none; padding-top: 0; margin-top: 1rem;">
                 <button type="button" class="btn btn-secondary" id="password-cancel-btn">Cancel</button>
                 <button type="button" class="btn btn-primary" id="password-submit-btn" disabled>Submit</button>
@@ -530,7 +557,7 @@
                         </div>
                         <div class="form-group">
                             <label for="login-password">Password</label>
-                            <div class="input-wrapper" style="position: relative; display: flex; align-items: center;">
+                            <div class="password-field-container" style="position: relative; display: flex; align-items: center;">
                                 <input type="password" id="login-password" required
                                     style="width: 100%; padding-right: 40px;">
                                 <span class="material-icons-round toggle-password"
@@ -548,7 +575,7 @@
                                 style="font-size: 0.85rem; color: var(--primary); font-weight: 600; text-decoration: none;">Forgot Password?</a>
                         </div>
                         <!-- Cloudflare Turnstile for Login -->
-                        <div class="cf-turnstile" data-sitekey="0x4AAAAAACtXtctvBtKGNWKl" data-callback="onLoginTurnstileSuccess" style="margin-bottom: 1rem; display: flex; justify-content: center;"></div>
+                        <div class="cf-turnstile" id="login-turnstile" style="margin-bottom: 1rem; display: flex; justify-content: center;"></div>
                         <div class="modal-actions" style="margin-top: 1rem; flex-direction: column; gap: 1rem;">
                             <button type="submit" class="btn btn-primary" id="login-submit-btn"
                                 style="width: 100%;" disabled>Login</button>
@@ -587,7 +614,7 @@
                         </div>
                         
                         <!-- Cloudflare Turnstile for Register -->
-                        <div class="cf-turnstile" data-sitekey="0x4AAAAAACtXtctvBtKGNWKl" data-callback="onRegisterTurnstileSuccess" style="margin-bottom: 1rem; display: flex; justify-content: center;"></div>
+                        <div class="cf-turnstile" id="register-turnstile" style="margin-bottom: 1rem; display: flex; justify-content: center;"></div>
                         
                         <div id="register-get-otp-wrapper" style="margin-bottom: 1rem;">
                             <button type="button" class="btn btn-primary btn-sm" id="register-get-otp-btn"
@@ -1037,29 +1064,72 @@
         </div>
     </div>
 
-    <!-- Floating Social Messaging Widget -->
-    <div class="floating-chat-widget" id="floating-chat-widget">
-        <div class="chat-options" id="chat-options">
-            <a href="https://m.me/61582394120895" target="_blank" class="chat-option messenger" aria-label="Messenger">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/be/Facebook_Messenger_logo_2020.svg"
-                    alt="Messenger">
-            </a>
-            <a href="https://wa.me/8801604708353" target="_blank" class="chat-option whatsapp" aria-label="WhatsApp">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/WhatsApp_icon.png" alt="WhatsApp">
-            </a>
-            <a href="https://ig.me/m/toy_and_craft" target="_blank" class="chat-option instagram"
-                aria-label="Instagram">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram">
-            </a>
-        </div>
-        <button class="chat-toggle-btn" id="chat-toggle-btn" aria-label="Toggle Chat Options">
-            <span class="material-icons-round chat-icon-main">chat</span>
-            <span class="material-icons-round chat-icon-close" style="display:none;">close</span>
-        </button>
-    </div>
+
 
     <!-- Config & Main Application Logic -->
-    <script type="module" src="js/app.js?v=carousel_v5"></script>
+    <script type="module" src="js/features/chatbot.js"></script>
+    <script type="module" src="js/app.js"></script>
+
+    <!-- Premium Chatbot -->
+    <div class="chatbot-container no-print" id="chatbot-container">
+        <button class="chatbot-trigger" id="chatbot-trigger" title="Need Help?">
+            <span class="material-icons-round">chat</span>
+        </button>
+        
+        <div class="chatbot-window" id="chatbot-window">
+            <div class="chatbot-header">
+                <div class="chatbot-header-top">
+                    <div class="chatbot-header-info">
+                        <img src="assets/tc_logo.png" alt="Toy & Craft">
+                        <div>
+                            <h3>Toy & Craft Helper</h3>
+                            <span>AI Assistant Online</span>
+                        </div>
+                    </div>
+                    <button class="close-chatbot" id="close-chatbot">
+                        <span class="material-icons-round">close</span>
+                    </button>
+                </div>
+                
+                <div class="chatbot-header-socials">
+                    <span style="font-size: 0.8rem; opacity: 0.9; margin-left: 54px;">Contact us directly:</span>
+                    <div class="social-chat-buttons">
+                        <a href="https://m.me/61582394120895" target="_blank" class="social-circle messenger" title="Messenger">
+                            <i class="fab fa-facebook-messenger"></i>
+                        </a>
+                        <a href="https://wa.me/8801604708353" target="_blank" class="social-circle whatsapp" title="WhatsApp">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                        <a href="https://ig.me/m/toy_and_craft" target="_blank" class="social-circle instagram" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chatbot-messages" id="chatbot-messages">
+                <div class="chat-msg bot">
+                    Hello! 👋 I'm your Toy & Craft assistant. How can I help you today?
+                </div>
+            </div>
+
+            <div class="chatbot-actions" id="chatbot-actions">
+                <button class="action-btn" data-action="track">Track Order</button>
+                <button class="action-btn" data-action="shipping">Shipping Info</button>
+                <button class="action-btn" data-action="return">Return Policy</button>
+                <button class="action-btn" data-action="human">Talk to Human</button>
+            </div>
+
+            <div class="chatbot-input">
+                <div class="cb-input-wrapper">
+                    <input type="text" id="chatbot-input-field" placeholder="Type your message...">
+                    <button id="send-chatbot-msg">
+                        <span class="material-icons-round">send</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
