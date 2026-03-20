@@ -6,7 +6,7 @@
 // Proxy base URL — same origin for local dev, external URL for production
 const PROXY_BASE = window.location.hostname === 'localhost'
     ? ''
-    : 'steadfast-proxy.akramhossainopu.workers.dev';
+    : 'https://steadfast-proxy.akramhossainopu.workers.dev';
 
 
 /**
