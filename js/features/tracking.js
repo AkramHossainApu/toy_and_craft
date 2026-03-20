@@ -30,14 +30,19 @@ export async function refreshTrackingBadge() {
     } catch(e) {}
 
     if (state.currentUser) {
-        // Query user's active orders from Firestore
         try {
-            const q1 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Pending'));
+            let q1, q2;
+            if (state.isAdmin) {
+                // Admin sees all active orders on the platform
+                q1 = query(collection(db, 'Orders'), where('status', '==', 'Pending'));
+                q2 = query(collection(db, 'Orders'), where('status', '==', 'Sent'));
+            } else {
+                // Regular user sees only their own orders
+                q1 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Pending'));
+                q2 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Sent'));
+            }
             const q1Snap = await getDocs(q1);
-            
-            const q2 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Sent'));
             const q2Snap = await getDocs(q2);
-            
             activeOrdersCount = q1Snap.size + q2Snap.size;
         } catch(e) { console.error("Error fetching active orders for badge:", e); }
     } else {
@@ -82,7 +87,7 @@ export function initTracking() {
             renderActiveOrdersView(trackView);
             trackView.style.display = 'flex';
             
-            if (window.history.pushState) window.history.pushState({ path: '/track' }, '', '/track');
+            if (window.updateUrlState) window.updateUrlState('track-order');
         });
     }
 
@@ -106,9 +111,16 @@ async function renderActiveOrdersView(container) {
     // Fetch appropriate order list
     if (state.currentUser) {
         try {
-            const q1 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Pending'));
+            let q1, q2;
+            if (state.isAdmin) {
+                q1 = query(collection(db, 'Orders'), where('status', '==', 'Pending'));
+                q2 = query(collection(db, 'Orders'), where('status', '==', 'Sent'));
+            } else {
+                q1 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Pending'));
+                q2 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Sent'));
+            }
+            
             const q1Snap = await getDocs(q1);
-            const q2 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Sent'));
             const q2Snap = await getDocs(q2);
             
             q1Snap.forEach(doc => activeOrders.push({ id: doc.id, ...doc.data() }));
@@ -201,22 +213,23 @@ function renderOrderCard(invoiceId, trackingCode, sfStatusObj, nativeStatus) {
     // step 3: Sent (Actually On The Way -> sfStatusObj says partially delivered or out etc)
     // step 4: Delivered
     
-    // Determine active step (1 to 4) based on Steadfast mapping:
-    let currentStep = 1;
-    if (nativeStatus === 'Sent') currentStep = 2; // Default generic sent
-    
-    // Fine tune step 3 using detailed sf status text
-    if (nativeStatus === 'Sent' && sfStatusObj.label !== 'Pending' && sfStatusObj.label !== 'In Review') {
-        currentStep = 3; // "Dispatched or out"
+    // Determine active step (1 to 4) based on status mapping:
+    let currentStep = 1; // Default: Order Received
+
+    if (sfStatusObj.label === 'In Review') {
+        currentStep = 2; // Processing
+    } else if (sfStatusObj.label === 'Pending') {
+        currentStep = 3; // On the way
+    } else if (nativeStatus === 'Delivered') {
+        currentStep = 4; // Delivered
     }
-    if (nativeStatus === 'Delivered') currentStep = 4;
 
     const stepColor = currentStep === 4 ? '#27ae60' : '#007BFF';
 
     const steps = [
         { icon: 'receipt', label: 'Order Received' },
         { icon: 'inventory_2', label: 'Processing' },
-        { icon: 'local_shipping', label: 'On The Way' },
+        { icon: 'local_shipping', label: 'On the way' },
         { icon: 'home', label: 'Delivered' }
     ];
 

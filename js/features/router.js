@@ -16,9 +16,9 @@ export function updateUrlState(categorySlug, pageNum = 1, productSlug = null) {
     if (!categorySlug) return;
 
     // Ignore updates for base auth actions where categorySlug is abused
-    if (['login', 'register', 'forgot', 'authenticate-admin', 'Details', 'Orders', 'Checkout...'].includes(categorySlug)) {
+    if (['login', 'register', 'forgot', 'authenticate-admin', 'Details', 'Orders', 'Checkout...', 'track-order'].includes(categorySlug)) {
         let newPath = `/${categorySlug}`;
-        if (state.currentUser && (categorySlug === 'Details' || categorySlug === 'Orders')) {
+        if (state.currentUser && (categorySlug === 'Details' || categorySlug === 'Orders' || categorySlug === 'track-order')) {
             newPath = `/${state.currentUser.id}/${categorySlug}`;
         }
         try {
@@ -129,31 +129,17 @@ export function processRoute() {
                 updateUrlState(maybeAction);
                 if (window.openAuthModal) window.openAuthModal(maybeAction);
             }
-        } else if (maybeAction === 'track' || rawAction === 'track') {
-            // Track Order URL: /track or /track/CODE
+        } else if (maybeAction === 'track-order' || rawAction === 'track-order' || maybeAction === 'track' || rawAction === 'track') {
+            // New Track Order URL: /userId/track-order or /track-order
             if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
             
-            const trackBtn = document.getElementById('nav-track-btn');
-            if (trackBtn) trackBtn.click();
-            
-            // If URL has a tracking code /track/SFR123
-            let trackingCode = null;
-            if (maybeAction === 'track' && parts.length > 1) {
-                trackingCode = decodeURIComponent(parts.slice(1).join('/'));
-            } else if (rawAction === 'track' && parts.length > 2) {
-                trackingCode = decodeURIComponent(parts.slice(2).join('/'));
-            }
-
-            if (trackingCode) {
-                setTimeout(() => {
-                    const input = document.getElementById('track-order-input');
-                    const btn = document.getElementById('track-order-btn');
-                    if (input && btn) {
-                        input.value = trackingCode;
-                        btn.click();
-                    }
-                }, 300);
-            }
+            // Wait for DOM to finish painting headers
+            setTimeout(() => {
+                const trackBtn = document.getElementById('nav-track-btn');
+                if (trackBtn) {
+                    trackBtn.click();
+                }
+            }, 50);
         } else if (maybeAction === 'authenticate-admin') {
             if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
             if (state.isAdmin) {
@@ -543,13 +529,25 @@ window.addEventListener('popstate', (e) => {
     // Re-evaluate the current URL and trigger rendering
     processRoute();
 
-    // Ensure shop layout is visible if we aren't rendering a product or invoice
-    if (!window.pendingProductSlug && !window.location.pathname.includes('/Details') && !window.location.pathname.includes('/Orders')) {
-        if (!window.location.pathname.includes('/admin/all-orders') && !window.location.pathname.includes('/admin/users-list') && !window.location.pathname.includes('/admin/sold-products')) {
+    // Ensure shop layout is visible if we aren't rendering a product, invoice, or track-order page
+    const isSpecialView = window.pendingProductSlug || 
+                         window.location.pathname.includes('/Details') || 
+                         window.location.pathname.includes('/Orders') ||
+                         window.location.pathname.includes('/track-order') ||
+                         window.location.pathname.includes('/track');
+
+    if (!isSpecialView) {
+        const isAdminPage = window.location.pathname.includes('/admin/all-orders') || 
+                          window.location.pathname.includes('/admin/users-list') || 
+                          window.location.pathname.includes('/admin/sold-products');
+        
+        if (!isAdminPage) {
             if (productViewSection) productViewSection.style.display = 'none';
             if (shopSection) shopSection.style.display = 'block';
             const invoiceView = document.getElementById('invoice-view');
             if (invoiceView) invoiceView.style.display = 'none';
+            const trackView = document.getElementById('track-view');
+            if (trackView) trackView.style.display = 'none';
         }
     }
 });

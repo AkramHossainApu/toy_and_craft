@@ -244,6 +244,16 @@ export class Chatbot {
             return { intent: 'greeting' };
         }
 
+        // Admin-only intents
+        if (state.isAdmin) {
+            if (/(?:check\s*)?stock|inventory|how\s*many\s*left/i.test(lower)) {
+                return { intent: 'admin_stock_check' };
+            }
+            if (/(?:sales|orders|revenue|stats|statistics|summary)/i.test(lower)) {
+                return { intent: 'admin_sales_stats' };
+            }
+        }
+
         // Invoice / Order by ID
         const invoiceMatch = lower.match(/(?:invoice|order)\s*#?\s*(\d+)/i)
             || lower.match(/#(\d+)/)
@@ -448,6 +458,14 @@ export class Chatbot {
                 await this.handleListOrders();
                 break;
 
+            case 'admin_stock_check':
+                this.handleAdminStockCheck();
+                break;
+
+            case 'admin_sales_stats':
+                await this.handleAdminSalesStats();
+                break;
+
             case 'track_order':
                 this.handleTrackOrder();
                 break;
@@ -524,11 +542,24 @@ export class Chatbot {
     // ─── Intent Handlers ──────────────────────────────────────────
 
     handleGreeting() {
-        if (this.isLoggedIn()) {
+        if (state.isAdmin) {
+            this.addMessage(`System accessing... Hello Admin ${this.getUserName()}! 🛡️ I'm ready to assist with store management. What would you like to check?`);
+            this.addActionButtons([
+                { label: '📊 Sales Stats', action: 'admin_sales_stats' },
+                { label: '📦 Global Tracking', action: 'track_order' },
+                { label: '📉 Low Stock', action: 'admin_stock_check' },
+                { label: '👥 User List', action: 'contact_human' } // Repurposed for now
+            ]);
+        } else if (this.isLoggedIn()) {
             this.addMessage(`Hello, ${this.getUserName()}! 👋 Welcome back to Toy & Craft! How can I help you today?`);
+            this.addDefaultSuggestions();
         } else {
             this.addMessage("Hello! 👋 Welcome to Toy & Craft. I'm your AI shopping assistant. How can I help you today?");
+            this.addDefaultSuggestions();
         }
+    }
+
+    addDefaultSuggestions() {
         this.addActionButtons([
             { label: '🔍 Search Products', action: 'list_categories' },
             { label: '📦 Track Order', action: 'track_order' },
@@ -870,13 +901,88 @@ export class Chatbot {
         }
 
         this.addMessage("I'm not sure I understand that. 🤔 Here's what I can help you with:");
-        this.addActionButtons([
-            { label: '🔍 Search Products', action: 'list_categories' },
-            { label: '📦 Track Order', action: 'track_order' },
-            { label: '🚚 Shipping Info', action: 'shipping_info' },
-            { label: '↩️ Return Policy', action: 'return_policy' },
-            { label: '💬 Talk to Human', action: 'contact_human' }
-        ]);
+        if (state.isAdmin) {
+            this.addActionButtons([
+                { label: '📊 Sales Stats', action: 'admin_sales_stats' },
+                { label: '📉 Low Stock', action: 'admin_stock_check' },
+                { label: '📦 Global Tracking', action: 'track_order' }
+            ]);
+        } else {
+            this.addActionButtons([
+                { label: '🔍 Search Products', action: 'list_categories' },
+                { label: '📦 Track Order', action: 'track_order' },
+                { label: '🚚 Shipping Info', action: 'shipping_info' },
+                { label: '↩️ Return Policy', action: 'return_policy' },
+                { label: '💬 Talk to Human', action: 'contact_human' }
+            ]);
+        }
+    }
+
+    // ─── Admin Mode Handlers ─────────────────────────────────────
+
+    handleAdminStockCheck() {
+        const outOfStock = state.inventory.filter(p => (p.stock === 0 || p.stock === '0'));
+        const lowStock = state.inventory.filter(p => {
+            const s = parseInt(p.stock);
+            return !isNaN(s) && s > 0 && s <= 5;
+        });
+
+        if (outOfStock.length === 0 && lowStock.length === 0) {
+            this.addMessage("Excellent news! All products have healthy stock levels right now. ✅");
+        } else {
+            if (outOfStock.length > 0) {
+                this.addMessage(`There are ${outOfStock.length} items currently out of stock. ❌`);
+                this.addProductCarousel(outOfStock.slice(0, 5), "Here are the top out-of-stock items:");
+            }
+            if (lowStock.length > 0) {
+                this.addMessage(`Heads up! ${lowStock.length} items are running low on stock (5 or less). ⚠️`);
+                this.addProductCarousel(lowStock.slice(0, 5), "Items needing restock soon:");
+            }
+        }
+    }
+
+    async handleAdminSalesStats() {
+        this.addTypingIndicator();
+        try {
+            const ordersSnap = await getDocs(collection(db, 'Orders'));
+            const orders = ordersSnap.docs.map(doc => doc.data());
+            
+            const totalOrders = orders.length;
+            const completedOrders = orders.filter(o => o.status === 'Delivered').length;
+            const pendingOrders = orders.filter(o => o.status === 'Pending').length;
+            const totalRevenue = orders.filter(o => o.status !== 'Cancelled').reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
+
+            this.removeTypingIndicator();
+            this.addRichMessage(`
+                <div style="background: var(--bg-hover); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <h4 style="margin-top:0; color:var(--primary); font-family:var(--font-heading); font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+                        <span class="material-icons-round" style="font-size:20px;">analytics</span> Store Performance
+                    </h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem;">
+                        <div style="background:var(--bg-card); padding:8px; border-radius:6px;">
+                            <div style="color:var(--text-muted); font-size:0.75rem;">Total Orders</div>
+                            <div style="font-weight:700; font-size:1.1rem;">${totalOrders}</div>
+                        </div>
+                        <div style="background:var(--bg-card); padding:8px; border-radius:6px;">
+                            <div style="color:var(--text-muted); font-size:0.75rem;">Revenue</div>
+                            <div style="font-weight:700; font-size:1.1rem; color:var(--primary);">৳${totalRevenue.toLocaleString()}</div>
+                        </div>
+                        <div style="background:var(--bg-card); padding:8px; border-radius:6px;">
+                            <div style="color:var(--text-muted); font-size:0.75rem;">Pending</div>
+                            <div style="font-weight:700; font-size:1.1rem; color:#f39c12;">${pendingOrders}</div>
+                        </div>
+                        <div style="background:var(--bg-card); padding:8px; border-radius:6px;">
+                            <div style="color:var(--text-muted); font-size:0.75rem;">Delivered</div>
+                            <div style="font-weight:700; font-size:1.1rem; color:#27ae60;">${completedOrders}</div>
+                        </div>
+                    </div>
+                </div>
+            `);
+        } catch (err) {
+            console.error(err);
+            this.removeTypingIndicator();
+            this.addMessage("Sorry, I encountered an error while fetching sales statistics. 🛑");
+        }
     }
 }
 
