@@ -5,8 +5,9 @@
 
 // Proxy base URL — same origin for local dev, external URL for production
 const PROXY_BASE = window.location.hostname === 'localhost'
-    ? ''  // server.py handles it on same origin
-    : '';  // TODO: Set your deployed proxy URL here (e.g. 'https://your-proxy.onrender.com')
+    ? ''
+    : 'steadfast-proxy.akramhossainopu.workers.dev';
+
 
 /**
  * Create a Steadfast delivery parcel for an order.
@@ -89,17 +90,17 @@ export async function trackByCode(trackingCode) {
  */
 export function getStatusDisplay(status) {
     const map = {
-        'in_review':                        { label: 'In Review',              color: '#f39c12', emoji: '📋' },
-        'pending':                          { label: 'Pending',                color: '#e67e22', emoji: '⏳' },
-        'delivered':                        { label: 'Delivered',              color: '#27ae60', emoji: '✅' },
-        'delivered_approval_pending':       { label: 'Delivered (Verifying)',   color: '#2ecc71', emoji: '🔄' },
-        'partial_delivered':                { label: 'Partially Delivered',    color: '#3498db', emoji: '📦' },
-        'partial_delivered_approval_pending':{ label: 'Partial (Verifying)',    color: '#2980b9', emoji: '🔄' },
-        'cancelled':                        { label: 'Cancelled',              color: '#e74c3c', emoji: '❌' },
-        'cancelled_approval_pending':       { label: 'Cancelling',             color: '#c0392b', emoji: '🔄' },
-        'hold':                             { label: 'On Hold',                color: '#9b59b6', emoji: '⏸️' },
-        'unknown':                          { label: 'Unknown',                color: '#95a5a6', emoji: '❓' },
-        'unknown_approval_pending':         { label: 'Unknown (Pending)',       color: '#7f8c8d', emoji: '❓' },
+        'in_review': { label: 'In Review', color: '#f39c12', emoji: '📋' },
+        'pending': { label: 'Pending', color: '#e67e22', emoji: '⏳' },
+        'delivered': { label: 'Delivered', color: '#27ae60', emoji: '✅' },
+        'delivered_approval_pending': { label: 'Delivered (Verifying)', color: '#2ecc71', emoji: '🔄' },
+        'partial_delivered': { label: 'Partially Delivered', color: '#3498db', emoji: '📦' },
+        'partial_delivered_approval_pending': { label: 'Partial (Verifying)', color: '#2980b9', emoji: '🔄' },
+        'cancelled': { label: 'Cancelled', color: '#e74c3c', emoji: '❌' },
+        'cancelled_approval_pending': { label: 'Cancelling', color: '#c0392b', emoji: '🔄' },
+        'hold': { label: 'On Hold', color: '#9b59b6', emoji: '⏸️' },
+        'unknown': { label: 'Unknown', color: '#95a5a6', emoji: '❓' },
+        'unknown_approval_pending': { label: 'Unknown (Pending)', color: '#7f8c8d', emoji: '❓' },
     };
     return map[status] || { label: status || 'Unknown', color: '#95a5a6', emoji: '❓' };
 }

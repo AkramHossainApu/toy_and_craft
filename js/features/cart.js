@@ -900,7 +900,9 @@ export function setupCartListeners() {
 
                 // ── Steadfast Courier: Auto-create parcel ──────────
                 try {
-                    const fullAddress = `${orderAddress}, ${orderThana}, ${orderDistrict}`;
+                    // Normalize internal zones (e.g., "Inside Dhaka") to "Dhaka" for Steadfast's parser
+                    const steadfastDistrict = orderDistrict.includes('Dhaka') ? 'Dhaka' : orderDistrict;
+                    const fullAddress = `${orderAddress}, ${orderThana}, ${steadfastDistrict}`;
                     const itemNames = selectedItems.map(i => `${i.name} x${i.qty}`).join(', ');
 
                     const sfResult = await createSteadfastOrder({
@@ -910,7 +912,12 @@ export function setupCartListeners() {
                         recipient_address: fullAddress,
                         cod_amount: secureGrandTotal,
                         note: `Order #${secureInvoiceId}`,
-                        item_description: itemNames
+                        item_description: itemNames,
+                        // Inject explicit fields in case the API uses them (ignored if not supported)
+                        district: steadfastDistrict,
+                        thana: orderThana,
+                        city: steadfastDistrict,
+                        zone: orderThana
                     });
 
                     if (sfResult.success) {
