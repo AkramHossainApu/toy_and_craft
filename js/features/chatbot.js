@@ -41,9 +41,6 @@ export class Chatbot {
 
     toggle() {
         this.window.classList.toggle('active');
-        if (this.window.classList.contains('active')) {
-            this.inputField.focus();
-        }
     }
 
     close() {
