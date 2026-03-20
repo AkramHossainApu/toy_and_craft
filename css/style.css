@@ -2631,6 +2631,272 @@ a {
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+/* ─── Rich Chat Messages ─────────────────────────────────────── */
+
+.chat-rich {
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    max-width: 95% !important;
+}
+
+/* Product Carousel */
+.chat-carousel {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 8px 4px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.chat-carousel::-webkit-scrollbar {
+    height: 4px;
+}
+
+.chat-carousel::-webkit-scrollbar-thumb {
+    background: rgba(0, 123, 255, 0.3);
+    border-radius: 4px;
+}
+
+.chat-product-card {
+    flex: 0 0 130px;
+    scroll-snap-align: start;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #eef1f5;
+}
+
+.chat-product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.chat-product-card img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    background: #f5f7fa;
+}
+
+.chat-card-info {
+    padding: 8px;
+}
+
+.chat-card-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #2d3436;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+.chat-card-price {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #007BFF;
+    margin-top: 3px;
+}
+
+.chat-card-oos {
+    display: inline-block;
+    font-size: 0.6rem;
+    color: #e53e3e;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.chat-carousel-more {
+    flex: 0 0 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: #007BFF;
+    font-weight: 600;
+    border: 2px dashed #007BFF;
+    border-radius: 12px;
+    min-height: 100px;
+}
+
+/* Link Buttons */
+.chat-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
+    color: white !important;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+    white-space: nowrap;
+}
+
+.chat-link-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 123, 255, 0.4);
+}
+
+.chat-link-btn-sm {
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    border-radius: 14px;
+    margin-top: 6px;
+}
+
+/* Inline Action Buttons */
+.chat-inline-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px 0;
+}
+
+.chat-inline-action {
+    padding: 6px 14px;
+    border: 1.5px solid #007BFF;
+    border-radius: 18px;
+    background: rgba(0, 123, 255, 0.06);
+    color: #007BFF;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+.chat-inline-action:hover {
+    background: #007BFF;
+    color: white;
+}
+
+/* Login Button */
+.chat-login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 18px;
+    background: #007BFF;
+    color: white !important;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.chat-login-btn:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+/* Order Cards */
+.chat-order-card {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 14px;
+    border: 1px solid #eef1f5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.chat-order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #2d3436;
+}
+
+.chat-order-date {
+    font-weight: 500;
+    font-size: 0.75rem;
+    color: #636e72;
+}
+
+.chat-order-detail {
+    font-size: 0.78rem;
+    color: #636e72;
+    margin-top: 4px;
+}
+
+/* Social Links in Chat */
+.chat-social-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.chat-social-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white !important;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.chat-social-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.chat-social-btn.messenger {
+    background: linear-gradient(135deg, #0084ff, #006AE5);
+}
+
+.chat-social-btn.whatsapp {
+    background: linear-gradient(135deg, #25D366, #128C7E);
+}
+
+.chat-social-btn.instagram {
+    background: linear-gradient(135deg, #E1306C, #C13584, #833AB4);
+}
+
+/* Typing Indicator */
+.chat-typing {
+    display: flex;
+    gap: 5px;
+    padding: 10px 14px !important;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-radius: 16px !important;
+    width: fit-content;
+}
+
+.chat-typing span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #636e72;
+    animation: chat-bounce 1.3s ease-in-out infinite;
+}
+
+.chat-typing span:nth-child(2) { animation-delay: 0.15s; }
+.chat-typing span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes chat-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-6px); opacity: 1; }
+}
+
 /* Mobile View Optimized */
 @media (max-width: 480px) {
     .chatbot-container {
@@ -2728,5 +2994,45 @@ a {
         width: 32px;
         height: 32px;
         border-radius: 8px;
+    }
+
+    /* Mobile Rich Messages */
+    .chat-product-card {
+        flex: 0 0 110px;
+    }
+
+    .chat-product-card img {
+        height: 80px;
+    }
+
+    .chat-card-name {
+        font-size: 0.65rem;
+    }
+
+    .chat-card-price {
+        font-size: 0.68rem;
+    }
+
+    .chat-inline-action {
+        padding: 5px 10px;
+        font-size: 0.72rem;
+    }
+
+    .chat-link-btn {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+    }
+
+    .chat-social-btn {
+        padding: 6px 12px;
+        font-size: 0.72rem;
+    }
+
+    .chat-order-header {
+        font-size: 0.78rem;
+    }
+
+    .chat-order-detail {
+        font-size: 0.72rem;
     }
 }

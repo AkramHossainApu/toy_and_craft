@@ -1,6 +1,7 @@
 import { state, updateCart } from '../core/state.js';
 import { db, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc, collection, writeBatch, runTransaction } from '../config/firebase.js';
 import { getAbsoluteImageUrl } from '../core/utils.js';
+import { createSteadfastOrder } from '../config/steadfast.js';
 import { openAuthModal } from './auth.js';
 import {
     cartBadge, cartItemsContainer, cartTotalPrice, cartSidebar, cartOverlay,
@@ -896,6 +897,44 @@ export function setupCartListeners() {
                         invProd.stock = Math.max(0, (invProd.stock || 1) - item.qty);
                     }
                 });
+
+                // ── Steadfast Courier: Auto-create parcel ──────────
+                try {
+                    const fullAddress = `${orderAddress}, ${orderThana}, ${orderDistrict}`;
+                    const itemNames = selectedItems.map(i => `${i.name} x${i.qty}`).join(', ');
+
+                    const sfResult = await createSteadfastOrder({
+                        invoice: secureInvoiceId,
+                        recipient_name: orderUsername,
+                        recipient_phone: orderMobile,
+                        recipient_address: fullAddress,
+                        cod_amount: secureGrandTotal,
+                        note: `Order #${secureInvoiceId}`,
+                        item_description: itemNames
+                    });
+
+                    if (sfResult.success) {
+                        // Save tracking data back to Firebase
+                        const trackingData = {
+                            consignment_id: sfResult.consignment_id,
+                            tracking_code: sfResult.tracking_code,
+                            steadfast_status: sfResult.steadfast_status
+                        };
+                        await updateDoc(newOrderRef, trackingData).catch(e =>
+                            console.warn('Failed to save tracking data:', e)
+                        );
+                        // Also update user's sub-collection copy
+                        if (state.currentUser) {
+                            const userOrderRef = doc(db, 'Users', state.currentUser.id, 'Orders', secureInvoiceId);
+                            await updateDoc(userOrderRef, trackingData).catch(() => {});
+                        }
+                        console.log(`✅ Steadfast parcel created: ${sfResult.tracking_code}`);
+                    } else {
+                        console.warn('⚠️ Steadfast submission failed (order still saved):', sfResult.error);
+                    }
+                } catch (sfErr) {
+                    console.warn('⚠️ Steadfast API error (order still saved):', sfErr);
+                }
 
                 // Show success modal
                 showOrderSuccessModal(secureInvoiceId, orderPayload.items, secureGrandTotal);

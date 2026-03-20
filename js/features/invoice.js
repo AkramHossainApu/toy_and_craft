@@ -1,5 +1,6 @@
 import { db, doc, getDoc } from '../config/firebase.js';
 import { state } from '../core/state.js';
+import { trackByInvoice, getStatusDisplay } from '../config/steadfast.js';
 
 export async function renderInvoicePage(userId, orderId) {
     const invoiceView = document.getElementById('invoice-view');
@@ -164,6 +165,43 @@ export async function renderInvoicePage(userId, orderId) {
                 </div>
             </div>
         `;
+
+        // ── Steadfast Tracking Section ────────────────────────
+        if (data.tracking_code) {
+            const sfStatus = getStatusDisplay(data.steadfast_status);
+            const trackingSection = document.createElement('div');
+            trackingSection.className = 'invoice-tracking-section';
+            trackingSection.id = 'invoice-tracking';
+            trackingSection.style.cssText = 'margin-top: 1.5rem; padding: 1rem 1.5rem; background: #f8f9fa; border-radius: 12px; border: 1px solid #eef1f5;';
+            trackingSection.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                        <h4 style="margin: 0 0 4px; font-size: 0.85rem; color: #636e72; text-transform: uppercase; letter-spacing: 0.5px;">📦 Delivery Tracking</h4>
+                        <div style="font-size: 0.95rem; font-weight: 700; color: #2d3436;">Tracking Code: <span style="color: #007BFF; font-family: monospace; letter-spacing: 1px;">${data.tracking_code}</span></div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div id="sf-live-status" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; background: ${sfStatus.color}20; color: ${sfStatus.color}; font-weight: 700; font-size: 0.85rem;">
+                            ${sfStatus.emoji} ${sfStatus.label}
+                        </div>
+                        <div style="font-size: 0.7rem; color: #b2bec3; margin-top: 4px;">Powered by Steadfast Courier</div>
+                    </div>
+                </div>
+            `;
+            invoiceContainer.appendChild(trackingSection);
+
+            // Fetch live status from Steadfast API
+            trackByInvoice(orderId).then(result => {
+                if (result.success) {
+                    const liveStatus = getStatusDisplay(result.delivery_status);
+                    const statusEl = document.getElementById('sf-live-status');
+                    if (statusEl) {
+                        statusEl.style.background = `${liveStatus.color}20`;
+                        statusEl.style.color = liveStatus.color;
+                        statusEl.innerHTML = `${liveStatus.emoji} ${liveStatus.label}`;
+                    }
+                }
+            }).catch(() => {});
+        }
 
         // Dynamic Auto-Scaling for Print
         const itemCount = (data.items || []).length;
