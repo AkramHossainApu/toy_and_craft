@@ -3,6 +3,7 @@ import { db, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc, collection, wri
 import { getAbsoluteImageUrl } from '../core/utils.js';
 import { createSteadfastOrder } from '../config/steadfast.js';
 import { openAuthModal } from './auth.js';
+import { refreshTrackingBadge } from './tracking.js';
 import {
     cartBadge, cartItemsContainer, cartTotalPrice, cartSidebar, cartOverlay,
     cartToggleBtn, closeCartBtn,
@@ -889,6 +890,17 @@ export function setupCartListeners() {
                 });
 
                 await batch.commit();
+
+                // Save to local device for guest tracking capability
+                if (!state.currentUser) {
+                    try {
+                        const guestOrders = JSON.parse(localStorage.getItem('tc_guest_orders')) || [];
+                        guestOrders.push({ id: secureInvoiceId, date: new Date().toISOString(), status: 'Pending' });
+                        localStorage.setItem('tc_guest_orders', JSON.stringify(guestOrders));
+                    } catch(e) { console.warn("Failed to save guest order to localStorage", e); }
+                }
+
+                refreshTrackingBadge();
 
                 // Update local memory inventory array
                 selectedItems.forEach(item => {

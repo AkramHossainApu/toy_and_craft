@@ -131,6 +131,10 @@
                     <span class="material-icons-round">shopping_bag</span>
                     <span class="cart-badge" id="cart-badge" style="display: none;">0</span>
                 </button>
+                <button class="icon-btn" id="nav-track-btn" aria-label="Track Order" title="Track Order"
+                    style="margin-right: 15px;">
+                    <span class="material-icons-round">local_shipping</span>
+                </button>
                 <button class="icon-btn theme-toggle" id="theme-toggle" aria-label="Toggle Theme"
                     style="margin-right: 15px;">
                     <span class="material-icons-round">dark_mode</span>
@@ -219,6 +223,22 @@
                 <button id="prev-page-btn" class="btn btn-secondary btn-sm" disabled>Previous</button>
                 <span id="page-indicator" style="font-weight: bold; color: var(--text-muted);">Page 1 of 1</span>
                 <button id="next-page-btn" class="btn btn-secondary btn-sm" disabled>Next</button>
+            </div>
+        </section>
+
+        <!-- Track Order View -->
+        <section id="track-view" style="display: none; padding: 4rem 1.5rem; text-align: center; min-height: 60vh; flex-direction: column; justify-content: center; align-items: center;">
+            <span class="material-icons-round" style="font-size: 80px; color: var(--text-muted); margin-bottom: 1rem;">local_shipping</span>
+            <h2 style="font-family: var(--font-heading); font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-main);">Track Your Order</h2>
+            <p style="color: var(--text-muted); font-size: 1.2rem; margin-bottom: 2rem; max-width: 600px;">
+                Enter your order ID to get the latest updates on your shipment.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; width: 100%; max-width: 400px;">
+                <input type="text" id="track-order-input" placeholder="Enter Order ID" style="flex-grow: 1; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text-main);">
+                <button class="btn btn-primary" id="track-order-btn" style="padding: 0.75rem 1.5rem;">Track</button>
+            </div>
+            <div id="track-order-results" style="margin-top: 2rem; width: 100%; max-width: 600px; text-align: left;">
+                <!-- Tracking results will be displayed here -->
             </div>
         </section>
 

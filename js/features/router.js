@@ -129,6 +129,31 @@ export function processRoute() {
                 updateUrlState(maybeAction);
                 if (window.openAuthModal) window.openAuthModal(maybeAction);
             }
+        } else if (maybeAction === 'track' || rawAction === 'track') {
+            // Track Order URL: /track or /track/CODE
+            if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
+            
+            const trackBtn = document.getElementById('nav-track-btn');
+            if (trackBtn) trackBtn.click();
+            
+            // If URL has a tracking code /track/SFR123
+            let trackingCode = null;
+            if (maybeAction === 'track' && parts.length > 1) {
+                trackingCode = decodeURIComponent(parts.slice(1).join('/'));
+            } else if (rawAction === 'track' && parts.length > 2) {
+                trackingCode = decodeURIComponent(parts.slice(2).join('/'));
+            }
+
+            if (trackingCode) {
+                setTimeout(() => {
+                    const input = document.getElementById('track-order-input');
+                    const btn = document.getElementById('track-order-btn');
+                    if (input && btn) {
+                        input.value = trackingCode;
+                        btn.click();
+                    }
+                }, 300);
+            }
         } else if (maybeAction === 'authenticate-admin') {
             if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
             if (state.isAdmin) {

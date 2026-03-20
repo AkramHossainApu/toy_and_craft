@@ -20,6 +20,7 @@ import {
     profileOtpInput, profileOtpHint, profileResendOtpBtn, profileOtpTimer, profileGetOtpWrapper, profileEmailGroup
 } from '../core/dom.js';
 import { generateSlug } from '../core/utils.js';
+import { refreshTrackingBadge } from './tracking.js';
 
 // =============================================
 // EmailJS Configuration — UPDATE THESE VALUES
@@ -1033,6 +1034,7 @@ export function setupAuthListeners() {
 
             updateAuthUI();
             closeAuthModal();
+            refreshTrackingBadge();
 
             // Bounce to root category visually
             if (state.categories.length > 0) {
@@ -1243,6 +1245,7 @@ export function setupAuthListeners() {
 
                         updateAuthUI();
                         closeAuthModal();
+                        refreshTrackingBadge();
 
                         if (state.currentCategorySlug && window.updateUrlState) {
                             window.updateUrlState(state.currentCategorySlug);
@@ -1336,6 +1339,7 @@ export function setupAuthListeners() {
 
                     updateAuthUI();
                     closeAuthModal();
+                    refreshTrackingBadge();
 
                     if (state.currentCategorySlug && window.updateUrlState) {
                         window.updateUrlState(state.currentCategorySlug);

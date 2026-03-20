@@ -123,6 +123,8 @@ export function renderCategoryTabs() {
 
                 if (shopSection && shopSection.style.display === 'none') {
                     if (productViewSection) productViewSection.style.display = 'none';
+                    const trackView = document.getElementById('track-view');
+                    if (trackView) trackView.style.display = 'none';
                     shopSection.style.display = 'block';
                 }
 
@@ -346,6 +348,8 @@ export function renderProductPage(productSlug) {
     pvCurrentQty = 1;
 
     if (shopSection) shopSection.style.display = 'none';
+    const trackView = document.getElementById('track-view');
+    if (trackView) trackView.style.display = 'none';
     if (productViewSection) productViewSection.style.display = 'block';
     const errorViewSection = document.getElementById('error-view');
     if (errorViewSection) errorViewSection.style.display = 'none';
@@ -501,6 +505,8 @@ export function setupShopListeners() {
     if (backToShopBtn) {
         backToShopBtn.addEventListener('click', () => {
             if (productViewSection) productViewSection.style.display = 'none';
+            const trackView = document.getElementById('track-view');
+            if (trackView) trackView.style.display = 'none';
             if (shopSection) shopSection.style.display = 'block';
             const errorViewSection = document.getElementById('error-view');
             if (errorViewSection) errorViewSection.style.display = 'none';

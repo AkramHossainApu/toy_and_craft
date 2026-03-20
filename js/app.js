@@ -13,6 +13,7 @@ import { setupAdminListeners, setupAdminOrderListeners, toggleAdminMode } from '
 import { setupSearchListeners } from './features/search.js';
 import { renderInvoicePage, cleanupInvoiceView } from './features/invoice.js';
 import { initRouting } from './features/router.js';
+import { initTracking } from './features/tracking.js';
 
 import { getTrueDistrict } from './features/cart.js'; // Needed globally locally by forms
 
@@ -144,6 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupAdminListeners();
     setupAdminOrderListeners();
     setupSearchListeners();
+    initTracking();
 
     // 2. Initialize Visual Toggles & Stored Global States
     if (themeToggleBtn) {
