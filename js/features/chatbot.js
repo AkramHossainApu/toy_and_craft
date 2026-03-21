@@ -19,6 +19,10 @@ export class Chatbot {
         this.inputField = document.getElementById('chatbot-input-field');
         this.sendBtn = document.getElementById('send-chatbot-msg');
         this.firstMessageSent = false;
+        
+        // Storage for keyboard avoidance
+        this.initialBaseHeight = 0;
+        this.initialBaseTop = 0;
 
         this.init();
     }
@@ -89,37 +93,52 @@ export class Chatbot {
         if (this.window.classList.contains('active')) {
             if (window.innerWidth <= 480) {
                 document.body.classList.add('chat-open');
-                this.handleViewportChange();
+                // Capture initial state for floating keyboard avoidance
+                setTimeout(() => {
+                    const rect = this.window.getBoundingClientRect();
+                    this.initialBaseTop = rect.top;
+                    this.initialBaseHeight = rect.height;
+                    this.handleViewportChange();
+                }, 310); // Wait for open transition
             }
         } else {
             document.body.classList.remove('chat-open');
+            this.window.style.height = '';
+            this.window.style.bottom = '';
         }
     }
 
     close() {
         this.window.classList.remove('active');
         document.body.classList.remove('chat-open');
+        this.window.style.height = '';
+        this.window.style.bottom = '';
     }
 
     handleViewportChange() {
-        if (!this.window.classList.contains('active') || window.innerWidth > 480) {
-            this.window.style.height = '';
-            this.window.style.bottom = '';
-            return;
-        }
+        if (!this.window.classList.contains('active') || window.innerWidth > 480) return;
 
         const vv = window.visualViewport;
-        // On mobile, we want the window to fill the visual viewport up to 85%
-        // and be anchored to the bottom of the visual viewport (above keyboard)
-        const vHeight = vv.height;
-        const vTop = vv.offsetTop;
-        
-        // Calculate the height to be 85% of available visual space
-        this.window.style.height = `${vHeight * 0.85}px`;
-        
-        // Adjust bottom to account for the keyboard (difference between layout and visual viewport)
-        const bottomOffset = window.innerHeight - (vTop + vHeight);
-        this.window.style.bottom = `${bottomOffset}px`;
+        const layoutHeight = window.innerHeight;
+        const keyboardHeight = layoutHeight - vv.height - vv.offsetTop;
+
+        if (keyboardHeight > 10) {
+            // Keyboard is likely visible
+            const margin = 18;
+            const targetBottom = keyboardHeight + margin;
+            
+            // We want to keep the TOP of the window where it was initially
+            // New Height = Distance from original Top to new Bottom
+            const availableSpaceBelowTop = layoutHeight - targetBottom - this.initialBaseTop;
+            const newHeight = Math.max(160, availableSpaceBelowTop); // Min height of 160px
+            
+            this.window.style.bottom = `${targetBottom}px`;
+            this.window.style.height = `${newHeight}px`;
+        } else {
+            // Keyboard is hidden
+            this.window.style.bottom = ''; // Revert to CSS default (18px)
+            this.window.style.height = ''; // Revert to CSS default (65vh)
+        }
     }
 
     // ─── Message Rendering ────────────────────────────────────────
