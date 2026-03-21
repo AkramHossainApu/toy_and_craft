@@ -120,24 +120,31 @@ export class Chatbot {
 
         const vv = window.visualViewport;
         const layoutHeight = window.innerHeight;
-        const keyboardHeight = layoutHeight - vv.height - vv.offsetTop;
+        
+        // keyboardHeight is technically the space below the visual viewport in the layout viewport
+        const offsetFromBottom = layoutHeight - (vv.height + vv.offsetTop);
+        const isKeyboardUp = offsetFromBottom > 30; // Threshold for keyboard detection
 
-        if (keyboardHeight > 10) {
-            // Keyboard is likely visible
-            const margin = 18;
-            const targetBottom = keyboardHeight + margin;
+        if (isKeyboardUp) {
+            const margin = 16;
+            // Anchoring to the visual bottom ensures it stays above keyboard even if browser scrolls the background
+            const targetBottom = offsetFromBottom + margin;
             
-            // We want to keep the TOP of the window where it was initially
-            // New Height = Distance from original Top to new Bottom
-            const availableSpaceBelowTop = layoutHeight - targetBottom - this.initialBaseTop;
-            const newHeight = Math.max(160, availableSpaceBelowTop); // Min height of 160px
+            // Available space depends on the visual viewport height
+            // We want to keep the top stable relative to the LAYOUT viewport 
+            // unless it gets too squashed
+            const targetTop = this.initialBaseTop;
+            const newHeight = Math.max(240, layoutHeight - targetBottom - targetTop); // Guaranteed 240px min height for "2 lines"
             
             this.window.style.bottom = `${targetBottom}px`;
             this.window.style.height = `${newHeight}px`;
+            
+            // Force scroll the messages to the bottom to see the latest text
+            this.scrollToBottom();
         } else {
             // Keyboard is hidden
-            this.window.style.bottom = ''; // Revert to CSS default (18px)
-            this.window.style.height = ''; // Revert to CSS default (65vh)
+            this.window.style.bottom = ''; 
+            this.window.style.height = ''; 
         }
     }
 
