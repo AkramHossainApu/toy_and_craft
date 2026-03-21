@@ -76,14 +76,50 @@ export class Chatbot {
         this.inputField.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.handleSendMessage();
         });
+
+        // Mobile Viewport Handling (Keyboard Fix)
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => this.handleViewportChange());
+            window.visualViewport.addEventListener('scroll', () => this.handleViewportChange());
+        }
     }
 
     toggle() {
         this.window.classList.toggle('active');
+        if (this.window.classList.contains('active')) {
+            if (window.innerWidth <= 480) {
+                document.body.classList.add('chat-open');
+                this.handleViewportChange();
+            }
+        } else {
+            document.body.classList.remove('chat-open');
+        }
     }
 
     close() {
         this.window.classList.remove('active');
+        document.body.classList.remove('chat-open');
+    }
+
+    handleViewportChange() {
+        if (!this.window.classList.contains('active') || window.innerWidth > 480) {
+            this.window.style.height = '';
+            this.window.style.bottom = '';
+            return;
+        }
+
+        const vv = window.visualViewport;
+        // On mobile, we want the window to fill the visual viewport up to 85%
+        // and be anchored to the bottom of the visual viewport (above keyboard)
+        const vHeight = vv.height;
+        const vTop = vv.offsetTop;
+        
+        // Calculate the height to be 85% of available visual space
+        this.window.style.height = `${vHeight * 0.85}px`;
+        
+        // Adjust bottom to account for the keyboard (difference between layout and visual viewport)
+        const bottomOffset = window.innerHeight - (vTop + vHeight);
+        this.window.style.bottom = `${bottomOffset}px`;
     }
 
     // ─── Message Rendering ────────────────────────────────────────
