@@ -371,14 +371,27 @@ export function openGuestModal() {
         });
     }
 
-    if (guestDistrict) {
-        guestDistrict.addEventListener('change', (e) => {
-            const selected = e.target.value;
-            if (guestThana) {
-                guestThana.innerHTML = '<option value="" disabled selected>Select Thana</option>';
-                guestThana.disabled = false;
-                guestThana.style.background = 'var(--bg-card)';
-                guestThana.style.cursor = 'pointer';
+    if (closeGuestModalBtn) {
+        closeGuestModalBtn.onclick = () => { if (guestModal) guestModal.style.display = 'none'; };
+    }
+
+    if (guestCheckoutForm) {
+        guestCheckoutForm.onsubmit = null;
+        const newGuestForm = guestCheckoutForm.cloneNode(true);
+        guestCheckoutForm.parentNode.replaceChild(newGuestForm, guestCheckoutForm);
+
+        // Re-query the elements from the NEW form because cloneNode(true) creates new elements 
+        // and the previous listeners on 'guestDistrict' (from dom.js) are lost.
+        const newGuestDistrict = document.getElementById('guest-district');
+        const newGuestThana = document.getElementById('guest-thana');
+
+        if (newGuestDistrict && newGuestThana) {
+            newGuestDistrict.addEventListener('change', (e) => {
+                const selected = e.target.value;
+                newGuestThana.innerHTML = '<option value="" disabled selected>Select Thana</option>';
+                newGuestThana.disabled = false;
+                newGuestThana.style.background = 'var(--bg-card)';
+                newGuestThana.style.cursor = 'pointer';
 
                 let thanas = [];
                 if (selected === "Dhaka") {
@@ -391,35 +404,25 @@ export function openGuestModal() {
                     const opt = document.createElement('option');
                     opt.value = t;
                     opt.textContent = t;
-                    guestThana.appendChild(opt);
+                    newGuestThana.appendChild(opt);
                 });
-            }
-        });
-    }
-
-    if (closeGuestModalBtn) {
-        closeGuestModalBtn.onclick = () => { if (guestModal) guestModal.style.display = 'none'; };
-    }
-
-    if (guestCheckoutForm) {
-        guestCheckoutForm.onsubmit = null;
-        const newGuestForm = guestCheckoutForm.cloneNode(true);
-        guestCheckoutForm.parentNode.replaceChild(newGuestForm, guestCheckoutForm);
+            });
+        }
 
         newGuestForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const newGuestNameInput = document.getElementById('guest-name');
             const newGuestMobileInput = document.getElementById('guest-mobile');
             const newGuestAddressInput = document.getElementById('guest-address');
-            const newGuestDistrict = document.getElementById('guest-district');
-            const newGuestThana = document.getElementById('guest-thana');
+            const newGuestDistrictVal = document.getElementById('guest-district');
+            const newGuestThanaVal = document.getElementById('guest-thana');
 
             state.currentGuest = {
                 name: newGuestNameInput.value.trim(),
                 mobile: newGuestMobileInput.value.trim(),
                 address: newGuestAddressInput.value.trim(),
-                district: newGuestDistrict.value,
-                thana: newGuestThana.value
+                district: newGuestDistrictVal.value,
+                thana: newGuestThanaVal.value
             };
 
             if (guestModal) guestModal.style.display = 'none';
@@ -616,6 +619,8 @@ function enterShippingEditMode(activeTarget) {
         districtSelect.addEventListener('change', () => {
             if (thanaSelect) {
                 thanaSelect.innerHTML = buildThanaDropdown(districtSelect.value, '');
+                thanaSelect.disabled = false;
+                thanaSelect.style.background = 'var(--bg-card)';
             }
         });
     }

@@ -345,8 +345,13 @@ export function initLocationDropdowns() {
         });
     };
 
-    populateDistrict(registerDistrictInput);
-    populateDistrict(profileDistrictInput);
+    const regDist = document.getElementById('register-district');
+    const regThana = document.getElementById('register-thana');
+    const profDist = document.getElementById('profile-district');
+    const profThana = document.getElementById('profile-thana');
+
+    populateDistrict(regDist);
+    populateDistrict(profDist);
 
     const handleDistrictChange = (thanaSelectEl) => (e) => {
         if (!thanaSelectEl) return;
@@ -371,11 +376,11 @@ export function initLocationDropdowns() {
         });
     };
 
-    if (registerDistrictInput && registerThanaInput) {
-        registerDistrictInput.addEventListener('change', handleDistrictChange(registerThanaInput));
+    if (regDist && regThana) {
+        regDist.addEventListener('change', handleDistrictChange(regThana));
     }
-    if (profileDistrictInput && profileThanaInput) {
-        profileDistrictInput.addEventListener('change', handleDistrictChange(profileThanaInput));
+    if (profDist && profThana) {
+        profDist.addEventListener('change', handleDistrictChange(profThana));
     }
 
     // Add input listeners for all profile fields to track changes

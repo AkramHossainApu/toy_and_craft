@@ -51,7 +51,8 @@ def steadfast_request(method, path, data=None):
 
 
 class SPARequestHandler(http.server.SimpleHTTPRequestHandler):
-    extensions_map = http.server.SimpleHTTPRequestHandler.extensions_map.copy()
+    # Satisfy linter by using getattr for potentially instance-only attribute
+    extensions_map = getattr(http.server.SimpleHTTPRequestHandler, 'extensions_map', {}).copy()
     extensions_map.update({
         '.js': 'application/javascript',
         '.css': 'text/css',
