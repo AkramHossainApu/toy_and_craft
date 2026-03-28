@@ -1099,6 +1099,7 @@
 
 
     <!-- Config & Main Application Logic -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script type="module" src="js/features/chatbot.js"></script>
     <script type="module" src="js/app.js"></script>
 
@@ -1106,6 +1107,12 @@
     <div class="chatbot-container no-print" id="chatbot-container">
         <button class="chatbot-trigger" id="chatbot-trigger" title="Need Help?">
             <span class="material-icons-round">chat</span>
+            
+            <!-- AI 3D Cat Companion (Nested for Perfect Origin) -->
+            <div class="cat-companion" id="cat-companion">
+                <div class="cat-bubble" id="cat-bubble">Meow! 🐾</div>
+                <canvas id="cat-canvas"></canvas>
+            </div>
         </button>
         
         <div class="chatbot-window" id="chatbot-window">

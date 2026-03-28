@@ -2422,6 +2422,74 @@ a {
     color: white !important;
 }
 
+/* --- AI Cat Companion --- */
+.cat-companion {
+    position: absolute;
+    bottom: 50%; /* Center start point */
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-100%, 10px) scale(0.6); /* Start lower-left hidden */
+    transform-origin: center bottom;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cat-companion.active {
+    opacity: 1;
+}
+
+/* Specific state: Peeking (pop head from top-left) */
+.cat-companion.peek {
+    transform: translate(-95%, -35px) scale(0.95);
+}
+
+/* Specific state: Resting (sit higher on top-left) */
+.cat-companion.rest {
+    transform: translate(-90%, -52px) scale(1.1);
+}
+
+#cat-canvas {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+}
+
+.cat-bubble {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    background: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #333;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10002;
+}
+
+.cat-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid white;
+}
+
+.cat-bubble.show {
+    transform: translateX(-50%) scale(1);
+}
+
 .chatbot-window {
     position: fixed; /* Changed from absolute for better keyboard stability */
     bottom: 84px;

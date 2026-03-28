@@ -91,6 +91,9 @@ export class Chatbot {
     toggle() {
         this.window.classList.toggle('active');
         if (this.window.classList.contains('active')) {
+            // Hide cat buddy when chat is open
+            if (window.catBuddy) window.catBuddy.hide();
+            
             if (window.innerWidth <= 480) {
                 document.body.classList.add('chat-open');
                 // Capture initial state for floating keyboard avoidance
@@ -113,6 +116,7 @@ export class Chatbot {
         document.body.classList.remove('chat-open');
         this.window.style.height = '';
         this.window.style.bottom = '';
+        // Cat can start acting again after close (next interval)
     }
 
     handleViewportChange() {
@@ -1048,7 +1052,254 @@ export class Chatbot {
     }
 }
 
+/**
+ * AI 3D Cat Companion Logic (Three.js)
+ * Building a "Toy-style" 3D cat procedurally
+ */
+class ThreeCat {
+    constructor() {
+        this.canvas = document.getElementById('cat-canvas');
+        if (!this.canvas) return;
+
+        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true, antialias: true });
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.setSize(120, 120); // Canvas internal size
+
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+        this.camera.position.set(0, 1.5, 5);
+
+        this.setupLights();
+        this.buildCat();
+        this.animate();
+    }
+
+    setupLights() {
+        const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+        this.scene.add(ambient);
+
+        const directional = new THREE.DirectionalLight(0xffffff, 0.6);
+        directional.position.set(2, 5, 5);
+        this.scene.add(directional);
+    }
+
+    buildCat() {
+        this.catGroup = new THREE.Group();
+        this.catGroup.scale.set(0.85, 0.85, 0.85); // Shrink the model
+        this.scene.add(this.catGroup);
+
+        const orangeMaterial = new THREE.MeshStandardMaterial({ color: 0xffa500 });
+        const whiteMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
+
+        // Body
+        this.body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1, 1.5), orangeMaterial);
+        this.body.position.y = 0.5;
+        this.catGroup.add(this.body);
+
+        // Head
+        this.head = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.2, 1.2), orangeMaterial);
+        this.head.position.set(0, 1.5, 0.6);
+        this.catGroup.add(this.head);
+
+        // Muzzle
+        const muzzle = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.5, 0.3), whiteMaterial);
+        muzzle.position.set(0, 1.3, 1.3); // Head origin modified
+        this.catGroup.add(muzzle);
+
+        // Ears
+        const earGeo = new THREE.ConeGeometry(0.3, 0.5, 4);
+        this.earL = new THREE.Mesh(earGeo, orangeMaterial);
+        this.earL.position.set(0.4, 2.2, 0.6);
+        this.catGroup.add(this.earL);
+
+        this.earR = new THREE.Mesh(earGeo, orangeMaterial);
+        this.earR.position.set(-0.4, 2.2, 0.6);
+        this.catGroup.add(this.earR);
+
+        // Eyes
+        const eyeGeo = new THREE.SphereGeometry(0.12, 16, 16);
+        this.eyeL = new THREE.Mesh(eyeGeo, blackMaterial);
+        this.eyeL.position.set(0.35, 1.6, 1.15);
+        this.catGroup.add(this.eyeL);
+
+        this.eyeR = new THREE.Mesh(eyeGeo, blackMaterial);
+        this.eyeR.position.set(-0.35, 1.6, 1.15);
+        this.catGroup.add(this.eyeR);
+
+        // Tail
+        this.tailGroup = new THREE.Group();
+        this.tailGroup.position.set(0, 0.5, -0.75);
+        this.catGroup.add(this.tailGroup);
+
+        this.tail = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1.2), orangeMaterial);
+        this.tail.rotation.x = Math.PI / 2.5;
+        this.tail.position.z = -0.5;
+        this.tailGroup.add(this.tail);
+
+        this.catGroup.rotation.y = -Math.PI / 4;
+    }
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        const time = Date.now() * 0.002;
+        
+        if (this.tailGroup) {
+            this.tailGroup.rotation.y = Math.sin(time * 2) * 0.4;
+        }
+        if (this.head) {
+            this.head.rotation.z = Math.sin(time * 1.5) * 0.05;
+        }
+        if (Math.sin(time * 0.5) > 0.98) {
+            this.eyeL.scale.y = 0.1;
+            this.eyeR.scale.y = 0.1;
+        } else {
+            this.eyeL.scale.y = 1;
+            this.eyeR.scale.y = 1;
+        }
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    setPose(type) {
+        if (type === 'peek') {
+            this.catGroup.rotation.y = 0; // Look straight ahead when peeking
+            this.catGroup.position.y = -0.8; // Only show head
+        } else if (type === 'rest') {
+            this.catGroup.rotation.y = -Math.PI / 6;
+            this.catGroup.position.y = 0;
+        }
+    }
+}
+
+/**
+ * AI Cat Companion Logic (Controller)
+ */
+class CatCompanion {
+    constructor() {
+        this.el = document.getElementById('cat-companion');
+        this.trigger = document.getElementById('chatbot-trigger');
+        this.bubble = document.getElementById('cat-bubble');
+        this.threeCat = null;
+        this.timer = null;
+        this.isHovering = false;
+        this.messages = [
+            "Hi there! 👋",
+            "Meow! 🐾",
+            "Toys! 🧸",
+            "Search? 🔍",
+            "Found logic! ✨",
+            "Helping! 🐈",
+            "Check sales? 🏷️",
+            "Resting... 💤"
+        ];
+
+        this.init();
+    }
+
+    init() {
+        if (!this.el) return;
+        
+        try {
+            this.threeCat = new ThreeCat();
+        } catch (e) { console.error(e); }
+
+        // Hover events
+        if (this.trigger) {
+            this.trigger.addEventListener('mouseenter', () => {
+                this.isHovering = true;
+                this.peek(true); // Immediate pop
+            });
+            this.trigger.addEventListener('mouseleave', () => {
+                this.isHovering = false;
+                this.hide();
+            });
+        }
+
+        this.scheduleNextAction();
+    }
+
+    scheduleNextAction() {
+        if (this.timer) clearTimeout(this.timer);
+        const delay = 15000 + Math.random() * 25000;
+        this.timer = setTimeout(() => {
+            if (!this.isHovering) this.performRandomAction();
+            else this.scheduleNextAction();
+        }, delay);
+    }
+
+    performRandomAction() {
+        const isChatOpen = window.chatbot && window.chatbot.window.classList.contains('active');
+        if (isChatOpen || this.isHovering) {
+            this.scheduleNextAction();
+            return;
+        }
+
+        const rand = Math.random();
+        if (rand < 0.6) this.peek();
+        else this.climbAndRest();
+    }
+
+    hide() {
+        if (this.isHovering) return; // Don't hide if user is still hovering
+        this.el.classList.remove('active', 'peek', 'rest');
+        this.bubble.classList.remove('show');
+    }
+
+    peek(immediate = false) {
+        if (this.timer && !immediate) clearTimeout(this.timer);
+        
+        const isChatOpen = window.chatbot && window.chatbot.window.classList.contains('active');
+        if (isChatOpen) return;
+
+        this.el.classList.remove('rest');
+        if (this.threeCat) this.threeCat.setPose('peek');
+        this.el.classList.add('active', 'peek');
+        
+        if (Math.random() > 0.5) {
+            setTimeout(() => this.saySomething(), 400);
+        }
+
+        if (!immediate) {
+            setTimeout(() => {
+                if (!this.isHovering) {
+                    this.hide();
+                    this.scheduleNextAction();
+                }
+            }, 4000);
+        }
+    }
+
+    climbAndRest() {
+        const isChatOpen = window.chatbot && window.chatbot.window.classList.contains('active');
+        if (isChatOpen) return;
+
+        this.el.classList.remove('peek');
+        if (this.threeCat) this.threeCat.setPose('rest');
+        this.el.classList.add('active', 'rest');
+
+        setTimeout(() => this.saySomething(), 800);
+
+        setTimeout(() => {
+            if (!this.isHovering) {
+                this.hide();
+                this.scheduleNextAction();
+            }
+        }, 6000);
+    }
+
+    saySomething() {
+        const msg = this.messages[Math.floor(Math.random() * this.messages.length)];
+        this.bubble.innerText = msg;
+        this.bubble.classList.add('show');
+        
+        setTimeout(() => {
+            this.bubble.classList.remove('show');
+        }, 3000);
+    }
+}
+
 // Initialize when the DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.chatbot = new Chatbot();
+    window.catBuddy = new CatCompanion();
 });
