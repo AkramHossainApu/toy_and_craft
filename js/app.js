@@ -263,5 +263,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Promo Banner Close Logic
+    const promoBanner = document.getElementById('promo-banner');
+    const closePromoBtn = document.getElementById('close-promo-btn');
+    if (promoBanner && closePromoBtn) {
+        if (sessionStorage.getItem('tc_promo_closed') === 'true') {
+            promoBanner.style.display = 'none';
+        }
+
+        closePromoBtn.addEventListener('click', () => {
+            promoBanner.style.opacity = '0';
+            promoBanner.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => {
+                promoBanner.style.display = 'none';
+                sessionStorage.setItem('tc_promo_closed', 'true');
+            }, 300);
+        });
+    }
+
     initRouting();
 });

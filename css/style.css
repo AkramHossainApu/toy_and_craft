@@ -3051,3 +3051,79 @@ a {
         font-size: 0.72rem;
     }
 }
+/* --- Promo Banner --- */
+.promo-banner {
+  background: linear-gradient(135deg, #FF6B6B, #FFD93D);
+  color: #1A1A1A;
+  padding: 0.6rem 1rem;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2000;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.promo-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  animation: slideInBanner 0.6s ease-out;
+}
+
+.promo-text {
+  font-size: 0.95rem;
+  letter-spacing: 0.2px;
+}
+
+.promo-icon {
+  font-size: 1.2rem;
+  animation: pulseIcon 1.5s infinite;
+}
+
+.promo-close {
+  position: absolute;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  color: #1A1A1A;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.promo-close:hover {
+  background: rgba(0, 0, 0, 0.2);
+  transform: scale(1.1);
+}
+
+.promo-close .material-icons-round {
+  font-size: 16px;
+}
+
+@keyframes slideInBanner {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulseIcon {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 600px) {
+  .promo-text { font-size: 0.8rem; padding-right: 20px; text-align: left; }
+  .promo-close { right: 0.5rem; }
+  .promo-icon { display: none; }
+}
