@@ -334,7 +334,9 @@ export function processRoute() {
             if (shopSection) shopSection.style.display = 'block';
         }
 
-        if (window.renderProducts) window.renderProducts(state.currentCategorySlug, state.currentPage || 1);
+        const memory = state.categoryMemory && state.categoryMemory[state.currentCategorySlug];
+        const targetScroll = (memory && memory.page === (state.currentPage || 1)) ? memory.scroll : null;
+        if (window.renderProducts) window.renderProducts(state.currentCategorySlug, state.currentPage || 1, targetScroll);
     }
 }
 window.processRoute = processRoute;
@@ -506,7 +508,9 @@ function handleAdminRoute(parts, bounceToAdminRoot) {
     if (productViewSection) productViewSection.style.display = 'none';
     if (shopSection) shopSection.style.display = 'block';
 
-    if (window.renderProducts) window.renderProducts(state.currentCategorySlug, state.currentPage);
+    const memory = state.categoryMemory && state.categoryMemory[state.currentCategorySlug];
+    const targetScroll = (memory && memory.page === (state.currentPage || 1)) ? memory.scroll : null;
+    if (window.renderProducts) window.renderProducts(state.currentCategorySlug, state.currentPage, targetScroll);
 }
 
 export function initRouting() {

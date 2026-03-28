@@ -29,7 +29,8 @@ export const state = {
     currentSort: 'default',
     routingInitialized: false,
     draggedCategorySlug: null,
-    adminIntendedUrl: sessionStorage.getItem('tc_admin_redirect') || null
+    adminIntendedUrl: sessionStorage.getItem('tc_admin_redirect') || null,
+    categoryMemory: {} // { [slug]: { page: number, scroll: number } }
 };
 
 // State Mutators Ensure Reactivity where needed, or simply provide safe modification interfaces

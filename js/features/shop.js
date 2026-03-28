@@ -121,6 +121,14 @@ export function renderCategoryTabs() {
             btn.onclick = (e) => {
                 if (e.type === 'drag') return;
 
+                // Save current state before switching
+                if (state.currentCategorySlug) {
+                    state.categoryMemory[state.currentCategorySlug] = {
+                        page: state.currentPage || 1,
+                        scroll: window.scrollY
+                    };
+                }
+
                 if (shopSection && shopSection.style.display === 'none') {
                     if (productViewSection) productViewSection.style.display = 'none';
                     const trackView = document.getElementById('track-view');
@@ -131,10 +139,17 @@ export function renderCategoryTabs() {
                 categoryTabsContainer.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 state.currentCategorySlug = cat.slug;
+                
+                // Restore state from memory if available
+                const memory = state.categoryMemory[state.currentCategorySlug];
+                const targetPage = memory ? memory.page : 1;
+                const targetScroll = memory ? memory.scroll : 0;
+
                 if (window.updateTabSlider) window.updateTabSlider();
                 if (window._syncFloatingClone) window._syncFloatingClone();
-                renderProducts(state.currentCategorySlug);
-                if (window.updateUrlState) window.updateUrlState(state.currentCategorySlug);
+                
+                renderProducts(state.currentCategorySlug, targetPage, targetScroll);
+                if (window.updateUrlState) window.updateUrlState(state.currentCategorySlug, targetPage);
             };
             categoryTabsContainer.appendChild(btn);
         });
@@ -185,7 +200,7 @@ export function renderCategoryTabs() {
 }
 window.renderCategoryTabs = renderCategoryTabs;
 
-export function renderProducts(categorySlug, page = 1) {
+export function renderProducts(categorySlug, page = 1, targetScroll = null) {
     if (!productGrid) return;
     productGrid.innerHTML = '';
     const errorViewSection = document.getElementById('error-view');
@@ -244,6 +259,7 @@ export function renderProducts(categorySlug, page = 1) {
             if (tempPage > 1) {
                 renderProducts(categorySlug, tempPage - 1);
                 if (window.updateUrlState) window.updateUrlState(categorySlug, tempPage - 1);
+                // When explicitly clicking pagination, we want to scroll to the top of the products
                 window.scrollTo({ top: shopSection ? shopSection.offsetTop - 100 : 0, behavior: 'smooth' });
             }
         };
@@ -255,12 +271,21 @@ export function renderProducts(categorySlug, page = 1) {
             if (tempPage < totalPages) {
                 renderProducts(categorySlug, tempPage + 1);
                 if (window.updateUrlState) window.updateUrlState(categorySlug, tempPage + 1);
+                // When explicitly clicking pagination, we want to scroll to the top of the products
                 window.scrollTo({ top: shopSection ? shopSection.offsetTop - 100 : 0, behavior: 'smooth' });
             }
         };
     }
     if (pageIndicator) {
         pageIndicator.textContent = `Page ${state.currentPage} of ${totalPages}`;
+    }
+
+    // Restore scroll position if provided, otherwise default to top of shop section for NEW page loads
+    if (targetScroll !== null) {
+        window.scrollTo({ top: targetScroll, behavior: 'instant' });
+    } else if (page > 1) {
+        // Only auto-scroll to top if we are specifically switching pages within the same category
+        // without a specific target scroll (handled by pagination buttons)
     }
 
     paginatedProducts.forEach((product, index) => {
@@ -430,6 +455,23 @@ export function setupShopListeners() {
             if (window.updateUrlState) window.updateUrlState(state.currentCategorySlug, 1);
         });
     }
+
+    // Scroll listener to save scroll position to memory
+    let scrollTimeout;
+    window.addEventListener('scroll', () => {
+        if (!state.currentCategorySlug || (shopSection && shopSection.style.display === 'none')) return;
+        
+        // Throttle saving
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            if (!state.categoryMemory) state.categoryMemory = {};
+            if (!state.categoryMemory[state.currentCategorySlug]) {
+                state.categoryMemory[state.currentCategorySlug] = { page: state.currentPage, scroll: 0 };
+            }
+            state.categoryMemory[state.currentCategorySlug].scroll = window.scrollY;
+            state.categoryMemory[state.currentCategorySlug].page = state.currentPage;
+        }, 200);
+    }, { passive: true });
 
     // --- Floating category tabs on scroll (portal/clone pattern — no glitches) ---
     // Trick: the original tabs NEVER change position type.
