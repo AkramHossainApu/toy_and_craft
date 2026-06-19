@@ -921,6 +921,49 @@ export function setupCartListeners() {
 
                 await batch.commit();
 
+                // ── Send Telegram Notification ──────────
+                try {
+                    const botToken = '8886096891:AAFrgDxKXqHhJthCSnCGWgbLMjfngCYOxzc';
+                    const chatId = '-5047943969';
+                    
+                    let itemDetails = selectedItems.map(i => `- ${i.name} (x${i.qty}) : ৳${(i.currentPrice * i.qty).toFixed(2)}`).join('\\n');
+                    const messageText = `🚨 *NEW ORDER* 🚨\\n\\n*Invoice:* #${secureInvoiceId}\\n*Name:* ${orderUsername}\\n*Phone:* ${orderMobile}\\n*Address:* ${orderAddress}, ${orderThana}, ${orderDistrict}\\n\\n*Items:*\\n${itemDetails}\\n\\n*Subtotal:* ৳${rawSubtotal}\\n*Delivery:* ৳${secureDeliveryCharge}\\n*Total:* ৳${secureGrandTotal}`;
+
+                    // Send the main order text message
+                    fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: messageText,
+                            parse_mode: 'Markdown'
+                        })
+                    }).catch(e => console.warn("Telegram API error", e));
+
+                    // Send images for each product
+                    selectedItems.forEach(item => {
+                        if (item.image) {
+                            let imageUrl = item.image;
+                            if (imageUrl.startsWith('/')) {
+                                imageUrl = window.location.origin + imageUrl;
+                            } else if (!imageUrl.startsWith('http')) {
+                                imageUrl = window.location.origin + '/' + imageUrl;
+                            }
+                            
+                            fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    chat_id: chatId,
+                                    photo: imageUrl,
+                                    caption: `${item.name} (x${item.qty})`
+                                })
+                            }).catch(e => console.warn("Telegram photo API error", e));
+                        }
+                    });
+
+                } catch(e) { console.warn("Failed to send telegram notification", e); }
+
                 // Save to local device for guest tracking capability
                 if (!state.currentUser) {
                     try {

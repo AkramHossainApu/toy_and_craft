@@ -77,21 +77,57 @@ export async function fetchCategories() {
 
 export async function fetchAllProducts() {
     try {
-        const promises = state.categories.map(async (cat) => {
-            const itemsSnap = await getDocs(collection(db, 'Products', cat.id, 'Items'));
-            return itemsSnap.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    ...data,
-                    id: doc.id,
-                    categoryId: cat.id,
-                    categorySlug: cat.slug,
-                    slug: data.name ? generateSlug(data.name) : doc.id.toLowerCase().replace(/ /g, '-')
-                };
-            });
+        if (state.categories.length === 0) return;
+
+        // Determine the initial category to load (either from URL or default to first)
+        let initialSlug = state.categories[0].slug;
+        const hashParams = window.location.hash.split('/');
+        if (hashParams.length > 1 && hashParams[1]) {
+            const urlSlug = hashParams[1];
+            if (state.categories.find(c => c.slug === urlSlug)) {
+                initialSlug = urlSlug;
+            }
+        }
+        
+        const initialCat = state.categories.find(c => c.slug === initialSlug);
+        
+        // Fetch ONLY the initial category to unblock the UI instantly
+        const initialSnap = await getDocs(collection(db, 'Products', initialCat.id, 'Items'));
+        state.inventory = initialSnap.docs.map(doc => {
+            const data = doc.data();
+            return {
+                ...data,
+                id: doc.id,
+                categoryId: initialCat.id,
+                categorySlug: initialCat.slug,
+                slug: data.name ? generateSlug(data.name) : doc.id.toLowerCase().replace(/ /g, '-')
+            };
         });
-        const results = await Promise.all(promises);
-        state.inventory = results.flat();
+
+        // Background fetch the rest of the categories
+        setTimeout(async () => {
+            try {
+                const otherCats = state.categories.filter(c => c.slug !== initialSlug);
+                const promises = otherCats.map(async (cat) => {
+                    const itemsSnap = await getDocs(collection(db, 'Products', cat.id, 'Items'));
+                    return itemsSnap.docs.map(doc => {
+                        const data = doc.data();
+                        return {
+                            ...data,
+                            id: doc.id,
+                            categoryId: cat.id,
+                            categorySlug: cat.slug,
+                            slug: data.name ? generateSlug(data.name) : doc.id.toLowerCase().replace(/ /g, '-')
+                        };
+                    });
+                });
+                const results = await Promise.all(promises);
+                state.inventory = [...state.inventory, ...results.flat()];
+            } catch (bgErr) {
+                console.error("Background product fetch failed:", bgErr);
+            }
+        }, 100);
+
     } catch (err) {
         console.error("Error fetching products:", err);
         throw err;
