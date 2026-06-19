@@ -81,11 +81,13 @@ export async function fetchAllProducts() {
 
         // Determine the initial category to load (either from URL or default to first)
         let initialSlug = state.categories[0].slug;
-        const hashParams = window.location.hash.split('/');
-        if (hashParams.length > 1 && hashParams[1]) {
-            const urlSlug = hashParams[1];
-            if (state.categories.find(c => c.slug === urlSlug)) {
-                initialSlug = urlSlug;
+        const basePath = window.location.pathname.startsWith('/toy_and_craft') ? '/toy_and_craft/' : '/';
+        const pathParts = window.location.pathname.replace(basePath, '').split('/').filter(p => p);
+        
+        if (pathParts.length > 0) {
+            const potentialSlug = pathParts[0] === 'admin' && pathParts.length > 1 ? pathParts[1] : pathParts[0];
+            if (state.categories.find(c => c.slug === potentialSlug)) {
+                initialSlug = potentialSlug;
             }
         }
         
