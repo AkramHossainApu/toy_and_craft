@@ -25,6 +25,20 @@
     <!-- Module Preloads for faster Firebase init -->
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js">
+    
+    <!-- Module Preloads for faster Internal JS Loading (Fixes waterfall delay) -->
+    <link rel="modulepreload" href="js/app.js">
+    <link rel="modulepreload" href="js/core/state.js">
+    <link rel="modulepreload" href="js/core/dom.js">
+    <link rel="modulepreload" href="js/core/utils.js">
+    <link rel="modulepreload" href="js/config/firebase.js">
+    <link rel="modulepreload" href="js/config/steadfast.js">
+    <link rel="modulepreload" href="js/features/auth.js">
+    <link rel="modulepreload" href="js/features/shop.js">
+    <link rel="modulepreload" href="js/features/cart.js">
+    <link rel="modulepreload" href="js/features/router.js">
+    <link rel="modulepreload" href="js/features/admin.js">
+    <link rel="modulepreload" href="js/features/chatbot.js">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
