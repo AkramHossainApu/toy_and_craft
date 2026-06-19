@@ -29,8 +29,8 @@ export function updateUrlState(categorySlug, pageNum = 1, productSlug = null) {
         return;
     }
 
-    // Admin-specific pages (all-orders, users-list, sold-products)
-    if (['all-orders', 'users-list', 'sold-products'].includes(categorySlug)) {
+    // Admin-specific pages (all-orders, users-list, sold-products, analytics-dashboard)
+    if (['all-orders', 'users-list', 'sold-products', 'analytics-dashboard'].includes(categorySlug)) {
         let newPath = `/admin/${categorySlug}`;
         if (categorySlug === 'all-orders' && productSlug) { // abusing productSlug for invoiceId here
             newPath = `/admin/all-orders/${productSlug}`;
@@ -378,6 +378,7 @@ function handleAdminRoute(parts, bounceToAdminRoot) {
     const shopSection = document.getElementById('shop');
     const checkoutView = document.getElementById('checkout-view');
     const adminOrdersView = document.getElementById('admin-orders-view');
+    const adminAnalyticsView = document.getElementById('admin-analytics-view');
     const mainLayoutContainer = document.getElementById('main-content');
 
     // Hide chat widget on admin pages
@@ -391,6 +392,7 @@ function handleAdminRoute(parts, bounceToAdminRoot) {
         if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
         if (checkoutView) checkoutView.style.display = 'none';
         if (adminOrdersView) adminOrdersView.style.display = 'none';
+        if (adminAnalyticsView) adminAnalyticsView.style.display = 'none';
         if (productViewSection) productViewSection.style.display = 'none';
         if (shopSection) shopSection.style.display = 'block';
         if (window.renderProducts) window.renderProducts(state.currentCategorySlug, state.currentPage || 1);
@@ -407,6 +409,7 @@ function handleAdminRoute(parts, bounceToAdminRoot) {
         if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
         if (checkoutView) checkoutView.style.display = 'none';
         if (adminOrdersView) adminOrdersView.style.display = 'none';
+        if (adminAnalyticsView) adminAnalyticsView.style.display = 'none';
         if (productViewSection) productViewSection.style.display = 'none';
         if (shopSection) shopSection.style.display = 'block';
 
@@ -433,6 +436,7 @@ function handleAdminRoute(parts, bounceToAdminRoot) {
         if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
         if (checkoutView) checkoutView.style.display = 'none';
         if (adminOrdersView) adminOrdersView.style.display = 'block';
+        if (adminAnalyticsView) adminAnalyticsView.style.display = 'none';
         if (productViewSection) productViewSection.style.display = 'none';
         if (shopSection) shopSection.style.display = 'none';
 
@@ -440,9 +444,11 @@ function handleAdminRoute(parts, bounceToAdminRoot) {
         const adminOrdersBtn = document.getElementById('admin-orders-btn');
         const adminUsersBtn = document.getElementById('admin-users-btn');
         const adminSoldProductsBtn = document.getElementById('admin-sold-products-btn');
+        const adminAnalyticsBtn = document.getElementById('admin-analytics-btn');
         if (adminOrdersBtn) adminOrdersBtn.style.opacity = '1';
         if (adminUsersBtn) adminUsersBtn.style.opacity = '0.6';
         if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '0.6';
+        if (adminAnalyticsBtn) adminAnalyticsBtn.style.opacity = '0.6';
 
         if (window.loadAdminOrders) window.loadAdminOrders();
         return;
@@ -455,6 +461,7 @@ function handleAdminRoute(parts, bounceToAdminRoot) {
         if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
         if (checkoutView) checkoutView.style.display = 'none';
         if (adminOrdersView) adminOrdersView.style.display = 'block';
+        if (adminAnalyticsView) adminAnalyticsView.style.display = 'none';
         if (productViewSection) productViewSection.style.display = 'none';
         if (shopSection) shopSection.style.display = 'none';
 
@@ -462,9 +469,11 @@ function handleAdminRoute(parts, bounceToAdminRoot) {
         const adminOrdersBtn = document.getElementById('admin-orders-btn');
         const adminUsersBtn = document.getElementById('admin-users-btn');
         const adminSoldProductsBtn = document.getElementById('admin-sold-products-btn');
+        const adminAnalyticsBtn = document.getElementById('admin-analytics-btn');
         if (adminUsersBtn) adminUsersBtn.style.opacity = '1';
         if (adminOrdersBtn) adminOrdersBtn.style.opacity = '0.6';
         if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '0.6';
+        if (adminAnalyticsBtn) adminAnalyticsBtn.style.opacity = '0.6';
 
         if (window.loadAdminUsers) window.loadAdminUsers();
         return;
@@ -477,16 +486,45 @@ function handleAdminRoute(parts, bounceToAdminRoot) {
         if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
         if (checkoutView) checkoutView.style.display = 'none';
         if (adminOrdersView) adminOrdersView.style.display = 'block';
+        if (adminAnalyticsView) adminAnalyticsView.style.display = 'none';
         if (productViewSection) productViewSection.style.display = 'none';
         if (shopSection) shopSection.style.display = 'none';
 
         // Highlight correct button
         const adminOrdersBtn = document.getElementById('admin-orders-btn');
         const adminSoldProductsBtn = document.getElementById('admin-sold-products-btn');
+        const adminUsersBtn = document.getElementById('admin-users-btn');
+        const adminAnalyticsBtn = document.getElementById('admin-analytics-btn');
         if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '1';
         if (adminOrdersBtn) adminOrdersBtn.style.opacity = '0.6';
+        if (adminUsersBtn) adminUsersBtn.style.opacity = '0.6';
+        if (adminAnalyticsBtn) adminAnalyticsBtn.style.opacity = '0.6';
 
         if (window.renderAdminSoldProducts) window.renderAdminSoldProducts();
+        return;
+    }
+
+    if (subPage === 'analytics-dashboard') {
+        if (state.categories.length > 0) state.currentCategorySlug = state.categories[0].slug;
+        if (window.renderCategoryTabs) window.renderCategoryTabs();
+        if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
+        if (checkoutView) checkoutView.style.display = 'none';
+        if (adminOrdersView) adminOrdersView.style.display = 'none';
+        if (adminAnalyticsView) adminAnalyticsView.style.display = 'block';
+        if (productViewSection) productViewSection.style.display = 'none';
+        if (shopSection) shopSection.style.display = 'none';
+
+        // Highlight correct button
+        const adminOrdersBtn = document.getElementById('admin-orders-btn');
+        const adminSoldProductsBtn = document.getElementById('admin-sold-products-btn');
+        const adminUsersBtn = document.getElementById('admin-users-btn');
+        const adminAnalyticsBtn = document.getElementById('admin-analytics-btn');
+        if (adminAnalyticsBtn) adminAnalyticsBtn.style.opacity = '1';
+        if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '0.6';
+        if (adminOrdersBtn) adminOrdersBtn.style.opacity = '0.6';
+        if (adminUsersBtn) adminUsersBtn.style.opacity = '0.6';
+
+        if (window.renderAnalyticsDashboard) window.renderAnalyticsDashboard();
         return;
     }
 
@@ -511,6 +549,7 @@ function handleAdminRoute(parts, bounceToAdminRoot) {
     if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
     if (checkoutView) checkoutView.style.display = 'none';
     if (adminOrdersView) adminOrdersView.style.display = 'none';
+    if (adminAnalyticsView) adminAnalyticsView.style.display = 'none';
     if (productViewSection) productViewSection.style.display = 'none';
     if (shopSection) shopSection.style.display = 'block';
 
@@ -558,6 +597,8 @@ window.addEventListener('popstate', (e) => {
             if (invoiceView) invoiceView.style.display = 'none';
             const trackView = document.getElementById('track-view');
             if (trackView) trackView.style.display = 'none';
+            const adminAnalyticsView = document.getElementById('admin-analytics-view');
+            if (adminAnalyticsView) adminAnalyticsView.style.display = 'none';
         }
     }
 });
