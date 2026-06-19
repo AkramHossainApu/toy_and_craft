@@ -3,6 +3,7 @@
 
 export const state = {
     inventory: [],
+    inventoryFullyLoaded: false,
     inventoryUnsubscribers: [],
     categories: [],
     currentCategorySlug: '',

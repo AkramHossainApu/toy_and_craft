@@ -125,6 +125,12 @@ export async function fetchAllProducts() {
                 });
                 const results = await Promise.all(promises);
                 state.inventory = [...state.inventory, ...results.flat()];
+                state.inventoryFullyLoaded = true;
+                
+                // Trigger re-render to show products if they navigated to a category before its fetch finished
+                if (window.renderProducts && state.currentCategorySlug) {
+                    window.renderProducts(state.currentCategorySlug, state.currentPage || 1);
+                }
             } catch (bgErr) {
                 console.error("Background product fetch failed:", bgErr);
             }

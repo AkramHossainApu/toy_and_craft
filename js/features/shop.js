@@ -234,6 +234,13 @@ export function renderProducts(categorySlug, page = 1, targetScroll = null) {
         filteredProducts.sort((a, b) => (b.offerPrice || b.price) - (a.offerPrice || a.price));
     }
     if (filteredProducts.length === 0 && !state.isAdmin) {
+        if (!state.inventoryFullyLoaded) {
+            productGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem; display: flex; flex-direction: column; align-items: center;"><div class="loader-spinner" style="width: 40px; height: 40px; border: 3px solid var(--border-color); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem;"></div>Loading products...</div>';
+            if (prevPageBtn) prevPageBtn.disabled = true;
+            if (nextPageBtn) nextPageBtn.disabled = true;
+            if (pageIndicator) pageIndicator.textContent = 'Loading...';
+            return;
+        }
         productGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">No products found in this category.</div>';
         if (prevPageBtn) prevPageBtn.disabled = true;
         if (nextPageBtn) nextPageBtn.disabled = true;
