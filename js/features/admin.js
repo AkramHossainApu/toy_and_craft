@@ -806,8 +806,8 @@ export function promptDeleteCategory(cat) {
 window.promptDeleteCategory = promptDeleteCategory;
 
 // --- Admin Analytics Dashboard ---
-export async function renderAnalyticsDashboard() {
-    const adminAnalyticsView = document.getElementById('admin-analytics-view');
+export async function renderAdminDashboard() {
+    const adminDashboardView = document.getElementById('admin-dashboard-view');
     const adminOrdersView = document.getElementById('admin-orders-view');
     const mainLayoutContainer = document.getElementById('main-content');
     const productViewSection = document.getElementById('product-view');
@@ -817,10 +817,10 @@ export async function renderAnalyticsDashboard() {
     if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
     if (productViewSection) productViewSection.style.display = 'none';
     if (shopSection) shopSection.style.display = 'none';
-    if (adminAnalyticsView) adminAnalyticsView.style.display = 'block';
+    if (adminDashboardView) adminDashboardView.style.display = 'block';
 
     if (window.closeCart) window.closeCart();
-    if (window.updateUrlState) window.updateUrlState('analytics-dashboard');
+    if (window.updateUrlState) window.updateUrlState('dashboard');
 
     // 1. Gather Orders Data
     let totalSales = 0;
@@ -935,7 +935,7 @@ export async function renderAnalyticsDashboard() {
         });
     }
 }
-window.renderAnalyticsDashboard = renderAnalyticsDashboard;
+window.renderAdminDashboard = renderAdminDashboard;
 
 // --- Admin Orders Engine ---
 
@@ -1018,24 +1018,24 @@ export function setupAdminOrderListeners() {
         });
     }
 
-    const adminAnalyticsBtn = document.getElementById('admin-analytics-btn');
-    const adminAnalyticsCloseBtn = document.getElementById('admin-analytics-close-btn');
+    const adminDashboardBtn = document.getElementById('admin-dashboard-btn');
+    const adminDashboardCloseBtn = document.getElementById('admin-dashboard-close-btn');
 
-    if (adminAnalyticsBtn) {
-        adminAnalyticsBtn.addEventListener('click', () => {
+    if (adminDashboardBtn) {
+        adminDashboardBtn.addEventListener('click', () => {
             if (adminOrdersBtn) adminOrdersBtn.style.opacity = '0.6';
             if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '0.6';
             if (adminUsersBtn) adminUsersBtn.style.opacity = '0.6';
-            adminAnalyticsBtn.style.opacity = '1';
-            renderAnalyticsDashboard();
+            adminDashboardBtn.style.opacity = '1';
+            renderAdminDashboard();
         });
     }
 
-    if (adminAnalyticsCloseBtn) {
-        adminAnalyticsCloseBtn.addEventListener('click', () => {
-            const adminAnalyticsView = document.getElementById('admin-analytics-view');
+    if (adminDashboardCloseBtn) {
+        adminDashboardCloseBtn.addEventListener('click', () => {
+            const adminDashboardView = document.getElementById('admin-dashboard-view');
             const mainLayoutContainer = document.getElementById('main-content');
-            if (adminAnalyticsView) adminAnalyticsView.style.display = 'none';
+            if (adminDashboardView) adminDashboardView.style.display = 'none';
             if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
             // Navigate back to admin main page
             if (state.categories && state.categories.length > 0) {
