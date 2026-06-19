@@ -805,6 +805,138 @@ export function promptDeleteCategory(cat) {
 }
 window.promptDeleteCategory = promptDeleteCategory;
 
+// --- Admin Analytics Dashboard ---
+export async function renderAnalyticsDashboard() {
+    const adminAnalyticsView = document.getElementById('admin-analytics-view');
+    const adminOrdersView = document.getElementById('admin-orders-view');
+    const mainLayoutContainer = document.getElementById('main-content');
+    const productViewSection = document.getElementById('product-view');
+    const shopSection = document.getElementById('shop');
+
+    if (adminOrdersView) adminOrdersView.style.display = 'none';
+    if (mainLayoutContainer) mainLayoutContainer.style.display = 'none';
+    if (productViewSection) productViewSection.style.display = 'none';
+    if (shopSection) shopSection.style.display = 'none';
+    if (adminAnalyticsView) adminAnalyticsView.style.display = 'block';
+
+    if (window.closeCart) window.closeCart();
+    if (window.updateUrlState) window.updateUrlState('analytics-dashboard');
+
+    // 1. Gather Orders Data
+    let totalSales = 0;
+    let totalOrders = 0;
+    let pendingOrders = 0;
+
+    try {
+        const ordersSnap = await getDocs(collection(db, 'Orders'));
+        ordersSnap.forEach(doc => {
+            const data = doc.data();
+            totalOrders++;
+            if (data.totalPrice) totalSales += data.totalPrice;
+            if (data.status === 'Pending') pendingOrders++;
+        });
+
+        document.getElementById('stat-total-sales').textContent = `৳${totalSales.toFixed(2)}`;
+        document.getElementById('stat-total-orders').textContent = totalOrders;
+        document.getElementById('stat-pending-orders').textContent = pendingOrders;
+    } catch (e) {
+        console.error('Error fetching orders for analytics', e);
+    }
+
+    // 2. Gather Traffic Data
+    const labels = [];
+    const viewsData = [];
+    try {
+        // Last 7 days
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateStr = d.toISOString().split('T')[0];
+            labels.push(dateStr);
+            
+            const visitSnap = await getDoc(doc(db, 'Analytics', `Visits_${dateStr}`));
+            if (visitSnap.exists() && visitSnap.data().views) {
+                viewsData.push(visitSnap.data().views);
+            } else {
+                viewsData.push(0);
+            }
+        }
+    } catch (e) {
+        console.error('Error fetching traffic for analytics', e);
+    }
+
+    // 3. Gather Most Visited Products Data
+    const popularLabels = [];
+    const popularData = [];
+    try {
+        const allProducts = [];
+        const cats = await getDocs(collection(db, 'Products'));
+        for (const cat of cats.docs) {
+            const items = await getDocs(collection(db, 'Products', cat.id, 'Items'));
+            items.forEach(item => {
+                const d = item.data();
+                if (d.views && d.views > 0) {
+                    allProducts.push({ name: d.name, views: d.views });
+                }
+            });
+        }
+        allProducts.sort((a, b) => b.views - a.views);
+        const top5 = allProducts.slice(0, 5);
+        top5.forEach(p => {
+            popularLabels.push(p.name);
+            popularData.push(p.views);
+        });
+    } catch (e) {
+        console.error('Error fetching popular products for analytics', e);
+    }
+
+    // Initialize Charts (destroy old instances if they exist)
+    if (window.trafficChartInstance) window.trafficChartInstance.destroy();
+    if (window.popularChartInstance) window.popularChartInstance.destroy();
+
+    const ctxTraffic = document.getElementById('trafficChart');
+    if (ctxTraffic) {
+        window.trafficChartInstance = new Chart(ctxTraffic, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Page Views',
+                    data: viewsData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    const ctxPopular = document.getElementById('popularChart');
+    if (ctxPopular) {
+        window.popularChartInstance = new Chart(ctxPopular, {
+            type: 'bar',
+            data: {
+                labels: popularLabels.map(l => l.length > 15 ? l.substring(0, 15) + '...' : l),
+                datasets: [{
+                    label: 'Product Views',
+                    data: popularData,
+                    backgroundColor: '#10b981',
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+}
+window.renderAnalyticsDashboard = renderAnalyticsDashboard;
+
 // --- Admin Orders Engine ---
 
 // Navigate to an admin sub-page via URL
@@ -874,6 +1006,36 @@ export function setupAdminOrderListeners() {
             const adminOrdersView = document.getElementById('admin-orders-view');
             const mainLayoutContainer = document.getElementById('main-content');
             if (adminOrdersView) adminOrdersView.style.display = 'none';
+            if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
+            // Navigate back to admin main page
+            if (state.categories && state.categories.length > 0) {
+                state.currentCategorySlug = state.categories[0].slug;
+            }
+            if (window.updateUrlState) window.updateUrlState(state.currentCategorySlug, 1);
+            const shopSection = document.getElementById('shop');
+            if (shopSection) shopSection.style.display = 'block';
+            if (window.renderProducts) window.renderProducts(state.currentCategorySlug, 1);
+        });
+    }
+
+    const adminAnalyticsBtn = document.getElementById('admin-analytics-btn');
+    const adminAnalyticsCloseBtn = document.getElementById('admin-analytics-close-btn');
+
+    if (adminAnalyticsBtn) {
+        adminAnalyticsBtn.addEventListener('click', () => {
+            if (adminOrdersBtn) adminOrdersBtn.style.opacity = '0.6';
+            if (adminSoldProductsBtn) adminSoldProductsBtn.style.opacity = '0.6';
+            if (adminUsersBtn) adminUsersBtn.style.opacity = '0.6';
+            adminAnalyticsBtn.style.opacity = '1';
+            renderAnalyticsDashboard();
+        });
+    }
+
+    if (adminAnalyticsCloseBtn) {
+        adminAnalyticsCloseBtn.addEventListener('click', () => {
+            const adminAnalyticsView = document.getElementById('admin-analytics-view');
+            const mainLayoutContainer = document.getElementById('main-content');
+            if (adminAnalyticsView) adminAnalyticsView.style.display = 'none';
             if (mainLayoutContainer) mainLayoutContainer.style.display = 'block';
             // Navigate back to admin main page
             if (state.categories && state.categories.length > 0) {

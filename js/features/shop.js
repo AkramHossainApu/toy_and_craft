@@ -1,5 +1,5 @@
 import { state } from '../core/state.js';
-import { db, doc, updateDoc, writeBatch } from '../config/firebase.js';
+import { db, doc, updateDoc, writeBatch, increment } from '../config/firebase.js';
 import { generateSlug, getAbsoluteImageUrl, showErrorPage } from '../core/utils.js';
 import {
     productGrid, categoryTabsContainer, prevPageBtn, nextPageBtn, pageIndicator,
@@ -371,6 +371,11 @@ export function renderProductPage(productSlug) {
 
     window.currentViewedProduct = product;
     pvCurrentQty = 1;
+
+    // Analytics: increment product view count
+    if (!state.isAdmin) {
+        updateDoc(doc(db, 'Products', product.categoryId, 'Items', product.id), { views: increment(1) }).catch(e => console.warn('Product view tracking failed:', e));
+    }
 
     if (shopSection) shopSection.style.display = 'none';
     const trackView = document.getElementById('track-view');

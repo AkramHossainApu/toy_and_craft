@@ -926,21 +926,19 @@ export function setupCartListeners() {
                     const botToken = '8886096891:AAFrgDxKXqHhJthCSnCGWgbLMjfngCYOxzc';
                     const chatId = '-5047943969';
                     
-                    let itemDetails = selectedItems.map(i => `- ${i.name} (x${i.qty}) : ৳${(i.currentPrice * i.qty).toFixed(2)}`).join('\\n');
-                    const messageText = `🚨 *NEW ORDER* 🚨\\n\\n*Invoice:* #${secureInvoiceId}\\n*Name:* ${orderUsername}\\n*Phone:* ${orderMobile}\\n*Address:* ${orderAddress}, ${orderThana}, ${orderDistrict}\\n\\n*Items:*\\n${itemDetails}\\n\\n*Subtotal:* ৳${rawSubtotal}\\n*Delivery:* ৳${secureDeliveryCharge}\\n*Total:* ৳${secureGrandTotal}`;
+                    let itemDetails = selectedItems.map(i => `▪️ *${i.name}* (x${i.qty}) ➔ ৳${(i.currentPrice * i.qty).toFixed(2)}`).join('\n');
+                    
+                    const messageText = `🛒 *NEW ORDER RECEIVED* 🛒\n\n` +
+                                        `*🧾 Invoice:* #${secureInvoiceId}\n` +
+                                        `*👤 Name:* ${orderUsername}\n` +
+                                        `*📞 Phone:* ${orderMobile}\n` +
+                                        `*📍 Address:* ${orderAddress}, ${orderThana}, ${orderDistrict}\n\n` +
+                                        `*📦 Items Ordered:*\n${itemDetails}\n\n` +
+                                        `*💰 Subtotal:* ৳${rawSubtotal}\n` +
+                                        `*🚚 Delivery:* ৳${secureDeliveryCharge}\n` +
+                                        `*💵 Grand Total:* ৳${secureGrandTotal}`;
 
-                    // Send the main order text message
-                    fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            chat_id: chatId,
-                            text: messageText,
-                            parse_mode: 'Markdown'
-                        })
-                    }).catch(e => console.warn("Telegram API error", e));
-
-                    // Send images for each product
+                    let mediaGroup = [];
                     selectedItems.forEach(item => {
                         if (item.image) {
                             let imageUrl = item.image;
@@ -949,18 +947,46 @@ export function setupCartListeners() {
                             } else if (!imageUrl.startsWith('http')) {
                                 imageUrl = window.location.origin + '/' + imageUrl;
                             }
-                            
-                            fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    chat_id: chatId,
-                                    photo: imageUrl,
-                                    caption: `${item.name} (x${item.qty})`
-                                })
-                            }).catch(e => console.warn("Telegram photo API error", e));
+                            mediaGroup.push(imageUrl);
                         }
                     });
+
+                    if (mediaGroup.length === 0) {
+                        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ chat_id: chatId, text: messageText, parse_mode: 'Markdown' })
+                        }).catch(e => console.warn("Telegram API error", e));
+                    } else if (mediaGroup.length === 1) {
+                        fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                chat_id: chatId,
+                                photo: mediaGroup[0],
+                                caption: messageText,
+                                parse_mode: 'Markdown'
+                            })
+                        }).catch(e => console.warn("Telegram photo API error", e));
+                    } else {
+                        const mediaObjects = mediaGroup.slice(0, 10).map((url, index) => {
+                            let obj = { type: 'photo', media: url };
+                            if (index === 0) {
+                                obj.caption = messageText;
+                                obj.parse_mode = 'Markdown';
+                            }
+                            return obj;
+                        });
+                        
+                        fetch(`https://api.telegram.org/bot${botToken}/sendMediaGroup`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                chat_id: chatId,
+                                media: mediaObjects
+                            })
+                        }).catch(e => console.warn("Telegram media group API error", e));
+                    }
 
                 } catch(e) { console.warn("Failed to send telegram notification", e); }
 

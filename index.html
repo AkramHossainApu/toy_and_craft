@@ -210,6 +210,8 @@
             <span>Admin Mode Active</span>
         </div>
         <div class="admin-banner-actions">
+            <button class="btn btn-secondary btn-sm" id="admin-analytics-btn"
+                style="background: rgba(100,200,255,0.2); border: none; color: white; margin-right: 10px;">📊 Stats</button>
             <button class="btn btn-secondary btn-sm" id="admin-orders-btn"
                 style="background: rgba(255,255,255,0.2); border: none; color: white; margin-right: 10px;">All
                 Orders</button>
@@ -1120,6 +1122,40 @@
         </div>
     </div>
 
+    <!-- Admin Analytics SPA View -->
+    <div id="admin-analytics-view" style="display: none; padding: 2rem 1.5rem; max-width: 1200px; margin: 0 auto; min-height: 70vh;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 style="font-family: var(--font-heading); font-size: 2rem; color: var(--primary);">Dashboard Analytics</h2>
+            <button class="btn btn-secondary" id="admin-analytics-close-btn">Return to Shop</button>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+            <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center;">
+                <h3 style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 0.5rem;">Total Sales</h3>
+                <div id="stat-total-sales" style="font-size: 2rem; font-weight: bold; color: var(--text-main); font-family: var(--font-heading);">৳0</div>
+            </div>
+            <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center;">
+                <h3 style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 0.5rem;">Total Orders</h3>
+                <div id="stat-total-orders" style="font-size: 2rem; font-weight: bold; color: var(--text-main); font-family: var(--font-heading);">0</div>
+            </div>
+            <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center;">
+                <h3 style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 0.5rem;">Pending Orders</h3>
+                <div id="stat-pending-orders" style="font-size: 2rem; font-weight: bold; color: #e74c3c; font-family: var(--font-heading);">0</div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+            <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                <h3 style="color: var(--text-main); margin-bottom: 1rem; font-family: var(--font-heading);">Traffic (Last 7 Days)</h3>
+                <canvas id="trafficChart" width="400" height="250"></canvas>
+            </div>
+            <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                <h3 style="color: var(--text-main); margin-bottom: 1rem; font-family: var(--font-heading);">Most Visited Products</h3>
+                <canvas id="popularChart" width="400" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+
     <!-- Modern Invoice View -->
     <div id="invoice-view" style="display: none; padding: 2rem 1.5rem; max-width: 900px; margin: 0 auto; min-height: 80vh;">
         <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;" class="no-print">
@@ -1143,6 +1179,7 @@
 
 
     <!-- Config & Main Application Logic -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
     <script type="module" src="js/features/chatbot.js"></script>
     <!-- AI Visual Search Engine (Lazy Loaded) -->

@@ -1,5 +1,5 @@
 import { state, setAdmin } from './core/state.js';
-import { db, doc, getDoc, collection, getDocs } from './config/firebase.js';
+import { db, doc, getDoc, collection, getDocs, setDoc, increment } from './config/firebase.js';
 import {
     homeTitle, homeSubtitle, siteTitle, shopSection, errorViewSection,
     mainLayoutContainer, errorMessageText, appLoader, navbar, mainContent, themeToggleBtn
@@ -135,6 +135,20 @@ export async function fetchAllProducts() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // 0. Analytics Tracking (Daily Visits)
+    try {
+        if (!state.isAdmin && !sessionStorage.getItem('tc_visited_today')) {
+            const today = new Date().toISOString().split('T')[0];
+            await setDoc(doc(db, 'Analytics', `Visits_${today}`), {
+                date: today,
+                views: increment(1)
+            }, { merge: true });
+            sessionStorage.setItem('tc_visited_today', 'true');
+        }
+    } catch (e) {
+        console.warn('Analytics tracking failed', e);
+    }
+
     // 0. Session Recovery & Auth Logic
     try {
         const localUser = localStorage.getItem('tc_user') || sessionStorage.getItem('tc_user');
