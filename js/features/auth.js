@@ -47,8 +47,15 @@ function resetTurnstile() {
     if (registerGetOtpBtn) registerGetOtpBtn.disabled = true;
     const adminBtn = document.getElementById('password-submit-btn');
     if (adminBtn) adminBtn.disabled = true;
-    if (typeof turnstile !== 'undefined') {
-        try { turnstile.reset(); } catch (e) { console.warn("Turnstile reset error", e); }
+
+    // Remove all rendered widgets so they can be freshly re-rendered on next modal open
+    if (typeof turnstile !== 'undefined' && window._turnstileWidgetIds) {
+        ['login', 'register', 'admin'].forEach(key => {
+            if (window._turnstileWidgetIds[key] != null) {
+                try { turnstile.remove(window._turnstileWidgetIds[key]); } catch (e) {}
+                window._turnstileWidgetIds[key] = null;
+            }
+        });
     }
 }
 window.resetTurnstile = resetTurnstile;
@@ -549,6 +556,18 @@ export function openAuthModal(view = 'login') {
     if (authModal) {
         authModal.style.display = 'flex';
     }
+
+    // Render Turnstile widget AFTER modal is visible (fixes invisible iframe bug)
+    // Use a short delay to ensure the DOM has painted
+    setTimeout(() => {
+        if (state.currentUser) return; // Profile view — no Turnstile needed
+        if (view === 'login') {
+            if (window.renderTurnstileWidget) window.renderTurnstileWidget('login');
+        } else if (view === 'register') {
+            if (window.renderTurnstileWidget) window.renderTurnstileWidget('register');
+        }
+        // 'forgot' view doesn't use Turnstile
+    }, 100);
 }
 window.openAuthModal = openAuthModal;
 
@@ -1266,7 +1285,7 @@ export function setupAuthListeners() {
                 alert("Error communicating with the database.");
             }
 
-            loginSubmitBtn.disabled = false;
+            loginSubmitBtn.disabled = !window.isLoginTurnstilePassed;
             loginSubmitBtn.textContent = "Login";
         });
     }

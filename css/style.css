@@ -1917,6 +1917,121 @@ a {
   color: var(--primary);
 }
 
+.visual-search-btn {
+  background: none;
+  border: none;
+  padding: 0 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  border-radius: 50%;
+}
+
+.visual-search-btn:hover {
+  color: var(--primary);
+  background: rgba(0, 123, 255, 0.1);
+}
+
+.visual-search-btn.loading {
+  animation: rotate-search 1s linear infinite;
+  color: var(--primary);
+}
+
+@keyframes rotate-search {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* AI Scanning Overlay */
+#visual-search-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg);
+  z-index: 11000;
+  padding: 2.5rem;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+[data-theme='dark'] #visual-search-overlay {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.scanning-ring {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 3px solid var(--primary);
+  border-top-color: transparent;
+  animation: rotate-search 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  margin-bottom: 2rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scanning-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  position: absolute;
+  border: 4px solid var(--bg-card);
+}
+
+.scanning-status {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.scanning-subtext {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.scanning-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+[data-theme='dark'] .scanning-progress-bar {
+  background: rgba(255,255,255,0.05);
+}
+
+.scanning-line {
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  animation: scanPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes scanPulse {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+
 #search-input {
   flex: 1;
   border: none;

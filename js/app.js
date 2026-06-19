@@ -144,7 +144,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupShopListeners();
     setupAdminListeners();
     setupAdminOrderListeners();
-    setupSearchListeners();
+    try {
+        setupSearchListeners();
+    } catch (e) {
+        console.error("Search initialization failed", e);
+    }
     initTracking();
 
     // 2. Initialize Visual Toggles & Stored Global States

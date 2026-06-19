@@ -762,8 +762,11 @@ export function promptPassword(title, callback) {
     if (passwordInput) passwordInput.value = '';
     currentPasswordCallback = callback;
     if (passwordModal) passwordModal.style.display = 'flex';
-    if (window.resetTurnstile) window.resetTurnstile();
-    setTimeout(() => { if (passwordInput) passwordInput.focus(); }, 100);
+    // Render admin Turnstile widget on-demand AFTER modal is visible
+    setTimeout(() => {
+        if (window.renderTurnstileWidget) window.renderTurnstileWidget('admin');
+    }, 100);
+    setTimeout(() => { if (passwordInput) passwordInput.focus(); }, 150);
 }
 
 export function closePasswordModal() {

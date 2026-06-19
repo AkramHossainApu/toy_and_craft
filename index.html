@@ -40,6 +40,15 @@
         window.isRegisterTurnstilePassed = false;
         window.isAdminTurnstilePassed = false;
 
+        // Store rendered widget IDs for proper per-widget reset
+        window._turnstileWidgetIds = {
+            login: null,
+            register: null,
+            admin: null
+        };
+        // Track if Turnstile API is loaded
+        window._turnstileReady = false;
+
         window.onLoginTurnstileSuccess = function(token) {
             window.isLoginTurnstilePassed = true;
             const loginBtn = document.getElementById('login-submit-btn');
@@ -66,23 +75,51 @@
             turnstileKey: '0x4AAAAAACtXtctvBtKGNWKl'
         };
 
-        // Manual Turnstile Init
+        // Called when the Turnstile API script finishes loading — just marks ready, no rendering
         window.onloadTurnstileCallback = function() {
-            const widgets = [
-                { id: 'admin-turnstile', callback: 'onAdminTurnstileSuccess' },
-                { id: 'login-turnstile', callback: 'onLoginTurnstileSuccess' },
-                { id: 'register-turnstile', callback: 'onRegisterTurnstileSuccess' }
-            ];
+            window._turnstileReady = true;
+        };
 
-            widgets.forEach(w => {
-                const el = document.getElementById(w.id);
-                if (el && typeof turnstile !== 'undefined') {
-                    turnstile.render(`#${w.id}`, {
-                        sitekey: window.SITE_CONFIG.turnstileKey,
-                        callback: window[w.callback]
-                    });
-                }
+        /**
+         * Render (or re-render) a single Turnstile widget on-demand.
+         * Call this AFTER the parent modal/container is visible (display != none).
+         * @param {'login'|'register'|'admin'} which — which widget to render
+         */
+        window.renderTurnstileWidget = function(which) {
+            if (!window._turnstileReady || typeof turnstile === 'undefined') return;
+
+            var map = {
+                login:    { id: 'login-turnstile',    cb: window.onLoginTurnstileSuccess },
+                register: { id: 'register-turnstile', cb: window.onRegisterTurnstileSuccess },
+                admin:    { id: 'admin-turnstile',    cb: window.onAdminTurnstileSuccess }
+            };
+
+            var cfg = map[which];
+            if (!cfg) return;
+
+            var el = document.getElementById(cfg.id);
+            if (!el) return;
+
+            // Remove any previously rendered widget in this container
+            if (window._turnstileWidgetIds[which] != null) {
+                try { turnstile.remove(window._turnstileWidgetIds[which]); } catch (e) {}
+                window._turnstileWidgetIds[which] = null;
+            }
+
+            // Clear the container (Turnstile appends iframes inside)
+            el.innerHTML = '';
+
+            // Reset the flag so the button stays disabled until challenge completes
+            if (which === 'login')    window.isLoginTurnstilePassed = false;
+            if (which === 'register') window.isRegisterTurnstilePassed = false;
+            if (which === 'admin')    window.isAdminTurnstilePassed = false;
+
+            // Render fresh widget — container MUST be visible at this point
+            var widgetId = turnstile.render('#' + cfg.id, {
+                sitekey: window.SITE_CONFIG.turnstileKey,
+                callback: cfg.cb
             });
+            window._turnstileWidgetIds[which] = widgetId;
         };
     </script>
     <!-- Updated Turnstile Script with explicit callback -->
@@ -207,6 +244,10 @@
                         <span class="material-icons-round inline-search-icon">search</span>
                         <input type="text" id="search-input" placeholder="Search products..." autocomplete="off"
                             spellcheck="false">
+                        <button class="visual-search-btn" id="visual-search-btn" title="Search by Image">
+                            <span class="material-icons-round">photo_camera</span>
+                        </button>
+                        <input type="file" id="visual-search-input" accept="image/*" style="display: none;">
                         <button class="inline-search-clear" id="search-clear-btn" style="display: none;"
                             aria-label="Clear search">
                             <span class="material-icons-round">close</span>
@@ -1101,6 +1142,22 @@
     <!-- Config & Main Application Logic -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script type="module" src="js/features/chatbot.js"></script>
+    <!-- AI Visual Search Engine (Lazy Loaded) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/mobilenet.min.js" defer></script>
+    
+    <!-- Visual Search Overlay -->
+    <div id="visual-search-overlay">
+        <div class="scanning-ring">
+            <img id="scanning-preview" class="scanning-image" src="" alt="Scanning...">
+        </div>
+        <div class="scanning-status">AI Analyzing...</div>
+        <div class="scanning-subtext">Checking catalog for matches</div>
+        <div class="scanning-progress-bar">
+            <div class="scanning-line"></div>
+        </div>
+    </div>
+
     <script type="module" src="js/app.js"></script>
 
     <!-- Premium Chatbot -->

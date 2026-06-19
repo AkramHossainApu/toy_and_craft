@@ -176,8 +176,14 @@ export function processRoute() {
                     } catch (e) { }
                 }
             } else if (maybeAction === 'search' && parts.length >= 3) {
-                // /userid/search/keyword — user URL
-                searchKeyword = decodeURIComponent(parts.slice(2).join('/'));
+                // /userid/search/keyword OR /userid/search/image/filename
+                if (parts[2] === 'image') {
+                    // It's an image search deep link
+                    searchKeyword = 'Visual Search Results';
+                } else {
+                    searchKeyword = decodeURIComponent(parts.slice(2).join('/'));
+                }
+                
                 if (!state.currentUser) {
                     // Non-logged-in user accessing user search URL — redirect to /search/keyword
                     const newPath = `search/${encodeURIComponent(searchKeyword)}`;
