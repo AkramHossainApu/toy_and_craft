@@ -865,13 +865,38 @@ export function setupCartListeners() {
                 const counterRef = doc(db, 'Counters', 'InvoiceCounter');
                 const secureInvoiceId = await runTransaction(db, async (transaction) => {
                     const counterDoc = await transaction.get(counterRef);
-                    let nextInvoice = 2636;
+
+                    // Current date parts for the invoice prefix
+                    const now = new Date();
+                    const currentYear = now.getFullYear() % 100;  // e.g. 26 for 2026
+                    const currentMonth = now.getMonth() + 1;      // 1-12
+
+                    let monthlyCount = 0;
+
                     if (counterDoc.exists()) {
-                        nextInvoice = counterDoc.data().lastInvoice;
+                        const data = counterDoc.data();
+                        const storedYear = data.year || 0;
+                        const storedMonth = data.month || 0;
+
+                        if (storedYear === currentYear && storedMonth === currentMonth) {
+                            // Same month — increment from the last count
+                            monthlyCount = (data.monthlyCount || 0);
+                        }
+                        // Otherwise: new month/year — monthlyCount stays 0 and will become 1 below
                     }
-                    nextInvoice += 1;
-                    transaction.set(counterRef, { lastInvoice: nextInvoice }, { merge: true });
-                    return nextInvoice.toString();
+
+                    monthlyCount += 1;
+
+                    transaction.set(counterRef, {
+                        year: currentYear,
+                        month: currentMonth,
+                        monthlyCount: monthlyCount
+                    });
+
+                    // Build invoice ID: YY + M(M) + sequential number
+                    // e.g. year=26, month=6, count=26 → "26626"
+                    // e.g. year=26, month=11, count=45 → "261145"
+                    return `${currentYear}${currentMonth}${monthlyCount}`;
                 });
 
                 const newOrderRef = doc(db, 'Orders', secureInvoiceId);
