@@ -1271,7 +1271,9 @@ export function setupAuthListeners() {
                         closeAuthModal();
                         refreshTrackingBadge();
 
-                        if (state.currentCategorySlug && window.updateUrlState) {
+                        if (window.pendingCheckout) {
+                            if (window.processRoute) window.processRoute();
+                        } else if (state.currentCategorySlug && window.updateUrlState) {
                             window.updateUrlState(state.currentCategorySlug);
                         }
                     } else {
@@ -1365,7 +1367,9 @@ export function setupAuthListeners() {
                     closeAuthModal();
                     refreshTrackingBadge();
 
-                    if (state.currentCategorySlug && window.updateUrlState) {
+                    if (window.pendingCheckout) {
+                        if (window.processRoute) window.processRoute();
+                    } else if (state.currentCategorySlug && window.updateUrlState) {
                         window.updateUrlState(state.currentCategorySlug);
                     }
                 }

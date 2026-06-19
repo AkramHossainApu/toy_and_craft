@@ -1187,8 +1187,7 @@ export async function renderAdminSoldProducts() {
         }
 
         const deliveredOrders = snapshots.docs
-            .map(d => ({ id: d.id, ...d.data() }))
-            .filter(o => o.status === 'Delivered');
+            .map(d => ({ id: d.id, ...d.data() })); // Showing all orders here for comprehensive product analytics
 
         if (deliveredOrders.length === 0) {
             adminOrdersList.innerHTML = '<div style="color: var(--text-muted);">No sold products yet.</div>';

@@ -68,12 +68,36 @@ window.saveCart = saveCart;
 export async function handleFirebaseCartSync(uid) {
     try {
         const cartSnap = await getDocs(collection(db, 'Users', uid, 'Cart'));
+        let remoteCart = [];
         if (!cartSnap.empty) {
-            state.cart = cartSnap.docs.map(doc => doc.data());
-            saveCart();
-        } else {
-            state.cart = [];
-            saveCart();
+            remoteCart = cartSnap.docs.map(doc => doc.data());
+        }
+
+        // Merge local cart (state.cart) with remoteCart
+        let mergedCart = [...remoteCart];
+        let hasLocalItems = state.cart.length > 0;
+        
+        for (const localItem of state.cart) {
+            const existing = mergedCart.find(i => i.id === localItem.id);
+            if (existing) {
+                // Stock cap
+                const newQty = existing.qty + localItem.qty;
+                existing.qty = localItem.stock ? Math.min(newQty, localItem.stock) : newQty;
+            } else {
+                mergedCart.push(localItem);
+            }
+        }
+
+        state.cart = mergedCart;
+        saveCart();
+
+        // Push merged items to firebase if there was local data
+        if (hasLocalItems && state.cart.length > 0) {
+            const batch = writeBatch(db);
+            for (const item of state.cart) {
+                batch.set(doc(db, 'Users', uid, 'Cart', item.id), item);
+            }
+            await batch.commit();
         }
         // Also load cart selections
         await loadCartSelections(uid);
@@ -367,6 +391,7 @@ export function openGuestModal() {
         clonedLink.addEventListener('click', (e) => {
             e.preventDefault();
             if (guestModal) guestModal.style.display = 'none';
+            window.pendingCheckout = true; // Return to checkout after login
             openAuthModal('login');
         });
     }
