@@ -1223,7 +1223,10 @@ export function setupAuthListeners() {
             const password = loginPasswordInput.value;
             const remember = loginRememberInput.checked;
 
-            if (!identifier || !password) return;
+            if (!identifier || !password) {
+                alert("Please enter both your mobile/email and password.");
+                return;
+            }
 
             loginSubmitBtn.disabled = true;
             loginSubmitBtn.textContent = "Checking...";

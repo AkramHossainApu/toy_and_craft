@@ -78,9 +78,26 @@
             turnstileKey: '0x4AAAAAACtXtctvBtKGNWKl'
         };
 
-        // Called when the Turnstile API script finishes loading — just marks ready, no rendering
+        // Called when the Turnstile API script finishes loading
         window.onloadTurnstileCallback = function() {
             window._turnstileReady = true;
+            
+            // Check if any auth modals are currently visible and render their widgets
+            var authModal = document.getElementById('auth-modal');
+            if (authModal && window.getComputedStyle(authModal).display !== 'none') {
+                var loginView = document.getElementById('login-view');
+                var registerView = document.getElementById('register-view');
+                if (loginView && window.getComputedStyle(loginView).display !== 'none') {
+                    window.renderTurnstileWidget('login');
+                } else if (registerView && window.getComputedStyle(registerView).display !== 'none') {
+                    window.renderTurnstileWidget('register');
+                }
+            }
+
+            var passwordModal = document.getElementById('password-modal');
+            if (passwordModal && window.getComputedStyle(passwordModal).display !== 'none') {
+                window.renderTurnstileWidget('admin');
+            }
         };
 
         /**
