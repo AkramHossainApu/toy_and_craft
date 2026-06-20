@@ -6,16 +6,16 @@ import {
 } from './core/dom.js';
 import { generateSlug } from './core/utils.js';
 
-import { setupAuthListeners, updateAuthUI, initLocationDropdowns } from './features/auth.js';
-import { setupCartListeners, handleFirebaseCartSync } from './features/cart.js';
-import { setupShopListeners, renderCategoryTabs, renderProducts } from './features/shop.js';
-import { setupAdminListeners, setupAdminOrderListeners, toggleAdminMode } from './features/admin.js';
-import { setupSearchListeners } from './features/search.js';
-import { renderInvoicePage, cleanupInvoiceView } from './features/invoice.js';
-import { initRouting } from './features/router.js';
-import { initTracking } from './features/tracking.js';
+import { setupAuthListeners, updateAuthUI, initLocationDropdowns } from './features/auth.js?v=4';
+import { setupCartListeners, handleFirebaseCartSync } from './features/cart.js?v=4';
+import { setupShopListeners, renderCategoryTabs, renderProducts } from './features/shop.js?v=4';
+import { setupAdminListeners, setupAdminOrderListeners, toggleAdminMode } from './features/admin.js?v=4';
+import { setupSearchListeners } from './features/search.js?v=4';
+import { renderInvoicePage, cleanupInvoiceView } from './features/invoice.js?v=4';
+import { initRouting } from './features/router.js?v=4';
+import { initTracking } from './features/tracking.js?v=4';
 
-import { getTrueDistrict } from './features/cart.js'; // Needed globally locally by forms
+import { getTrueDistrict } from './features/cart.js?v=4'; // Needed globally locally by forms
 
 // --- LocalStorage Cache Keys ---
 const CACHE_KEY_CATEGORIES = 'tc_cache_categories';
