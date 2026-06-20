@@ -174,9 +174,13 @@ export function renderCategoryTabs() {
         categoryTabsContainer.appendChild(slider);
     }
 
-    const updateTabSlider = () => {
+    const updateTabSlider = (retries = 10) => {
         const activeBtn = categoryTabsContainer.querySelector('.tab-btn.active');
         if (activeBtn && slider) {
+            if (activeBtn.offsetWidth === 0 && retries > 0) {
+                requestAnimationFrame(() => updateTabSlider(retries - 1));
+                return;
+            }
             slider.style.width = activeBtn.offsetWidth + 'px';
             slider.style.height = activeBtn.offsetHeight + 'px';
             slider.style.left = activeBtn.offsetLeft + 'px';
