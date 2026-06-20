@@ -89,7 +89,7 @@ async function fetchSteadfastLocations() {
     }
 }
 
-export async function fetchCategories() {
+export async function fetchCategories({ silent = false } = {}) {
     try {
         const catSnap = await getDocs(collection(db, 'Products'));
         state.categories = catSnap.docs.map(doc => ({ id: doc.id, slug: doc.id.toLowerCase().replace(/ /g, '-'), ...doc.data() }));
@@ -98,17 +98,44 @@ export async function fetchCategories() {
         // Cache for next visit
         setCachedData(CACHE_KEY_CATEGORIES, state.categories);
 
-        renderCategoryTabs();
+        // Only re-render tabs on initial load, not during background refresh
+        if (!silent) renderCategoryTabs();
     } catch (err) {
         console.error("Error fetching categories:", err);
         throw err;
     }
 }
 
-export async function fetchAllProducts() {
+export async function fetchAllProducts({ silent = false } = {}) {
     try {
         if (state.categories.length === 0) return;
 
+        // Helper to fetch a single category's products
+        const fetchCategoryProducts = async (cat) => {
+            const itemsSnap = await getDocs(collection(db, 'Products', cat.id, 'Items'));
+            return itemsSnap.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    ...data,
+                    id: doc.id,
+                    categoryId: cat.id,
+                    categorySlug: cat.slug,
+                    slug: data.name ? generateSlug(data.name) : doc.id.toLowerCase().replace(/ /g, '-')
+                };
+            });
+        };
+
+        // SILENT MODE (background refresh): Fetch everything, then replace atomically
+        if (silent) {
+            const allPromises = state.categories.map(cat => fetchCategoryProducts(cat));
+            const allResults = await Promise.all(allPromises);
+            state.inventory = allResults.flat();
+            state.inventoryFullyLoaded = true;
+            setCachedData(CACHE_KEY_PRODUCTS, state.inventory);
+            return;
+        }
+
+        // NORMAL MODE (initial load): Priority-first progressive loading
         state.inventoryFullyLoaded = false;
 
         // Determine the priority category to load first (from URL path)
@@ -125,21 +152,6 @@ export async function fetchAllProducts() {
         }
         
         const priorityCat = state.categories.find(c => c.slug === prioritySlug);
-
-        // Helper to fetch a single category's products
-        const fetchCategoryProducts = async (cat) => {
-            const itemsSnap = await getDocs(collection(db, 'Products', cat.id, 'Items'));
-            return itemsSnap.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    ...data,
-                    id: doc.id,
-                    categoryId: cat.id,
-                    categorySlug: cat.slug,
-                    slug: data.name ? generateSlug(data.name) : doc.id.toLowerCase().replace(/ /g, '-')
-                };
-            });
-        };
         
         // 1. Fetch the PRIORITY category first and wait for it (unblocks initial render)
         state.inventory = await fetchCategoryProducts(priorityCat);
@@ -163,7 +175,6 @@ export async function fetchAllProducts() {
             Promise.all(otherCats.map(cat => fetchAndAppend(cat)))
                 .then(() => {
                     state.inventoryFullyLoaded = true;
-                    // Cache all products for next visit
                     setCachedData(CACHE_KEY_PRODUCTS, state.inventory);
                 })
                 .catch(() => {
@@ -286,8 +297,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         usedCache = true;
 
         // Refresh data in background (stale-while-revalidate)
-        fetchCategories()
-            .then(() => fetchAllProducts())
+        // silent: true prevents destructive state overwrites and tab re-renders
+        fetchCategories({ silent: true })
+            .then(() => fetchAllProducts({ silent: true }))
             .catch(err => console.error("Background refresh failed:", err));
     }
 
