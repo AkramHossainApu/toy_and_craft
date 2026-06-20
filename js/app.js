@@ -17,19 +17,49 @@ import { initTracking } from './features/tracking.js';
 
 import { getTrueDistrict } from './features/cart.js'; // Needed globally locally by forms
 
+// --- LocalStorage Cache Keys ---
+const CACHE_KEY_CATEGORIES = 'tc_cache_categories';
+const CACHE_KEY_PRODUCTS = 'tc_cache_products';
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// --- Cache Helpers ---
+function getCachedData(key) {
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (Date.now() - parsed.timestamp > CACHE_TTL) {
+            localStorage.removeItem(key);
+            return null;
+        }
+        return parsed.data;
+    } catch (e) {
+        return null;
+    }
+}
+
+function setCachedData(key, data) {
+    try {
+        localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
+    } catch (e) {
+        // localStorage full or unavailable — ignore
+    }
+}
+
 // --- Initialization sequence ---
 
 async function fetchSiteMetadata() {
     try {
         const snap = await getDocs(collection(db, 'Settings'));
-        snap.forEach(doc => {
-            if (doc.id === 'SiteMetadata') {
-                const data = doc.data();
-                if (homeTitle && data.title) homeTitle.textContent = data.title;
-                if (homeSubtitle && data.subtitle) homeSubtitle.textContent = data.subtitle;
-            } else if (doc.id === 'DeliveryRules') {
-                const data = doc.data();
-                // Avoid polluting root prototype unless required, handled mostly inside cart calculation
+        snap.forEach(d => {
+            if (d.id === 'SiteMetadata') {
+                const data = d.data();
+                if (data.site_name && siteTitle) siteTitle.textContent = data.site_name;
+                if (data.title && homeTitle) homeTitle.textContent = data.title;
+                if (data.subtitle && homeSubtitle) homeSubtitle.textContent = data.subtitle;
+                document.title = data.site_name || "Toy & Craft";
+            } else if (d.id === 'DeliveryRules') {
+                const data = d.data();
                 state.deliveryRules = data.Rules || {};
             }
         });
@@ -46,17 +76,13 @@ async function fetchSteadfastLocations() {
         if (locSnap.exists()) {
             const docData = locSnap.data();
             const locationData = docData.data || docData;
-            console.log("PAYLOAD_DUMP:", JSON.stringify(locationData));
             for (const district in locationData) {
-                // Ignore any internal Firebase meta keys if they exist
                 if (Array.isArray(locationData[district])) {
                     state.steadfastLocations[district] = locationData[district];
                 } else if (typeof locationData[district] === 'object' && locationData[district].thanas) {
                     state.steadfastLocations[district] = locationData[district].thanas;
                 }
             }
-        } else {
-            console.warn("Settings/Locations document is missing from Firebase.");
         }
     } catch (e) {
         console.warn("Could not fetch location list", e);
@@ -68,6 +94,10 @@ export async function fetchCategories() {
         const catSnap = await getDocs(collection(db, 'Products'));
         state.categories = catSnap.docs.map(doc => ({ id: doc.id, slug: doc.id.toLowerCase().replace(/ /g, '-'), ...doc.data() }));
         state.categories.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        // Cache for next visit
+        setCachedData(CACHE_KEY_CATEGORIES, state.categories);
+
         renderCategoryTabs();
     } catch (err) {
         console.error("Error fetching categories:", err);
@@ -87,7 +117,6 @@ export async function fetchAllProducts() {
         const pathParts = window.location.pathname.replace(basePath, '').split('/').filter(p => p);
         
         // Search ALL path parts for a matching category slug
-        // This handles /key-rings/page-1, /userId/key-rings/page-1, /admin/key-rings/page-1
         for (const part of pathParts) {
             if (state.categories.find(c => c.slug === part)) {
                 prioritySlug = part;
@@ -122,9 +151,7 @@ export async function fetchAllProducts() {
             const fetchAndAppend = async (cat) => {
                 try {
                     const products = await fetchCategoryProducts(cat);
-                    // Append to inventory as soon as this category arrives
                     state.inventory = [...state.inventory, ...products];
-                    // If the user switched to this category while it was loading, re-render immediately
                     if (state.currentCategorySlug === cat.slug && window.renderProducts) {
                         window.renderProducts(state.currentCategorySlug, state.currentPage || 1);
                     }
@@ -133,16 +160,18 @@ export async function fetchAllProducts() {
                 }
             };
 
-            // Fire all remaining fetches in parallel (non-blocking)
             Promise.all(otherCats.map(cat => fetchAndAppend(cat)))
                 .then(() => {
                     state.inventoryFullyLoaded = true;
+                    // Cache all products for next visit
+                    setCachedData(CACHE_KEY_PRODUCTS, state.inventory);
                 })
                 .catch(() => {
                     state.inventoryFullyLoaded = true;
                 });
         } else {
             state.inventoryFullyLoaded = true;
+            setCachedData(CACHE_KEY_PRODUCTS, state.inventory);
         }
 
     } catch (err) {
@@ -152,73 +181,35 @@ export async function fetchAllProducts() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 0. Analytics Tracking (Daily Visits)
-    try {
-        if (!state.isAdmin && !sessionStorage.getItem('tc_visited_today')) {
-            const today = new Date().toISOString().split('T')[0];
-            await setDoc(doc(db, 'Analytics', `Visits_${today}`), {
-                date: today,
-                views: increment(1)
-            }, { merge: true });
-            sessionStorage.setItem('tc_visited_today', 'true');
-        }
-    } catch (e) {
-        console.warn('Analytics tracking failed', e);
-    }
+    // ============================================================
+    // PHASE 0: INSTANT — Use cached local data + local session (NO network)
+    // ============================================================
 
-    // 0. Session Recovery & Auth Logic
+    // Session recovery from localStorage (instant, no Firestore)
     try {
         const localUser = localStorage.getItem('tc_user') || sessionStorage.getItem('tc_user');
         if (localUser) {
-            const parsed = JSON.parse(localUser);
-            // Refresh user data from Firestore to ensure all fields (like email) are present
-            try {
-                const userSnap = await getDoc(doc(db, 'Users', parsed.id));
-                if (userSnap.exists()) {
-                    const data = userSnap.data();
-                    state.currentUser = {
-                        id: userSnap.id,
-                        name: data.username || '',
-                        email: data.email || '',
-                        mobile: data.mobile || '',
-                        address: data.address || '',
-                        district: data.district || '',
-                        thana: data.thana || ''
-                    };
-                    // Update storage with fresh data
-                    const storage = localStorage.getItem('tc_user') ? localStorage : sessionStorage;
-                    storage.setItem('tc_user', JSON.stringify(state.currentUser));
-                } else {
-                    state.currentUser = parsed;
-                }
-            } catch (err) {
-                console.error("Failed to refresh user data", err);
-                state.currentUser = parsed;
-            }
-            await handleFirebaseCartSync(state.currentUser.id);
-        } else {
-            const localCart = localStorage.getItem('tc_cart');
-            if (localCart) state.cart = JSON.parse(localCart);
-            if (window.saveCart) window.saveCart(); // Syncs to UI
+            state.currentUser = JSON.parse(localUser);
+        }
+        const localCart = localStorage.getItem('tc_cart');
+        if (localCart) {
+            state.cart = JSON.parse(localCart);
+            if (window.saveCart) window.saveCart();
         }
     } catch (e) {
         console.error("Local session recovery failed", e);
     }
 
-    // 1. Attach specialized listeners
+    // Attach listeners (synchronous, instant)
     setupAuthListeners();
     setupCartListeners();
     setupShopListeners();
     setupAdminListeners();
     setupAdminOrderListeners();
-    try {
-        setupSearchListeners();
-    } catch (e) {
-        console.error("Search initialization failed", e);
-    }
+    try { setupSearchListeners(); } catch (e) { console.error("Search init failed", e); }
     initTracking();
 
-    // 2. Initialize Visual Toggles & Stored Global States
+    // Theme toggle (instant)
     if (themeToggleBtn) {
         if (localStorage.getItem('tc_theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
@@ -227,13 +218,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         themeToggleBtn.addEventListener('click', () => {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
             if (newTheme === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
             } else {
                 document.documentElement.removeAttribute('data-theme');
             }
-
             localStorage.setItem('tc_theme', newTheme);
             themeToggleBtn.innerHTML = newTheme === 'dark' ?
                 '<span class="material-icons-round">light_mode</span>' :
@@ -245,11 +234,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         toggleAdminMode(true);
     }
 
-    // Logo/Title click → navigate to home
+    // Logo click handler (instant)
     const logoEl = document.querySelector('.logo');
     if (logoEl) {
         logoEl.addEventListener('click', () => {
-            // Hide any open views
             const productViewSection = document.getElementById('product-view');
             const errorViewSection = document.getElementById('error-view');
             const checkoutViewEl = document.getElementById('checkout-view');
@@ -264,7 +252,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (mainContentEl) mainContentEl.style.display = 'block';
             if (shopEl) shopEl.style.display = 'block';
 
-            // Navigate to first category
             if (state.categories.length > 0) {
                 state.currentCategorySlug = state.categories[0].slug;
                 state.currentPage = 1;
@@ -277,46 +264,104 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     updateAuthUI();
 
-    // 3. Critical Data Fetching (Parallelized)
-    try {
-        const fetchMetadata = async () => {
-            const metaSnap = await getDoc(doc(db, 'Settings', 'SiteMetadata'));
-            if (metaSnap.exists()) {
-                const data = metaSnap.data();
-                // Only update navbar title if site_name exists, otherwise keep Toy & Craft
-                if (data.site_name && siteTitle) {
-                    siteTitle.textContent = data.site_name;
-                } else if (siteTitle) {
-                    siteTitle.textContent = "Toy & Craft";
-                }
+    // ============================================================
+    // PHASE 1: TRY CACHE — Show cached data instantly if available
+    // ============================================================
+    const cachedCategories = getCachedData(CACHE_KEY_CATEGORIES);
+    const cachedProducts = getCachedData(CACHE_KEY_PRODUCTS);
+    let usedCache = false;
 
-                if (data.title && homeTitle) homeTitle.textContent = data.title;
-                if (data.subtitle && homeSubtitle) homeSubtitle.textContent = data.subtitle;
-                
-                // Tab title should be the brand name
-                document.title = data.site_name || "Toy & Craft";
-            }
-        };
+    if (cachedCategories && cachedCategories.length > 0 && cachedProducts && cachedProducts.length > 0) {
+        state.categories = cachedCategories;
+        state.inventory = cachedProducts;
+        state.inventoryFullyLoaded = true;
 
-        // Parallel fetch for critical data
-        await Promise.all([
-            fetchMetadata(),
-            fetchCategories().then(() => fetchAllProducts()),
-            fetchSteadfastLocations().then(() => {
-                initLocationDropdowns();
-            })
-        ]);
+        renderCategoryTabs();
 
-    } catch (err) {
-        console.error("APP INITIALIZATION ERROR:", err);
-        showErrorPage("Application failed to load critical data. Please check your internet connection.");
-        return; // Halt initialization if critical data fails
+        // Show page immediately from cache
+        if (appLoader) appLoader.style.display = 'none';
+        if (navbar) navbar.style.display = 'block';
+        if (mainContent) mainContent.style.display = 'block';
+        initRouting();
+        usedCache = true;
+
+        // Refresh data in background (stale-while-revalidate)
+        fetchCategories()
+            .then(() => fetchAllProducts())
+            .catch(err => console.error("Background refresh failed:", err));
     }
 
-    // 4. Initialize Routing Engine & Trigger Component Renders
-    if (appLoader) appLoader.style.display = 'none';
-    if (navbar) navbar.style.display = 'block';
-    if (mainContent) mainContent.style.display = 'block';
+    // ============================================================
+    // PHASE 2: NETWORK — Only the critical path (categories + products)
+    // ============================================================
+    if (!usedCache) {
+        try {
+            // ONLY wait for categories + products — the absolute minimum to show the page
+            await fetchCategories();
+            await fetchAllProducts();
+        } catch (err) {
+            console.error("APP INITIALIZATION ERROR:", err);
+            const { showErrorPage } = await import('./core/utils.js');
+            showErrorPage("Application failed to load critical data. Please check your internet connection.");
+            return;
+        }
+
+        // Show the page NOW
+        if (appLoader) appLoader.style.display = 'none';
+        if (navbar) navbar.style.display = 'block';
+        if (mainContent) mainContent.style.display = 'block';
+        initRouting();
+    }
+
+    // ============================================================
+    // PHASE 3: BACKGROUND — Everything else loads without blocking
+    // ============================================================
+
+    // Analytics tracking (fire-and-forget)
+    if (!state.isAdmin && !sessionStorage.getItem('tc_visited_today')) {
+        const today = new Date().toISOString().split('T')[0];
+        setDoc(doc(db, 'Analytics', `Visits_${today}`), {
+            date: today,
+            views: increment(1)
+        }, { merge: true })
+            .then(() => sessionStorage.setItem('tc_visited_today', 'true'))
+            .catch(e => console.warn('Analytics tracking failed', e));
+    }
+
+    // Metadata + site title (non-blocking, updates text when ready)
+    fetchSiteMetadata().catch(e => console.warn('Metadata fetch failed', e));
+
+    // Locations (only needed at checkout, non-blocking)
+    fetchSteadfastLocations()
+        .then(() => initLocationDropdowns())
+        .catch(e => console.warn('Location fetch failed', e));
+
+    // Refresh user data from Firestore + sync cart (non-blocking)
+    if (state.currentUser) {
+        (async () => {
+            try {
+                const userSnap = await getDoc(doc(db, 'Users', state.currentUser.id));
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    state.currentUser = {
+                        id: userSnap.id,
+                        name: data.username || '',
+                        email: data.email || '',
+                        mobile: data.mobile || '',
+                        address: data.address || '',
+                        district: data.district || '',
+                        thana: data.thana || ''
+                    };
+                    const storage = localStorage.getItem('tc_user') ? localStorage : sessionStorage;
+                    storage.setItem('tc_user', JSON.stringify(state.currentUser));
+                    updateAuthUI();
+                }
+                await handleFirebaseCartSync(state.currentUser.id);
+            } catch (err) {
+                console.error("Background user/cart sync failed", err);
+            }
+        })();
+    }
 
     // Floating Chat Widget Toggle
     const chatWidget = document.getElementById('floating-chat-widget');
@@ -325,8 +370,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatToggleBtn.addEventListener('click', () => {
             chatWidget.classList.toggle('active');
         });
-
-        // Close when clicking outside
         document.addEventListener('click', (e) => {
             if (!chatWidget.contains(e.target) && chatWidget.classList.contains('active')) {
                 chatWidget.classList.remove('active');
@@ -341,7 +384,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (sessionStorage.getItem('tc_promo_closed') === 'true') {
             promoBanner.style.display = 'none';
         }
-
         closePromoBtn.addEventListener('click', () => {
             promoBanner.style.opacity = '0';
             promoBanner.style.transition = 'opacity 0.3s ease';
@@ -351,6 +393,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 300);
         });
     }
-
-    initRouting();
 });
