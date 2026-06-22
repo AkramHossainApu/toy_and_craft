@@ -295,6 +295,12 @@ export function processRoute() {
     // Now trigger the actual page render based on the parsed URL
     const productViewSection = document.getElementById('product-view');
     const shopSection = document.getElementById('shop');
+    
+    // Ensure admin views are hidden on regular user pages
+    const adminDashboardView = document.getElementById('admin-dashboard-view');
+    const adminOrdersView = document.getElementById('admin-orders-view');
+    if (adminDashboardView) adminDashboardView.style.display = 'none';
+    if (adminOrdersView) adminOrdersView.style.display = 'none';
 
     if (window.pendingProductSlug) {
         const tempSlug = window.pendingProductSlug;
