@@ -68,7 +68,8 @@ export async function renderInvoicePage(userId, orderId) {
             day: 'numeric', month: 'long', year: 'numeric'
         });
 
-        const statusBadgeClass = data.status === 'Delivered' ? 'status-delivered' : (data.status === 'Sent' ? 'status-sent' : 'status-pending');
+        const statusBadgeMap = { 'Preparing': 'status-preparing', 'Pending': 'status-pending', 'Sent': 'status-sent', 'Delivered': 'status-delivered', 'Cancelled': 'status-cancelled' };
+        const statusBadgeClass = statusBadgeMap[data.status] || 'status-preparing';
 
         let itemsHTML = '';
         (data.items || []).forEach(item => {

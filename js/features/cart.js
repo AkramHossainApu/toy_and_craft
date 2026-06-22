@@ -883,7 +883,7 @@ export function setupCartListeners() {
                     subtotal: rawSubtotal,
                     deliveryCharge: secureDeliveryCharge,
                     totalPrice: secureGrandTotal,
-                    status: 'Pending',
+                    status: 'Preparing',
                     createdAt: Date.now()
                 };
 
@@ -946,14 +946,16 @@ export function setupCartListeners() {
 
                 await batch.commit();
 
-                // ── Send Telegram Notification ──────────
+                // ── Send Telegram Notification & Store message_id ──────────
+                let tgMessageId = null;
+                let tgIsMedia = false;
                 try {
                     const botToken = '8886096891:AAFrgDxKXqHhJthCSnCGWgbLMjfngCYOxzc';
                     const chatId = '-5047943969';
                     
                     let itemDetails = selectedItems.map(i => `▪️ *${i.name}* (x${i.qty}) ➔ ৳${(i.currentPrice * i.qty).toFixed(2)}`).join('\n');
                     
-                    const messageText = `🛒 *NEW ORDER RECEIVED* 🛒\n\n` +
+                    const messageText = `📦 *PREPARING ORDER* 📦\n\n` +
                                         `*🧾 Invoice:* #${secureInvoiceId}\n` +
                                         `*👤 Name:* ${orderUsername}\n` +
                                         `*📞 Phone:* ${orderMobile}\n` +
@@ -962,6 +964,9 @@ export function setupCartListeners() {
                                         `*💰 Subtotal:* ৳${rawSubtotal}\n` +
                                         `*🚚 Delivery:* ৳${secureDeliveryCharge}\n` +
                                         `*💵 Grand Total:* ৳${secureGrandTotal}`;
+
+                    // Store messageText for later Steadfast edit
+                    window._lastTgOrderMsg = messageText;
 
                     let mediaGroup = [];
                     selectedItems.forEach(item => {
@@ -977,13 +982,18 @@ export function setupCartListeners() {
                     });
 
                     if (mediaGroup.length === 0) {
-                        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                        const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ chat_id: chatId, text: messageText, parse_mode: 'Markdown' })
-                        }).catch(e => console.warn("Telegram API error", e));
+                        });
+                        const tgData = await tgRes.json();
+                        if (tgData.ok && tgData.result) {
+                            tgMessageId = tgData.result.message_id;
+                            tgIsMedia = false;
+                        }
                     } else if (mediaGroup.length === 1) {
-                        fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+                        const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -992,7 +1002,12 @@ export function setupCartListeners() {
                                 caption: messageText,
                                 parse_mode: 'Markdown'
                             })
-                        }).catch(e => console.warn("Telegram photo API error", e));
+                        });
+                        const tgData = await tgRes.json();
+                        if (tgData.ok && tgData.result) {
+                            tgMessageId = tgData.result.message_id;
+                            tgIsMedia = true;
+                        }
                     } else {
                         const mediaObjects = mediaGroup.slice(0, 10).map((url, index) => {
                             let obj = { type: 'photo', media: url };
@@ -1003,14 +1018,29 @@ export function setupCartListeners() {
                             return obj;
                         });
                         
-                        fetch(`https://api.telegram.org/bot${botToken}/sendMediaGroup`, {
+                        const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMediaGroup`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 chat_id: chatId,
                                 media: mediaObjects
                             })
-                        }).catch(e => console.warn("Telegram media group API error", e));
+                        });
+                        const tgData = await tgRes.json();
+                        if (tgData.ok && tgData.result && tgData.result.length > 0) {
+                            tgMessageId = tgData.result[0].message_id;
+                            tgIsMedia = true;
+                        }
+                    }
+
+                    // Save telegram message_id to Firebase order for future editing
+                    if (tgMessageId) {
+                        const tgPayload = { telegram_message_id: tgMessageId, telegram_is_media: tgIsMedia };
+                        await updateDoc(newOrderRef, tgPayload).catch(e => console.warn('Failed to save TG msg id:', e));
+                        if (state.currentUser) {
+                            const userOrderRef = doc(db, 'Users', state.currentUser.id, 'Orders', secureInvoiceId);
+                            await updateDoc(userOrderRef, tgPayload).catch(() => {});
+                        }
                     }
 
                 } catch(e) { console.warn("Failed to send telegram notification", e); }
@@ -1072,6 +1102,28 @@ export function setupCartListeners() {
                             await updateDoc(userOrderRef, trackingData).catch(() => {});
                         }
                         console.log(`✅ Steadfast parcel created: ${sfResult.tracking_code}`);
+
+                        // ── Edit Original Telegram Message to Add Parcel ID ──
+                        if (tgMessageId && window._lastTgOrderMsg) {
+                            try {
+                                const botToken = '8886096891:AAFrgDxKXqHhJthCSnCGWgbLMjfngCYOxzc';
+                                const chatId = '-5047943969';
+                                const updatedMsg = window._lastTgOrderMsg + 
+                                    `\n\n*🔖 Parcel ID:* ${sfResult.consignment_id}` +
+                                    `\n*📍 Tracking:* ${sfResult.tracking_code}`;
+                                
+                                const editEndpoint = tgIsMedia ? 'editMessageCaption' : 'editMessageText';
+                                const editBody = tgIsMedia
+                                    ? { chat_id: chatId, message_id: tgMessageId, caption: updatedMsg, parse_mode: 'Markdown' }
+                                    : { chat_id: chatId, message_id: tgMessageId, text: updatedMsg, parse_mode: 'Markdown' };
+
+                                fetch(`https://api.telegram.org/bot${botToken}/${editEndpoint}`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(editBody)
+                                }).catch(e => console.warn('TG edit for parcel failed:', e));
+                            } catch(tgEditErr) { console.warn('Parcel TG edit error:', tgEditErr); }
+                        }
                     } else {
                         console.warn('⚠️ Steadfast submission failed (order still saved):', sfResult.error);
                     }

@@ -10,7 +10,7 @@ function mapSteadfastStatusToNative(steadfastStatusStr) {
     if (!steadfastStatusStr) return null;
     const raw = steadfastStatusStr.toLowerCase();
     
-    if (raw === 'in_review') return 'Pending';
+    if (raw === 'in_review') return 'Preparing';
     if (raw === 'pending') return 'Sent';
     if (raw.includes('approval') || raw.includes('delivered')) return 'Delivered';
     if (raw.includes('cancelled')) return 'Cancelled';
@@ -34,11 +34,11 @@ export async function refreshTrackingBadge() {
             let q1, q2;
             if (state.isAdmin) {
                 // Admin sees all active orders on the platform
-                q1 = query(collection(db, 'Orders'), where('status', '==', 'Pending'));
+                q1 = query(collection(db, 'Orders'), where('status', '==', 'Preparing'));
                 q2 = query(collection(db, 'Orders'), where('status', '==', 'Sent'));
             } else {
                 // Regular user sees only their own orders
-                q1 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Pending'));
+                q1 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Preparing'));
                 q2 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Sent'));
             }
             const q1Snap = await getDocs(q1);
@@ -47,7 +47,7 @@ export async function refreshTrackingBadge() {
         } catch(e) { console.error("Error fetching active orders for badge:", e); }
     } else {
         // Evaluate local guest orders
-        const activeGuests = localGuestOrders.filter(o => o.status === 'Pending' || o.status === 'Sent');
+        const activeGuests = localGuestOrders.filter(o => o.status === 'Preparing' || o.status === 'Pending' || o.status === 'Sent');
         activeOrdersCount = activeGuests.length;
     }
 
@@ -113,10 +113,10 @@ async function renderActiveOrdersView(container) {
         try {
             let q1, q2;
             if (state.isAdmin) {
-                q1 = query(collection(db, 'Orders'), where('status', '==', 'Pending'));
+                q1 = query(collection(db, 'Orders'), where('status', '==', 'Preparing'));
                 q2 = query(collection(db, 'Orders'), where('status', '==', 'Sent'));
             } else {
-                q1 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Pending'));
+                q1 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Preparing'));
                 q2 = query(collection(db, 'Orders'), where('userId', '==', state.currentUser.id), where('status', '==', 'Sent'));
             }
             
@@ -129,7 +129,7 @@ async function renderActiveOrdersView(container) {
     } else {
         try {
             const guestOrders = JSON.parse(localStorage.getItem('tc_guest_orders')) || [];
-            activeOrders = guestOrders.filter(o => o.status === 'Pending' || o.status === 'Sent');
+            activeOrders = guestOrders.filter(o => o.status === 'Preparing' || o.status === 'Pending' || o.status === 'Sent');
         } catch(e) {}
     }
 
@@ -182,6 +182,18 @@ async function renderActiveOrdersView(container) {
                    } catch(e) {}
                 }
                 stateChanged = true;
+
+                // ── Auto-sync: Edit Original Telegram Message ──
+                if (order.telegram_message_id && window.editTelegramOrderStatus) {
+                    try {
+                        await window.editTelegramOrderStatus(
+                            order.telegram_message_id,
+                            order.telegram_is_media || false,
+                            order.id,
+                            nativeEquivalent
+                        );
+                    } catch(tgErr) { console.warn('Auto-sync TG edit failed:', tgErr); }
+                }
             }
         } else {
             // Steadfast error or hasn't propagated to their system yet (rare)
@@ -206,30 +218,27 @@ async function renderActiveOrdersView(container) {
 
 /** Function replacing generic timeline renderer with dynamic component */
 function renderOrderCard(invoiceId, trackingCode, sfStatusObj, nativeStatus) {
-    // nativeStatus is: Pending, Sent, Delivered. 
-    // We can map these natively to 4 steps: 
-    // step 1: Pending (Processing warehouse)
-    // step 2: Sent (Steadfast In Review)
-    // step 3: Sent (Actually On The Way -> sfStatusObj says partially delivered or out etc)
-    // step 4: Delivered
-    
-    // Determine active step (1 to 4) based on status mapping:
-    let currentStep = 1; // Default: Order Received
+    // nativeStatus: Preparing, Sent, Delivered
+    // 5-step timeline: Order Placed → Preparing → Shipped → On the Way → Delivered
+    let currentStep = 1;
 
-    if (sfStatusObj.label === 'In Review') {
-        currentStep = 2; // Processing
-    } else if (sfStatusObj.label === 'Pending') {
-        currentStep = 3; // On the way
+    if (nativeStatus === 'Preparing') {
+        currentStep = 2;
+    } else if (nativeStatus === 'Sent' && sfStatusObj.label === 'In Review') {
+        currentStep = 3;
+    } else if (nativeStatus === 'Sent') {
+        currentStep = 4;
     } else if (nativeStatus === 'Delivered') {
-        currentStep = 4; // Delivered
+        currentStep = 5;
     }
 
-    const stepColor = currentStep === 4 ? '#27ae60' : '#007BFF';
+    const stepColor = currentStep === 5 ? '#27ae60' : '#007BFF';
 
     const steps = [
-        { icon: 'receipt', label: 'Order Received' },
-        { icon: 'inventory_2', label: 'Processing' },
-        { icon: 'local_shipping', label: 'On the way' },
+        { icon: 'receipt', label: 'Order Placed' },
+        { icon: 'inventory_2', label: 'Preparing' },
+        { icon: 'local_shipping', label: 'Shipped' },
+        { icon: 'directions_run', label: 'On the Way' },
         { icon: 'home', label: 'Delivered' }
     ];
 
@@ -252,7 +261,7 @@ function renderOrderCard(invoiceId, trackingCode, sfStatusObj, nativeStatus) {
     // Line BG
     html += `<div style="position: absolute; top: 18px; left: 10%; right: 10%; height: 4px; background: #eef1f5; z-index: 1;"></div>`;
     // Active Line
-    const progressWidth = currentStep === 1 ? '0%' : currentStep === 2 ? '33%' : currentStep === 3 ? '66%' : '100%';
+    const progressWidth = currentStep === 1 ? '0%' : currentStep === 2 ? '25%' : currentStep === 3 ? '50%' : currentStep === 4 ? '75%' : '100%';
     html += `<div style="position: absolute; top: 18px; left: 10%; width: ${progressWidth}; height: 4px; background: ${stepColor}; z-index: 2; transition: width 1s ease;"></div>`;
 
     steps.forEach((step, index) => {

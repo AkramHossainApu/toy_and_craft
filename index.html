@@ -48,7 +48,7 @@
     <!-- Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <!-- Styles -->
-    <link rel="stylesheet" href="css/style.css?v=premium_ui_v2">
+    <link rel="stylesheet" href="css/style.css?v=5">
     <!-- FontAwesome for Social Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Cloudflare Turnstile Callbacks -->
@@ -1154,35 +1154,111 @@
     </div>
 
     <!-- Admin Dashboard SPA View -->
-    <div id="admin-dashboard-view" style="display: none; padding: 2rem 1.5rem; max-width: 1200px; margin: 0 auto; min-height: 70vh;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <h2 style="font-family: var(--font-heading); font-size: 2rem; color: var(--primary);">Dashboard Analytics</h2>
+    <div id="admin-dashboard-view" style="display: none; padding: 2rem 1.5rem; max-width: 1300px; margin: 0 auto; min-height: 70vh;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h2 style="font-family: var(--font-heading); font-size: 2rem; color: var(--primary); margin: 0;">📊 Dashboard Analytics</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 4px 0 0;">Real-time business intelligence</p>
+            </div>
             <button class="btn btn-secondary" id="admin-dashboard-close-btn">Return to Shop</button>
         </div>
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
-            <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center;">
-                <h3 style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 0.5rem;">Total Sales</h3>
-                <div id="stat-total-sales" style="font-size: 2rem; font-weight: bold; color: var(--text-main); font-family: var(--font-heading);">৳0</div>
+        <!-- Stat Cards Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;" id="dash-stats-grid">
+            <div class="dash-stat-card" style="animation-delay: 0s; --accent: #6366f1;">
+                <div style="background: rgba(99,102,241,0.12);" class="dash-stat-icon">💰</div>
+                <div class="dash-stat-value" id="stat-total-sales" data-target="0">৳0</div>
+                <div class="dash-stat-label">Total Revenue</div>
+                <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#6366f1,#818cf8);border-radius:16px 16px 0 0;"></div>
             </div>
-            <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center;">
-                <h3 style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 0.5rem;">Total Orders</h3>
-                <div id="stat-total-orders" style="font-size: 2rem; font-weight: bold; color: var(--text-main); font-family: var(--font-heading);">0</div>
+            <div class="dash-stat-card" style="animation-delay: 0.08s; --accent: #3b82f6;">
+                <div style="background: rgba(59,130,246,0.12);" class="dash-stat-icon">📦</div>
+                <div class="dash-stat-value" id="stat-total-orders" data-target="0">0</div>
+                <div class="dash-stat-label">Total Orders</div>
+                <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:16px 16px 0 0;"></div>
             </div>
-            <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center;">
-                <h3 style="color: var(--text-muted); font-size: 1rem; font-weight: 500; margin-bottom: 0.5rem;">Pending Orders</h3>
-                <div id="stat-pending-orders" style="font-size: 2rem; font-weight: bold; color: #e74c3c; font-family: var(--font-heading);">0</div>
+            <div class="dash-stat-card" style="animation-delay: 0.16s; --accent: #9c27b0;">
+                <div style="background: rgba(156,39,176,0.12);" class="dash-stat-icon">🔧</div>
+                <div class="dash-stat-value" id="stat-preparing-orders" data-target="0">0</div>
+                <div class="dash-stat-label">Preparing</div>
+                <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#9c27b0,#ce93d8);border-radius:16px 16px 0 0;"></div>
+            </div>
+            <div class="dash-stat-card" style="animation-delay: 0.24s; --accent: #2979ff;">
+                <div style="background: rgba(41,121,255,0.12);" class="dash-stat-icon">🚚</div>
+                <div class="dash-stat-value" id="stat-sent-orders" data-target="0">0</div>
+                <div class="dash-stat-label">Sent</div>
+                <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#2979ff,#82b1ff);border-radius:16px 16px 0 0;"></div>
+            </div>
+            <div class="dash-stat-card" style="animation-delay: 0.32s; --accent: #00c853;">
+                <div style="background: rgba(0,200,83,0.12);" class="dash-stat-icon">✅</div>
+                <div class="dash-stat-value" id="stat-delivered-orders" data-target="0">0</div>
+                <div class="dash-stat-label">Delivered</div>
+                <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#00c853,#69f0ae);border-radius:16px 16px 0 0;"></div>
+            </div>
+            <div class="dash-stat-card" style="animation-delay: 0.4s; --accent: #e74c3c;">
+                <div style="background: rgba(231,76,60,0.12);" class="dash-stat-icon">❌</div>
+                <div class="dash-stat-value" id="stat-cancelled-orders" data-target="0">0</div>
+                <div class="dash-stat-label">Cancelled</div>
+                <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#e74c3c,#ff7675);border-radius:16px 16px 0 0;"></div>
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
-            <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
-                <h3 style="color: var(--text-main); margin-bottom: 1rem; font-family: var(--font-heading);">Traffic (Last 7 Days)</h3>
-                <canvas id="trafficChart" width="400" height="250"></canvas>
+        <!-- Extra Stats Row -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;" id="dash-stats-grid-2">
+            <div class="dash-stat-card" style="animation-delay: 0.48s;">
+                <div style="background: rgba(16,185,129,0.12);" class="dash-stat-icon">📅</div>
+                <div class="dash-stat-value" id="stat-today-revenue" data-target="0">৳0</div>
+                <div class="dash-stat-label">Today's Revenue</div>
+                <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#10b981,#34d399);border-radius:16px 16px 0 0;"></div>
             </div>
-            <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
-                <h3 style="color: var(--text-main); margin-bottom: 1rem; font-family: var(--font-heading);">Most Visited Products</h3>
-                <canvas id="popularChart" width="400" height="250"></canvas>
+            <div class="dash-stat-card" style="animation-delay: 0.56s;">
+                <div style="background: rgba(245,158,11,0.12);" class="dash-stat-icon">🛍️</div>
+                <div class="dash-stat-value" id="stat-today-orders" data-target="0">0</div>
+                <div class="dash-stat-label">Today's Orders</div>
+                <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:16px 16px 0 0;"></div>
+            </div>
+            <div class="dash-stat-card" style="animation-delay: 0.64s;">
+                <div style="background: rgba(139,92,246,0.12);" class="dash-stat-icon">📊</div>
+                <div class="dash-stat-value" id="stat-avg-order" data-target="0">৳0</div>
+                <div class="dash-stat-label">Avg Order Value</div>
+                <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#8b5cf6,#a78bfa);border-radius:16px 16px 0 0;"></div>
+            </div>
+            <div class="dash-stat-card" style="animation-delay: 0.72s;">
+                <div style="background: rgba(236,72,153,0.12);" class="dash-stat-icon">👥</div>
+                <div class="dash-stat-value" id="stat-total-customers" data-target="0">0</div>
+                <div class="dash-stat-label">Total Customers</div>
+                <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#ec4899,#f472b6);border-radius:16px 16px 0 0;"></div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
+            <div class="dash-chart-card" style="animation-delay: 0.5s;">
+                <h3><span class="material-icons-round" style="color: var(--primary); font-size: 20px;">trending_up</span> Revenue Trend (Last 30 Days)</h3>
+                <canvas id="revenueChart" height="200"></canvas>
+            </div>
+            <div class="dash-chart-card" style="animation-delay: 0.6s;">
+                <h3><span class="material-icons-round" style="color: var(--primary); font-size: 20px;">donut_small</span> Order Status</h3>
+                <canvas id="statusChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
+            <div class="dash-chart-card" style="animation-delay: 0.7s;">
+                <h3><span class="material-icons-round" style="color: var(--primary); font-size: 20px;">show_chart</span> Traffic (Last 7 Days)</h3>
+                <canvas id="trafficChart" height="200"></canvas>
+            </div>
+            <div class="dash-chart-card" style="animation-delay: 0.8s;">
+                <h3><span class="material-icons-round" style="color: var(--primary); font-size: 20px;">bar_chart</span> Most Visited Products</h3>
+                <canvas id="popularChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Orders Table -->
+        <div class="dash-chart-card" style="animation-delay: 0.9s;">
+            <h3><span class="material-icons-round" style="color: var(--primary); font-size: 20px;">receipt_long</span> Recent Orders</h3>
+            <div style="overflow-x: auto;" id="dash-recent-orders">
+                <p style="color: var(--text-muted); text-align: center; padding: 1rem;">Loading...</p>
             </div>
         </div>
     </div>
@@ -1229,7 +1305,7 @@
         </div>
     </div>
 
-    <script type="module" src="js/app.js?v=4"></script>
+    <script type="module" src="js/app.js?v=5"></script>
 
     <!-- Premium Chatbot -->
     <div class="chatbot-container no-print" id="chatbot-container">

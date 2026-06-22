@@ -822,50 +822,200 @@ export async function renderAdminDashboard() {
     if (window.closeCart) window.closeCart();
     if (window.updateUrlState) window.updateUrlState('dashboard');
 
-    // 1. Gather Orders Data
-    let totalSales = 0;
-    let totalOrders = 0;
-    let pendingOrders = 0;
+    // Re-trigger animations by removing and re-adding class
+    adminDashboardView.querySelectorAll('.dash-stat-card, .dash-chart-card').forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight; // force reflow
+        el.style.animation = '';
+    });
+
+    // --- Animated Count-Up Helper ---
+    function animateValue(el, start, end, duration, prefix = '', suffix = '') {
+        const startTime = performance.now();
+        const isDecimal = String(end).includes('.');
+        function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease out cubic
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = start + (end - start) * eased;
+            el.textContent = prefix + (isDecimal ? current.toFixed(2) : Math.round(current)) + suffix;
+            if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+    }
+
+    // 1. Gather ALL Orders Data
+    let totalSales = 0, totalOrders = 0, preparingOrders = 0, sentOrders = 0, deliveredOrders = 0, cancelledOrders = 0;
+    let allOrders = [];
+    const dailyRevenue = {}; // date string -> revenue
 
     try {
         const ordersSnap = await getDocs(collection(db, 'Orders'));
-        ordersSnap.forEach(doc => {
-            const data = doc.data();
+        ordersSnap.forEach(d => {
+            const data = { id: d.id, ...d.data() };
+            allOrders.push(data);
             totalOrders++;
             if (data.totalPrice) totalSales += data.totalPrice;
-            if (data.status === 'Pending') pendingOrders++;
+            if (data.status === 'Preparing') preparingOrders++;
+            else if (data.status === 'Pending') preparingOrders++; // legacy Pending = Preparing
+            else if (data.status === 'Sent') sentOrders++;
+            else if (data.status === 'Delivered') deliveredOrders++;
+            else if (data.status === 'Cancelled') cancelledOrders++;
+
+            // Revenue by date (last 30 days)
+            if (data.createdAt) {
+                const dateStr = new Date(data.createdAt).toISOString().split('T')[0];
+                dailyRevenue[dateStr] = (dailyRevenue[dateStr] || 0) + (data.totalPrice || 0);
+            }
         });
 
-        document.getElementById('stat-total-sales').textContent = `৳${totalSales.toFixed(2)}`;
-        document.getElementById('stat-total-orders').textContent = totalOrders;
-        document.getElementById('stat-pending-orders').textContent = pendingOrders;
+        // Animate stat cards
+        animateValue(document.getElementById('stat-total-sales'), 0, totalSales, 1200, '৳');
+        animateValue(document.getElementById('stat-total-orders'), 0, totalOrders, 1000);
+        animateValue(document.getElementById('stat-preparing-orders'), 0, preparingOrders, 800);
+        animateValue(document.getElementById('stat-sent-orders'), 0, sentOrders, 800);
+        animateValue(document.getElementById('stat-delivered-orders'), 0, deliveredOrders, 800);
+        animateValue(document.getElementById('stat-cancelled-orders'), 0, cancelledOrders, 800);
+
+        // Extra stats: Today's Revenue/Orders, Avg Order Value, Total Customers
+        const todayStr = new Date().toISOString().split('T')[0];
+        let todayRevenue = 0, todayOrders = 0;
+        const uniqueCustomers = new Set();
+        allOrders.forEach(o => {
+            if (o.createdAt) {
+                const oDate = new Date(o.createdAt).toISOString().split('T')[0];
+                if (oDate === todayStr) {
+                    todayRevenue += (o.totalPrice || 0);
+                    todayOrders++;
+                }
+            }
+            if (o.userId && o.userId !== 'guest') uniqueCustomers.add(o.userId);
+        });
+        const avgOrder = totalOrders > 0 ? Math.round(totalSales / totalOrders) : 0;
+
+        animateValue(document.getElementById('stat-today-revenue'), 0, todayRevenue, 900, '৳');
+        animateValue(document.getElementById('stat-today-orders'), 0, todayOrders, 700);
+        animateValue(document.getElementById('stat-avg-order'), 0, avgOrder, 900, '৳');
+        animateValue(document.getElementById('stat-total-customers'), 0, uniqueCustomers.size, 800);
     } catch (e) {
         console.error('Error fetching orders for analytics', e);
     }
 
-    // 2. Gather Traffic Data
-    const labels = [];
+    // 2. Revenue Trend Chart (Last 30 days)
+    const revLabels = [];
+    const revData = [];
+    for (let i = 29; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        revLabels.push(d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+        revData.push(dailyRevenue[dateStr] || 0);
+    }
+
+    if (window.revenueChartInstance) window.revenueChartInstance.destroy();
+    const ctxRevenue = document.getElementById('revenueChart');
+    if (ctxRevenue) {
+        window.revenueChartInstance = new Chart(ctxRevenue, {
+            type: 'line',
+            data: {
+                labels: revLabels,
+                datasets: [{
+                    label: 'Revenue (৳)',
+                    data: revData,
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.08)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#6366f1',
+                    pointRadius: 2,
+                    pointHoverRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { maxTicksLimit: 10, font: { size: 10 } }, grid: { display: false } },
+                    y: { ticks: { callback: v => '৳' + v }, grid: { color: 'rgba(0,0,0,0.05)' } }
+                }
+            }
+        });
+    }
+
+    // 3. Order Status Doughnut Chart
+    if (window.statusChartInstance) window.statusChartInstance.destroy();
+    const ctxStatus = document.getElementById('statusChart');
+    if (ctxStatus) {
+        window.statusChartInstance = new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: ['Preparing', 'Sent', 'Delivered', 'Cancelled'],
+                datasets: [{
+                    data: [preparingOrders, sentOrders, deliveredOrders, cancelledOrders],
+                    backgroundColor: ['#9c27b0', '#2979ff', '#00c853', '#e74c3c'],
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '65%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } }
+                }
+            }
+        });
+    }
+
+    // 4. Traffic Chart (Last 7 Days)
+    const trafficLabels = [];
     const viewsData = [];
     try {
-        // Last 7 days
         for (let i = 6; i >= 0; i--) {
             const d = new Date();
             d.setDate(d.getDate() - i);
             const dateStr = d.toISOString().split('T')[0];
-            labels.push(dateStr);
-            
+            trafficLabels.push(d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' }));
+
             const visitSnap = await getDoc(doc(db, 'Analytics', `Visits_${dateStr}`));
-            if (visitSnap.exists() && visitSnap.data().views) {
-                viewsData.push(visitSnap.data().views);
-            } else {
-                viewsData.push(0);
-            }
+            viewsData.push(visitSnap.exists() && visitSnap.data().views ? visitSnap.data().views : 0);
         }
     } catch (e) {
         console.error('Error fetching traffic for analytics', e);
     }
 
-    // 3. Gather Most Visited Products Data
+    if (window.trafficChartInstance) window.trafficChartInstance.destroy();
+    const ctxTraffic = document.getElementById('trafficChart');
+    if (ctxTraffic) {
+        window.trafficChartInstance = new Chart(ctxTraffic, {
+            type: 'line',
+            data: {
+                labels: trafficLabels,
+                datasets: [{
+                    label: 'Page Views',
+                    data: viewsData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#3b82f6',
+                    pointRadius: 4,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { grid: { color: 'rgba(0,0,0,0.05)' }, beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    // 5. Most Visited Products Chart
     const popularLabels = [];
     const popularData = [];
     try {
@@ -881,58 +1031,70 @@ export async function renderAdminDashboard() {
             });
         }
         allProducts.sort((a, b) => b.views - a.views);
-        const top5 = allProducts.slice(0, 5);
-        top5.forEach(p => {
-            popularLabels.push(p.name);
+        allProducts.slice(0, 7).forEach(p => {
+            popularLabels.push(p.name.length > 18 ? p.name.substring(0, 18) + '…' : p.name);
             popularData.push(p.views);
         });
     } catch (e) {
         console.error('Error fetching popular products for analytics', e);
     }
 
-    // Initialize Charts (destroy old instances if they exist)
-    if (window.trafficChartInstance) window.trafficChartInstance.destroy();
     if (window.popularChartInstance) window.popularChartInstance.destroy();
-
-    const ctxTraffic = document.getElementById('trafficChart');
-    if (ctxTraffic) {
-        window.trafficChartInstance = new Chart(ctxTraffic, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Page Views',
-                    data: viewsData,
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    tension: 0.3,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } }
-            }
-        });
-    }
-
     const ctxPopular = document.getElementById('popularChart');
     if (ctxPopular) {
         window.popularChartInstance = new Chart(ctxPopular, {
             type: 'bar',
             data: {
-                labels: popularLabels.map(l => l.length > 15 ? l.substring(0, 15) + '...' : l),
+                labels: popularLabels,
                 datasets: [{
-                    label: 'Product Views',
+                    label: 'Views',
                     data: popularData,
-                    backgroundColor: '#10b981',
+                    backgroundColor: ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6'],
+                    borderRadius: 6,
+                    maxBarThickness: 40
                 }]
             },
             options: {
+                indexAxis: 'y',
                 responsive: true,
-                plugins: { legend: { display: false } }
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: 'rgba(0,0,0,0.05)' }, beginAtZero: true },
+                    y: { grid: { display: false } }
+                }
             }
         });
+    }
+
+    // 6. Recent Orders Table
+    const recentContainer = document.getElementById('dash-recent-orders');
+    if (recentContainer) {
+        const sortedOrders = allOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, 8);
+        if (sortedOrders.length === 0) {
+            recentContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">No orders yet.</p>';
+        } else {
+            let tableHTML = `<table class="dash-recent-table"><thead><tr>
+                <th>Invoice</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th>
+            </tr></thead><tbody>`;
+
+            sortedOrders.forEach(order => {
+                const statusKey = (order.status || 'Preparing').toLowerCase();
+                const badgeClass = 'status-' + statusKey;
+                const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'N/A';
+                const itemCount = (order.items || []).reduce((sum, i) => sum + i.qty, 0);
+
+                tableHTML += `<tr>
+                    <td style="font-weight:600; font-family:monospace; color:var(--primary);">#${order.id}</td>
+                    <td>${order.username || 'Guest'}</td>
+                    <td style="text-align:center;">${itemCount}</td>
+                    <td style="font-weight:600;">৳${(order.totalPrice || 0).toFixed(0)}</td>
+                    <td><span class="status-badge ${badgeClass}" style="font-size:0.7rem; padding:3px 8px;">${order.status || 'Preparing'}</span></td>
+                    <td style="color:var(--text-muted); font-size:0.8rem;">${dateStr}</td>
+                </tr>`;
+            });
+            tableHTML += '</tbody></table>';
+            recentContainer.innerHTML = tableHTML;
+        }
     }
 }
 window.renderAdminDashboard = renderAdminDashboard;
@@ -1079,18 +1241,26 @@ export async function loadAdminOrders(filterStatus = null) {
             const itemsHTML = (order.items || []).map(i => `• ${i.name} (x${i.qty}) - ৳${(i.price || 0).toFixed(2)}`).join('<br>');
 
             const li = document.createElement('div');
-            const statusClass = (order.status || 'Pending').toLowerCase();
+            const statusClass = (order.status || 'Preparing').toLowerCase();
             li.className = `admin-order-card ${statusClass}`;
             
             // Background colors based on status (light versions)
-            let bgColor = 'var(--bg-card)';
-            if (order.status === 'Pending') bgColor = 'rgba(255, 145, 0, 0.08)';
-            else if (order.status === 'Sent') bgColor = 'rgba(0, 123, 255, 0.08)';
-            else if (order.status === 'Delivered') bgColor = 'rgba(34, 197, 94, 0.08)';
+            const bgColors = {
+                'Preparing': 'rgba(156, 39, 176, 0.08)',
+                'Pending': 'rgba(255, 145, 0, 0.08)',
+                'Sent': 'rgba(0, 123, 255, 0.08)',
+                'Delivered': 'rgba(34, 197, 94, 0.08)',
+                'Cancelled': 'rgba(231, 76, 60, 0.08)'
+            };
+            let bgColor = bgColors[order.status] || 'var(--bg-card)';
 
             li.style.cssText = `padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); display: flex; flex-direction: column; gap: 0.5rem; background: ${bgColor}; margin-bottom: 1rem; transition: background 0.3s ease;`;
 
-            const statusBadgeClass = order.status === 'Delivered' ? 'status-delivered' : (order.status === 'Sent' ? 'status-sent' : 'status-pending');
+            const statusBadgeMap = {
+                'Preparing': 'status-preparing', 'Pending': 'status-pending',
+                'Sent': 'status-sent', 'Delivered': 'status-delivered', 'Cancelled': 'status-cancelled'
+            };
+            const statusBadgeClass = statusBadgeMap[order.status] || 'status-preparing';
 
             li.innerHTML = `
                 <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; flex-wrap: wrap; gap: 10px;">
@@ -1119,11 +1289,12 @@ export async function loadAdminOrders(filterStatus = null) {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; border-top: 1px dashed var(--border-color); padding-top: 0.5rem;">
                     <div style="font-weight: 600;">Total: ৳${(order.totalPrice || 0).toFixed(2)}</div>
                     <div style="display: flex; gap: 10px; align-items: center;">
-                        <span class="status-badge ${statusBadgeClass}">${order.status || 'Pending'}</span>
-                        <select class="admin-status-dropdown" data-id="${order.id}" data-userid="${order.userId}" style="padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-hover); color: var(--text-main); font-family: inherit;">
-                            <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                        <span class="status-badge ${statusBadgeClass}">${order.status || 'Preparing'}</span>
+                        <select class="admin-status-dropdown" data-id="${order.id}" data-userid="${order.userId}" data-tg-msgid="${order.telegram_message_id || ''}" data-tg-media="${order.telegram_is_media || false}" style="padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-hover); color: var(--text-main); font-family: inherit;">
+                            <option value="Preparing" ${order.status === 'Preparing' || order.status === 'Pending' ? 'selected' : ''}>Preparing</option>
                             <option value="Sent" ${order.status === 'Sent' ? 'selected' : ''}>Sent</option>
                             <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                            <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
                         </select>
                     </div>
                 </div>
@@ -1136,6 +1307,8 @@ export async function loadAdminOrders(filterStatus = null) {
                 const oid = e.target.getAttribute('data-id');
                 const uid = e.target.getAttribute('data-userid');
                 const newStatus = e.target.value;
+                const tgMsgId = e.target.getAttribute('data-tg-msgid');
+                const tgIsMedia = e.target.getAttribute('data-tg-media') === 'true';
                 try {
                     const batch = writeBatch(db);
                     batch.update(doc(db, 'Orders', oid), { status: newStatus });
@@ -1145,18 +1318,28 @@ export async function loadAdminOrders(filterStatus = null) {
                     await batch.commit();
 
                     const badge = e.target.previousElementSibling;
-                    const newBadgeClass = newStatus === 'Delivered' ? 'status-delivered' : (newStatus === 'Sent' ? 'status-sent' : 'status-pending');
-                    badge.className = `status-badge ${newBadgeClass}`;
+                    const badgeMap = {
+                        'Preparing': 'status-preparing', 'Sent': 'status-sent',
+                        'Delivered': 'status-delivered', 'Cancelled': 'status-cancelled'
+                    };
+                    badge.className = `status-badge ${badgeMap[newStatus] || 'status-preparing'}`;
                     badge.innerText = newStatus;
 
                     const card = e.target.closest('.admin-order-card');
                     if (card) {
-                        card.classList.remove('pending', 'sent', 'delivered');
+                        card.classList.remove('pending', 'preparing', 'sent', 'delivered', 'cancelled');
                         card.classList.add(newStatus.toLowerCase());
                     }
 
-                    // If we are currently filtering by Sold and this is changed, we might want to reload, 
-                    // but for now, just let the color change reflect it.
+                    // ── Edit Original Telegram Message + React with Emoji ──
+                    if (tgMsgId) {
+                        try {
+                            await editTelegramOrderStatus(tgMsgId, tgIsMedia, oid, newStatus);
+                        } catch (tgErr) {
+                            console.warn('Telegram edit/react failed (non-critical):', tgErr);
+                        }
+                    }
+
                 } catch (err) {
                     console.error("Status Update Failed", err);
                     alert("Failed to update status");
@@ -1170,6 +1353,84 @@ export async function loadAdminOrders(filterStatus = null) {
     }
 }
 window.loadAdminOrders = loadAdminOrders;
+
+// --- Telegram Message Edit & React on Status Change ---
+const TG_BOT_TOKEN = '8886096891:AAFrgDxKXqHhJthCSnCGWgbLMjfngCYOxzc';
+const TG_CHAT_ID = '-5047943969';
+
+async function editTelegramOrderStatus(messageId, isMedia, orderId, newStatus) {
+    const statusEmojis = {
+        'Preparing': '📦', 'Sent': '🚚', 'Delivered': '✅', 'Cancelled': '❌'
+    };
+    const statusBanners = {
+        'Preparing': '🔧 PREPARING',
+        'Sent': '🚚 SHIPPED / ON THE WAY',
+        'Delivered': '✅ DELIVERED SUCCESSFULLY',
+        'Cancelled': '❌ ORDER CANCELLED'
+    };
+    const emoji = statusEmojis[newStatus] || '📋';
+    const banner = statusBanners[newStatus] || newStatus;
+
+    // 1. Fetch original order data from Firebase to reconstruct the message
+    try {
+        const orderSnap = await getDoc(doc(db, 'Orders', orderId));
+        if (!orderSnap.exists()) return;
+        const order = orderSnap.data();
+
+        let itemDetails = (order.items || []).map(i => `▪️ *${i.name}* (x${i.qty}) ➔ ৳${(i.price * i.qty).toFixed(2)}`).join('\n');
+
+        let updatedText = `${emoji} *${banner}* ${emoji}\n\n` +
+            `*🧾 Invoice:* #${orderId}\n` +
+            `*👤 Name:* ${order.username}\n` +
+            `*📞 Phone:* ${order.mobile}\n` +
+            `*📍 Address:* ${order.address}, ${order.thana || ''}, ${order.district || ''}\n\n` +
+            `*📦 Items Ordered:*\n${itemDetails}\n\n` +
+            `*💰 Subtotal:* ৳${(order.subtotal || 0)}\n` +
+            `*🚚 Delivery:* ৳${(order.deliveryCharge || 0)}\n` +
+            `*💵 Grand Total:* ৳${(order.totalPrice || 0)}`;
+
+        // Add parcel ID if available
+        if (order.consignment_id) {
+            updatedText += `\n\n*🔖 Parcel ID:* ${order.consignment_id}`;
+        }
+        if (order.tracking_code) {
+            updatedText += `\n*📍 Tracking:* ${order.tracking_code}`;
+        }
+
+        // 2. Edit the message
+        const editEndpoint = isMedia ? 'editMessageCaption' : 'editMessageText';
+        const editBody = isMedia
+            ? { chat_id: TG_CHAT_ID, message_id: parseInt(messageId), caption: updatedText, parse_mode: 'Markdown' }
+            : { chat_id: TG_CHAT_ID, message_id: parseInt(messageId), text: updatedText, parse_mode: 'Markdown' };
+
+        await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/${editEndpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(editBody)
+        }).catch(e => console.warn('Telegram edit failed:', e));
+
+        // 3. React with emoji
+        const reactionEmojis = {
+            'Preparing': '👀', 'Sent': '🔥', 'Delivered': '🎉', 'Cancelled': '💔'
+        };
+        const reactionEmoji = reactionEmojis[newStatus];
+        if (reactionEmoji) {
+            await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/setMessageReaction`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: TG_CHAT_ID,
+                    message_id: parseInt(messageId),
+                    reaction: [{ type: 'emoji', emoji: reactionEmoji }],
+                    is_big: true
+                })
+            }).catch(e => console.warn('Telegram reaction failed:', e));
+        }
+    } catch (e) {
+        console.warn('editTelegramOrderStatus error:', e);
+    }
+}
+window.editTelegramOrderStatus = editTelegramOrderStatus;
 
 // --- Admin Sold Products Analytics ---
 export async function renderAdminSoldProducts() {
